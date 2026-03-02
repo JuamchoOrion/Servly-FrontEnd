@@ -1,1 +1,47 @@
-/* You can add global styles to this file, and also import other style files */
+/* Estilos globales de la aplicación */
+
+// Variables de color global
+$primary-black: #1E1E1E;
+$accent-gold: #C8A951;
+$light-bg: #F5F5F5;
+$success-green: #2E7D32;
+$error-red: #C62828;
+$text-dark: #2C2C2C;
+$text-light: #666666;
+$white: #FFFFFF;
+
+// Tipografía global
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: $light-bg;
+  color: $text-dark;
+}
+
+// Configuración de Ionic
+ion-app {
+  --ion-background-color: #{$light-bg};
+  --ion-text-color: #{$text-dark};
+}
+
+// Botones por defecto
+ion-button {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+// Inputs por defecto
+ion-input {
+  font-family: inherit;
+}
+
+// Cards por defecto
+ion-card {
+  --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+}

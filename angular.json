@@ -31,6 +31,8 @@
               }
             ],
             "styles": [
+              "node_modules/onsenui/css/onsenui.css",
+              "node_modules/onsenui/css/onsen-css-components.css",
               "src/styles.scss"
             ]
           },

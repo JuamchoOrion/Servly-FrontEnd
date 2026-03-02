@@ -1,0 +1,117 @@
+<div class="login-page">
+  <div class="login-background"></div>
+
+  <div class="login-container" [@fadeInUp]>
+    <ion-card class="login-card">
+      <!-- Header con título y línea decorativa -->
+      <div class="login-header">
+        <h1 class="servly-title">Servly</h1>
+        <p class="login-subtitle">Sistema de gestión para empleados</p>
+      </div>
+
+      <!-- Formulario de login -->
+      <form [formGroup]="loginForm" (ngSubmit)="login()" class="login-form" novalidate>
+
+        <!-- Campos de entrada -->
+        <div class="form-fields">
+          <!-- Campo de Email -->
+          <div class="form-group">
+            <ion-label class="form-label">Correo electrónico</ion-label>
+            <ion-input
+              class="login-input"
+              [class.has-error]="emailError"
+              type="email"
+              placeholder="correo@ejemplo.com"
+              formControlName="email"
+              aria-label="Correo electrónico"
+              (blur)="emailControl?.markAsTouched()">
+            </ion-input>
+            <span class="error-message" *ngIf="emailError" role="alert">
+              {{ emailError }}
+            </span>
+          </div>
+
+          <!-- Campo de Contraseña -->
+          <div class="form-group">
+            <ion-label class="form-label">Contraseña</ion-label>
+            <div class="password-input-wrapper">
+              <ion-input
+                class="login-input"
+                [class.has-error]="passwordError"
+                [attr.type]="showPassword ? 'text' : 'password'"
+                placeholder="Ingresa tu contraseña"
+                formControlName="password"
+                aria-label="Contraseña"
+                (blur)="passwordControl?.markAsTouched()">
+              </ion-input>
+              <button
+                type="button"
+                class="toggle-password"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                tabindex="-1">
+                <span class="icon">{{ showPassword ? '👁️' : '👁️‍🗨️' }}</span>
+              </button>
+            </div>
+            <span class="error-message" *ngIf="passwordError" role="alert">
+              {{ passwordError }}
+            </span>
+          </div>
+
+          <!-- Mensaje de error general -->
+          <div class="error-alert" *ngIf="loginError" role="alert">
+            <span class="error-icon">⚠️</span>
+            {{ loginError }}
+          </div>
+        </div>
+
+        <!-- Contenedor de botones -->
+        <div class="form-buttons">
+          <!-- Botón principal de login -->
+          <button
+            class="btn btn-primary"
+            type="submit"
+            [disabled]="isLoading || loginForm.invalid"
+            aria-label="Iniciar sesión">
+            <span *ngIf="!isLoading" class="btn-text">Iniciar sesión</span>
+            <span *ngIf="isLoading" class="loading-spinner"></span>
+          </button>
+
+          <!-- Divisor -->
+          <div class="divider">
+            <span>o</span>
+          </div>
+
+          <!-- Botón de Google -->
+          <button
+            class="btn btn-google"
+            type="button"
+            (click)="loginWithGoogle()"
+            [disabled]="isLoading"
+            aria-label="Continuar con Google">
+            <svg class="google-logo" viewBox="0 0 48 48" aria-hidden="true">
+              <path fill="#EA4335" d="M24 9.5c3.1 0 5.9 1.1 8.1 3.2l6-6C34.4 2.5 29.6 0 24 0 14.6 0 6.5 5.8 2.9 14.1l7 5.4C11.7 13.2 17.3 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.6H24v9h12.4c-.5 2.9-2.2 5.3-4.7 7l7.3 5.6c4.3-4 6.8-9.9 6.8-16z"/>
+              <path fill="#FBBC05" d="M9.9 28.5c-.6-1.7-.9-3.5-.9-5.5s.3-3.8.9-5.5l-7-5.4C1 15.4 0 19.1 0 23s1 7.6 2.9 10.9l7-5.4z"/>
+              <path fill="#34A853" d="M24 48c6.5 0 12-2.1 16-5.7l-7.3-5.6c-2 1.4-4.6 2.3-8.7 2.3-6.7 0-12.3-3.7-14.1-8.6l-7 5.4C6.5 42.2 14.6 48 24 48z"/>
+            </svg>
+            <span class="btn-text">Continuar con Google</span>
+          </button>
+        </div>
+
+
+      </form>
+
+      <!-- Footer con link de soporte -->
+      <div class="login-footer">
+        <p class="footer-text">
+          ¿Problemas para iniciar sesión?
+          <a href="#" class="footer-link">Contactar soporte</a>
+        </p>
+      </div>
+
+    </ion-card>
+
+  </div>
+
+</div>
