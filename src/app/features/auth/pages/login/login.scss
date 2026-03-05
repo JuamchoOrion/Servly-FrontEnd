@@ -86,6 +86,116 @@ ion-button {
   }
 }
 
+/* ===============================
+   🎉 SUCCESS SCREEN
+================================ */
+
+.success-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.success-card {
+  width: 90%;
+  max-width: 500px;
+  padding: 60px 40px;
+  text-align: center;
+  background: $white;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border-radius: 20px;
+}
+
+.success-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.success-icon {
+  font-size: 80px;
+  animation: bounce 0.6s ease-in-out;
+}
+
+.success-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: $success-green;
+  margin: 0;
+}
+
+.success-message {
+  font-size: 18px;
+  font-weight: 600;
+  color: $primary-black;
+  margin: 0;
+}
+
+.success-subtitle {
+  font-size: 14px;
+  color: $text-light;
+  margin: 0;
+}
+
+/* Animación de puntos cargando */
+.loading-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  height: 20px;
+
+  span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: $accent-gold;
+    animation: pulse 1.4s ease-in-out infinite;
+
+    &:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    &:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    &:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+  }
+}
+
+.redirect-message {
+  font-size: 12px;
+  color: $text-muted;
+  margin: 0;
+}
+
+/* Animación de rebote */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+/* Animación de pulso */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
 
 /* ===============================
    🏷 HEADER
@@ -99,10 +209,20 @@ ion-button {
     font-size: 46px;
     font-weight: 800;
     letter-spacing: -1.5px;
+    color: $primary-black;
     background: linear-gradient(90deg, $primary-black, $accent-gold);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
+
+    // Asegurar visibilidad en modo alto contraste
+    @media (prefers-contrast: more) {
+      -webkit-text-fill-color: inherit;
+      color: $primary-black;
+      background: none;
+    }
   }
+
 
   &::after {
     content: '';
@@ -188,22 +308,40 @@ ion-button {
 
 .password-input-wrapper {
   position: relative;
+  display: flex;
+  align-items: center;
 
   .toggle-password {
     position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
+    right: 16px;
     background: none;
     border: none;
     cursor: pointer;
-    color: $text-light;
-    font-size: 18px;
     padding: 8px;
-    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border-radius: 6px;
 
     &:hover {
-      color: $accent-gold;
+      background-color: rgba($accent-gold, 0.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    .eye-icon {
+      width: 20px;
+      height: 20px;
+      color: $text-light;
+      stroke: currentColor;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: $accent-gold;
+      }
     }
   }
 }
@@ -230,6 +368,29 @@ ion-button {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+
+
+/* ===============================
+   🔐 reCAPTCHA V2 WIDGET
+================================ */
+
+.recaptcha-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  border: 1px solid $border-light;
+
+  .g-recaptcha {
+    display: flex;
+    justify-content: center;
+    transform: scale(1);
+    transform-origin: center;
+  }
 }
 
 
@@ -531,3 +692,262 @@ ion-button {
     height: 20px;
   }
 }
+
+/* ===============================
+   🌓 MODO OSCURO - ISO 25010
+================================ */
+
+:host-context(.dark-mode) {
+  .login-page {
+    background: #1a1a1a;
+  }
+
+  .login-background {
+    background:
+      radial-gradient(circle at 20% 20%, rgba(200,169,81,0.05), transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(200,169,81,0.02), transparent 40%),
+      #1a1a1a;
+  }
+
+  .login-card {
+    background: #2a2a2a;
+    border-color: rgba(200,169,81,0.2);
+    box-shadow:
+      0 20px 60px rgba(0,0,0,0.4),
+      0 8px 24px rgba(0,0,0,0.3);
+
+    &:hover {
+      box-shadow:
+        0 28px 70px rgba(0,0,0,0.5),
+        0 12px 30px rgba(0,0,0,0.4);
+    }
+  }
+
+  .login-header {
+    .servly-title {
+      background: linear-gradient(90deg, $accent-gold, #e8d4b0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  }
+
+  .form-label {
+    color: #e0e0e0;
+  }
+
+  .login-input {
+    --background: #333333;
+    --color: #f5f5f5;
+    --placeholder-color: #999999;
+    --border-color: rgba(200,169,81,0.3);
+  }
+
+  .password-input-wrapper .toggle-password {
+    .eye-icon {
+      color: #999999;
+      transition: color 0.2s ease;
+    }
+
+    &:hover .eye-icon {
+      color: $accent-gold;
+    }
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, $accent-gold 0%, #d4b380 100%);
+    color: $primary-black;
+    box-shadow:
+      0 8px 24px rgba(200,169,81,0.35),
+      0 2px 8px rgba(0,0,0,0.2);
+
+    &:hover:not(:disabled) {
+      box-shadow:
+        0 12px 32px rgba(200,169,81,0.45),
+        0 4px 12px rgba(0,0,0,0.3),
+        0 0 0 2px rgba(200,169,81,0.4);
+    }
+  }
+
+  .btn-google {
+    background: transparent;
+    border-color: $accent-gold;
+    color: $accent-gold;
+
+    &:hover:not(:disabled) {
+      background: rgba(200,169,81,0.12);
+      border-color: $accent-gold;
+      box-shadow:
+        0 8px 20px rgba(200,169,81,0.35),
+        inset 0 1px 0 rgba(200,169,81,0.2);
+    }
+  }
+
+  .error-message {
+    color: #ff6b6b;
+  }
+
+  .error-alert {
+    background: rgba(255, 107, 107, 0.1);
+    border-left-color: #ff6b6b;
+    color: #ff6b6b;
+  }
+
+  .divider {
+    color: #666666;
+
+    &::before,
+    &::after {
+      background: rgba(200,169,81,0.2);
+    }
+  }
+
+  .login-footer {
+    border-top-color: rgba(200,169,81,0.2);
+
+    .footer-text {
+      color: #b0b0b0;
+
+      .footer-link {
+        color: $accent-gold;
+
+        &:hover {
+          color: #e8d4b0;
+        }
+      }
+    }
+  }
+}
+
+/* ===============================
+   🔆 ALTO CONTRASTE - ISO 25010
+================================ */
+
+:host-context(.high-contrast) {
+  .login-page {
+    background: #ffffff;
+  }
+
+  .login-background {
+    background: #ffffff;
+  }
+
+  .login-card {
+    background: #ffffff;
+    border: 3px solid $primary-black;
+    box-shadow: none;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 0 $primary-black;
+    }
+  }
+
+  .login-header .servly-title {
+    background: none;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
+    color: $primary-black;
+    font-weight: 900;
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 8px;
+    text-decoration-color: #ffff00;
+  }
+
+  .login-header &::after {
+    background: $primary-black;
+    height: 4px;
+  }
+
+  .form-label {
+    color: $primary-black;
+    font-weight: 700;
+  }
+
+  .login-input {
+    --border-width: 2px;
+    --border-color: $primary-black;
+    --color: $primary-black;
+
+    &:focus-within {
+      --border-color: #ffff00;
+      box-shadow: 0 0 0 4px #ffff00;
+    }
+  }
+
+  .btn {
+    border-width: 2px;
+    border-color: $primary-black;
+    border-style: solid;
+    font-weight: 700;
+  }
+
+  .btn-primary {
+    background: $primary-black;
+    color: #ffff00;
+    border: 2px solid $primary-black;
+  }
+
+  .btn-google {
+    background: #ffffff;
+    color: $primary-black;
+    border: 3px solid $primary-black;
+  }
+
+  .error-message {
+    color: $error-red;
+    font-weight: 700;
+  }
+
+  .divider::before,
+  .divider::after {
+    background: $primary-black;
+    height: 2px;
+  }
+
+  .login-footer {
+    border-top: 2px solid $primary-black;
+
+    .footer-link {
+      text-decoration: underline;
+      font-weight: 700;
+    }
+  }
+}
+
+/* ===============================
+   🎬 REDUCIR MOVIMIENTO - ISO 25010
+================================ */
+
+:host-context(.reduce-motion) {
+  .login-container {
+    animation: none;
+  }
+
+  .login-card {
+    &:hover {
+      transform: none;
+      transition: all 0.01ms ease;
+    }
+  }
+
+  .btn {
+    transition: none;
+
+    &::before {
+      animation: none;
+      transition: none;
+    }
+
+    &:hover {
+      transform: none;
+      transition: none;
+    }
+  }
+
+  .loading-spinner {
+    animation: none;
+    border-top-color: rgba(255,255,255,0.5);
+  }
+}
+

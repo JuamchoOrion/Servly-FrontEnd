@@ -1,0 +1,105 @@
+<!-- Contenedor principal de accesibilidad -->
+<div class="accessibility-container">
+  <!-- Botón flotante de accesibilidad -->
+  <button
+    class="accessibility-toggle"
+    (click)="toggleMenu()"
+    aria-label="Abrir menú de accesibilidad"
+    title="Menú de accesibilidad - Presiona para abrir"
+    aria-expanded="isOpen"
+    aria-controls="accessibility-panel"
+  >
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" width="28" height="28" fill="currentColor">
+      <!-- Icono de accesibilidad - Figura humana con símbolo de ajustes -->
+      <circle cx="12" cy="4" r="2.5"/>
+      <path d="M12 8c-2.21 0-4 1.79-4 4v2H6v5h1v2h2v-2h6v2h2v-5h1v-2h-2v-2c0-2.21-1.79-4-4-4z"/>
+    </svg>
+  </button>
+
+  <!-- Menú desplegable de accesibilidad -->
+  <div
+    *ngIf="isOpen"
+    class="accessibility-menu"
+    role="dialog"
+    id="accessibility-panel"
+    aria-label="Panel de configuración de accesibilidad"
+  >
+    <!-- Encabezado del menú -->
+    <div class="menu-header">
+      <h3>Accesibilidad</h3>
+      <button
+        (click)="closeMenu()"
+        class="close-btn"
+        aria-label="Cerrar menú de accesibilidad"
+        title="Cerrar (Esc)"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- Contenido del menú -->
+    <div class="menu-content">
+      <!-- Modo oscuro -->
+      <div class="setting-item">
+        <label class="setting-label">
+          <input
+            type="checkbox"
+            [checked]="settings.darkMode"
+            (change)="toggleDarkMode()"
+            aria-label="Activar modo oscuro"
+          />
+          <span>Modo Oscuro</span>
+        </label>
+      </div>
+
+      <!-- Tamaño de fuente -->
+      <div class="setting-item">
+        <label class="setting-label" for="font-size"
+          >Tamaño de Letra</label
+        >
+        <select
+          id="font-size"
+          [value]="settings.fontSize"
+          (change)="updateFontSize($any($event).target.value)"
+          aria-label="Seleccionar tamaño de letra"
+        >
+          <option *ngFor="let option of fontSizeOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Alto contraste -->
+      <div class="setting-item">
+        <label class="setting-label">
+          <input
+            type="checkbox"
+            [checked]="settings.highContrast"
+            (change)="toggleHighContrast()"
+            aria-label="Activar alto contraste"
+          />
+          <span>Alto Contraste</span>
+        </label>
+      </div>
+
+      <!-- Reducir movimiento -->
+      <div class="setting-item">
+        <label class="setting-label">
+          <input
+            type="checkbox"
+            [checked]="settings.reduceMotion"
+            (change)="toggleReduceMotion()"
+            aria-label="Reducir movimiento y animaciones"
+          />
+          <span>Reducir Movimiento</span>
+        </label>
+      </div>
+
+      <!-- Botón de reset -->
+      <button class="reset-btn" (click)="resetSettings()">
+        Restablecer Valores
+      </button>
+    </div>
+  </div>
+</div>
+
