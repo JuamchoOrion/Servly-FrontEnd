@@ -1,17 +1,16 @@
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideIonicAngular } from '@ionic/angular/standalone';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import {authInterceptor} from './core/interceptors/auth.interceptor';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { routes } from './app.routes';
-
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideAnimations(),
-    provideIonicAngular(),
-    provideHttpClient(withInterceptors([authInterceptor]))
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([authInterceptor])
+    ),
   ]
 };
