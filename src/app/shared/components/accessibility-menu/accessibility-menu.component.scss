@@ -1,437 +1,606 @@
-// Variables de diseño
-$primary-color: #1e1e1e;
-$accent-color: #c8a951;
-$light-bg: #f5f5f5;
-$dark-bg: #1a1a1a;
-$card-bg: white;
-$white: #ffffff;
-$border-color: #e0e0e0;
-$text-color: #333;
-$light-text: #f5f5f5;
-$success-color: #2e7d32;
-$error-color: #c62828;
+// ===============================
+// 🎨 PALETA DE COLORES PREMIUM
+// ===============================
 
-// Tamaños
-$button-size: 56px;
-$menu-min-width: 320px;
-$menu-max-width: 350px;
+$olive-green: #556B2F;        // Verde oliva principal
+$light-olive: #6B8E23;        // Verde oliva más claro
+$dark-olive: #3B5314;         // Verde oliva oscuro
+$beige: #E8DCC8;              // Beige claro
+$dark-beige: #D4C4B0;         // Beige oscuro
+$gold: #C8A951;               // Dorado
+$dark-gold: #9B7E2A;          // Dorado oscuro
+$cream: #FFFEF9;              // Crema blanco
+$text-dark: #2C2C2C;
+$white: #FFFFFF;
 
-// Transiciones
-$transition-speed: 0.3s;
-$transition-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
+// ===============================
+// 📦 CONTENEDOR GLOBAL
+// ===============================
 
-/**
- * Contenedor principal
- */
 .accessibility-container {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
-/**
- * Botón flotante de accesibilidad
- */
+// ===============================
+// 🔘 BOTÓN FLOTANTE
+// ===============================
+
 .accessibility-toggle {
-  width: $button-size;
-  height: $button-size;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  background-color: $accent-color;
+  background: linear-gradient(135deg, $olive-green 0%, $light-olive 100%);
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all $transition-speed ease;
+  box-shadow: 0 8px 24px rgba(85, 107, 47, 0.3), 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
 
   &:hover {
-    background-color: #b8941f;
-    transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    transform: scale(1.15);
+    box-shadow: 0 12px 32px rgba(85, 107, 47, 0.4), 0 6px 16px rgba(0, 0, 0, 0.2);
+
+    &::before {
+      opacity: 1;
+    }
   }
 
   &:active {
-    transform: scale(0.95);
+    transform: scale(0.92);
   }
 
   &:focus {
-    outline: 3px solid $primary-color;
-    outline-offset: 2px;
+    outline: 3px solid $gold;
+    outline-offset: 3px;
   }
 
-  &:focus:not(:focus-visible) {
-    outline: none;
-  }
-
-  .icon {
-    display: block;
-    line-height: 1;
-    transition: transform $transition-speed ease;
-  }
-}
-
-/**
- * Icono SVG en el botón
- */
-.accessibility-toggle .icon {
-  width: 28px;
-  height: 28px;
-  color: $white;
-
-  &:hover {
+  .toggle-icon {
+    width: 32px;
+    height: 32px;
+    color: $cream;
+    fill: $cream;
+    position: relative;
+    z-index: 1;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   }
 }
 
-/**
- * Menú desplegable
- */
+// =======================================
+// 📋 MENÚ DESPLEGABLE
+// =======================================
+
 .accessibility-menu {
-  position: absolute;
-  bottom: 70px;
-  right: 0;
-  background-color: $card-bg;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  min-width: $menu-min-width;
-  max-width: $menu-max-width;
+  position: fixed;
+  bottom: 80px;
+  right: 24px;
+  width: 360px;
+  background: linear-gradient(135deg, $cream 0%, $beige 100%);
+  border-radius: 16px;
+  box-shadow:
+    0 20px 60px rgba(85, 107, 47, 0.25),
+    0 10px 30px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
   overflow: hidden;
-  animation: slideUp 0.3s $transition-easing forwards;
-
-  @media (max-width: 480px) {
-    min-width: calc(100vw - 60px);
-    max-width: calc(100vw - 40px);
-    right: auto;
-    left: 20px;
-  }
+  animation: slideUpBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  border: 1px solid rgba($gold, 0.3);
 }
 
-/**
- * Animación de entrada
- */
-@keyframes slideUp {
-  from {
+@keyframes slideUpBounce {
+  0% {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px) scale(0.95);
   }
-  to {
+  100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-/**
- * Reducir movimiento - deshabilitar animaciones
- */
-:host-context(.reduce-motion) {
-  .accessibility-menu {
-    animation: none;
-  }
-}
+// =======================================
+// 🎫 HEADER DEL MENÚ
+// =======================================
 
-/**
- * Encabezado del menú
- */
 .menu-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  border-bottom: 2px solid $accent-color;
-  background-color: $card-bg;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, $olive-green 0%, $light-olive 100%);
+  border-bottom: 3px solid $gold;
 
-  h3 {
+  .menu-title {
     margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: $primary-color;
+    font-size: 18px;
+    font-weight: 700;
+    color: $cream;
+    letter-spacing: 0.5px;
   }
 }
 
-/**
- * Botón de cerrar
- */
 .close-btn {
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: $primary-color;
-  padding: 0;
-  width: 24px;
-  height: 24px;
+  background: rgba($cream, 0.15);
+  border: 2px solid $cream;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color $transition-speed ease;
+  cursor: pointer;
+  color: $cream;
+  font-size: 20px;
+  font-weight: bold;
+  transition: all 0.2s ease;
 
   &:hover {
-    color: $accent-color;
+    background: rgba($cream, 0.25);
+    transform: rotate(90deg);
   }
 
   &:focus {
-    outline: 2px solid $accent-color;
-    border-radius: 4px;
-  }
-
-  &:focus:not(:focus-visible) {
-    outline: none;
+    outline: 2px solid $gold;
+    outline-offset: 2px;
   }
 }
 
-/**
- * Contenido del menú
- */
+// =======================================
+// 🎨 CONTENIDO DEL MENÚ
+// =======================================
+
+.menu-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, $gold, transparent);
+  margin: 0 16px;
+  opacity: 0.6;
+}
+
 .menu-content {
-  padding: 16px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
   max-height: 400px;
   overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba($olive-green, 0.1);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $gold;
+    border-radius: 3px;
+
+    &:hover {
+      background: $dark-gold;
+    }
+  }
 }
 
-/**
- * Elemento individual de configuración
- */
-.setting-item {
+// =======================================
+// ⚙️ GRUPOS DE CONFIGURACIÓN
+// =======================================
+
+.setting-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
+  padding: 16px;
+  background: rgba($white, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba($gold, 0.2);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba($white, 0.8);
+    border-color: rgba($gold, 0.4);
+    box-shadow: 0 4px 12px rgba($olive-green, 0.1);
+  }
 }
 
-/**
- * Etiqueta de configuración
- */
-.setting-label {
+.setting-label-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
+}
+
+.setting-label {
   font-size: 14px;
-  color: $text-color;
-  font-weight: 500;
+  font-weight: 600;
+  color: $text-dark;
   user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.3px;
+}
+
+// =======================================
+// 🎚️ TOGGLE SWITCH PERSONALIZADO
+// =======================================
+
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
 
   input[type='checkbox'] {
-    width: 18px;
-    height: 18px;
+    appearance: none;
+    width: 48px;
+    height: 28px;
+    background: linear-gradient(90deg, #e0e0e0 0%, #d0d0d0 100%);
+    border: none;
+    border-radius: 14px;
     cursor: pointer;
-    accent-color: $accent-color;
-    transition: all $transition-speed ease;
+    position: relative;
+    transition: all 0.3s ease;
+    margin: 0;
 
-    &:hover {
-      transform: scale(1.1);
+    &::before {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: $white;
+      left: 2px;
+      top: 2px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     }
 
-    &:focus {
-      outline: 2px solid $primary-color;
-      outline-offset: 2px;
-    }
+    &:checked {
+      background: linear-gradient(135deg, $olive-green, $light-olive);
+      box-shadow: inset 0 0 0 2px rgba($gold, 0.3);
 
-    &:focus:not(:focus-visible) {
-      outline: none;
-    }
-  }
-}
-
-/**
- * Select de tamaño de fuente
- */
-select {
-  padding: 10px 12px;
-  border: 1px solid $border-color;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  background-color: $card-bg;
-  color: $text-color;
-  transition: all $transition-speed ease;
-  font-family: inherit;
-
-  &:hover {
-    border-color: $accent-color;
-    background-color: rgba($accent-color, 0.05);
-  }
-
-  &:focus {
-    outline: none;
-    border-color: $accent-color;
-    box-shadow: 0 0 0 3px rgba($accent-color, 0.1);
-  }
-
-  option {
-    background-color: $card-bg;
-    color: $text-color;
-  }
-}
-
-/**
- * Botón de resetear
- */
-.reset-btn {
-  padding: 10px 12px;
-  background-color: #f0f0f0;
-  border: 1px solid $border-color;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  color: $primary-color;
-  transition: all $transition-speed ease;
-  font-family: inherit;
-
-  &:hover {
-    background-color: #e8e8e8;
-    border-color: $accent-color;
-    color: $accent-color;
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-
-  &:focus {
-    outline: 2px solid $accent-color;
-    outline-offset: 2px;
-  }
-
-  &:focus:not(:focus-visible) {
-    outline: none;
-  }
-}
-
-/**
- * Estilos en modo oscuro
- */
-:host-context(.dark-mode) {
-  .accessibility-menu {
-    background-color: #2a2a2a;
-    color: $light-text;
-
-    .menu-header {
-      background-color: #2a2a2a;
-      border-bottom-color: $accent-color;
-
-      h3 {
-        color: $light-text;
+      &::before {
+        left: calc(100% - 26px);
+        background: $gold;
       }
     }
 
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($olive-green, 0.2);
+    }
+
+    &:hover {
+      box-shadow: 0 0 0 2px rgba($olive-green, 0.15);
+    }
+  }
+}
+
+// =======================================
+// 📝 SELECT DE TAMAÑO DE LETRA
+// =======================================
+
+.font-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid $gold;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: $text-dark;
+  background: linear-gradient(135deg, rgba($gold, 0.05) 0%, rgba($beige, 0.1) 100%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+
+  &:hover {
+    border-color: $dark-gold;
+    box-shadow: 0 4px 12px rgba($gold, 0.15);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $olive-green;
+    box-shadow: 0 0 0 3px rgba($olive-green, 0.1);
+  }
+
+  option {
+    background: $cream;
+    color: $text-dark;
+    font-weight: 500;
+  }
+}
+
+// =======================================
+// 🔄 FOOTER - BOTÓN RESET
+// =======================================
+
+.menu-footer {
+  padding: 0 24px 24px;
+}
+
+.reset-btn {
+  width: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, $olive-green 0%, $light-olive 100%);
+  color: $cream;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  box-shadow: 0 4px 12px rgba($olive-green, 0.2);
+  letter-spacing: 0.3px;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba($olive-green, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus {
+    outline: 2px solid $gold;
+    outline-offset: 2px;
+  }
+}
+
+// =======================================
+// 🌙 DARK MODE
+// =======================================
+
+:host-context(.dark-mode) {
+  .accessibility-menu {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+    border-color: rgba($gold, 0.4);
+
+    .menu-header {
+      background: linear-gradient(135deg, $dark-olive 0%, $olive-green 100%);
+    }
+
     .close-btn {
-      color: $light-text;
+      border-color: rgba($cream, 0.3);
+      color: rgba($cream, 0.9);
 
       &:hover {
-        color: $accent-color;
+        background: rgba($cream, 0.1);
+      }
+    }
+
+    .setting-group {
+      background: rgba($white, 0.05);
+      border-color: rgba($gold, 0.2);
+
+      &:hover {
+        background: rgba($white, 0.1);
       }
     }
 
     .setting-label {
-      color: #e0e0e0;
+      color: rgba($cream, 0.9);
     }
 
-    select {
-      background-color: #333;
-      color: $light-text;
-      border-color: #444;
-
-      &:hover {
-        background-color: #383838;
-        border-color: $accent-color;
-      }
+    .font-select {
+      background: rgba($gold, 0.08);
+      color: rgba($cream, 0.9);
+      border-color: $gold;
 
       option {
-        background-color: #333;
-        color: $light-text;
-      }
-    }
-
-    .reset-btn {
-      background-color: #333;
-      border-color: #444;
-      color: $light-text;
-
-      &:hover {
-        background-color: #3a3a3a;
-        border-color: $accent-color;
-        color: $accent-color;
+        background: #2a2a2a;
+        color: rgba($cream, 0.9);
       }
     }
   }
 }
 
-/**
- * Estilos en alto contraste
- */
+// =======================================
+// 👁️ ALTO CONTRASTE
+// =======================================
+
 :host-context(.high-contrast) {
   .accessibility-toggle {
-    border: 3px solid $primary-color;
-    background-color: $accent-color;
+    border: 3px solid $text-dark;
+    outline: 3px solid $gold;
+    outline-offset: 2px;
   }
 
   .accessibility-menu {
-    border: 3px solid $primary-color;
+    border: 3px solid $text-dark;
   }
 
   .menu-header {
-    border-bottom-width: 3px;
+    border-bottom-width: 4px;
+    border-bottom-color: $text-dark;
   }
 
-  .setting-label {
-    color: $primary-color;
-    font-weight: 700;
-
-    input[type='checkbox'] {
-      border: 2px solid $primary-color;
-    }
-  }
-
-  select {
-    border: 2px solid $primary-color;
-    font-weight: 600;
-  }
-
+  .font-select,
   .reset-btn {
-    border: 2px solid $primary-color;
-    font-weight: 600;
+    border-width: 3px;
+    font-weight: 700;
+  }
+
+  .toggle-switch input[type='checkbox'] {
+    border: 2px solid $text-dark;
   }
 }
 
-/**
- * Media queries para dispositivos pequeños
- */
+// =======================================
+// ⏸️ REDUCIR MOVIMIENTO
+// =======================================
+
+:host-context(.reduce-motion) {
+  .accessibility-menu {
+    animation: none;
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  .accessibility-toggle,
+  .toggle-switch input[type='checkbox'],
+  .reset-btn {
+    transition: none;
+  }
+}
+
+// =======================================
+// 📱 RESPONSIVE
+// =======================================
+
 @media (max-height: 600px) {
+  .menu-content {
+    max-height: 250px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .accessibility-toggle {
+    width: 68px;
+    height: 68px;
+
+    .toggle-icon {
+      width: 36px;
+      height: 36px;
+    }
+  }
+
+  .font-select,
+  .reset-btn {
+    padding: 14px 16px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+}
+
+// =======================================
+// 📱 RESPONSIVE - DISPOSITIVOS MÓVILES
+// =======================================
+
+@media (max-width: 768px) {
+  .accessibility-container {
+    bottom: 16px;
+    right: 16px;
+  }
+
+  .accessibility-toggle {
+    width: 56px;
+    height: 56px;
+
+    .toggle-icon {
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  .accessibility-menu {
+    position: fixed !important;
+    width: 85vw !important;
+    max-width: 340px !important;
+    bottom: 70px !important;
+    right: auto !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    max-height: calc(100vh - 200px) !important;
+  }
+
   .menu-content {
     max-height: 300px;
   }
 }
 
-/**
- * Media queries para pantallas táctiles
- */
-@media (hover: none) and (pointer: coarse) {
+@media (max-width: 480px) {
+  .accessibility-container {
+    bottom: 12px;
+    right: 12px;
+  }
+
   .accessibility-toggle {
-    width: 60px;
-    height: 60px;
-    font-size: 32px;
+    width: 52px;
+    height: 52px;
+
+    .toggle-icon {
+      width: 24px;
+      height: 24px;
+    }
   }
 
-  .setting-label input[type='checkbox'] {
-    width: 20px;
-    height: 20px;
+  .accessibility-menu {
+    position: fixed !important;
+    width: 90vw !important;
+    max-width: 100% !important;
+    bottom: 65px !important;
+    right: auto !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    max-height: calc(100vh - 150px) !important;
+    border-radius: 12px !important;
   }
 
-  select,
+  .menu-header {
+    padding: 16px;
+
+    .menu-title {
+      font-size: 16px;
+    }
+  }
+
+  .menu-content {
+    padding: 16px;
+    gap: 16px;
+    max-height: 280px;
+  }
+
+  .menu-footer {
+    padding: 0 16px 16px;
+  }
+
+  .setting-group {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .setting-label {
+    font-size: 13px;
+  }
+
+  .font-select,
   .reset-btn {
-    padding: 12px 16px;
-    font-size: 16px;
+    padding: 10px 12px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+
+  .toggle-switch input[type='checkbox'] {
+    width: 44px;
+    height: 24px;
+
+    &::before {
+      width: 20px;
+      height: 20px;
+    }
+
+    &:checked {
+      &::before {
+        left: calc(100% - 24px);
+      }
+    }
   }
 }
-

@@ -1,6 +1,11 @@
-/* Estilos globales de la aplicación */
+/* ===============================
+   🎨 ESTILOS GLOBALES DE LA APLICACIÓN
+   Cumple con ISO 25010: Usabilidad y Accesibilidad
+================================ */
 
-// Variables de color global
+// ===============================
+// COLORES
+// ===============================
 $primary-black: #1E1E1E;
 $accent-gold: #C8A951;
 $light-bg: #F5F5F5;
@@ -9,8 +14,12 @@ $error-red: #C62828;
 $text-dark: #2C2C2C;
 $text-light: #666666;
 $white: #FFFFFF;
+$olive-green: #556B2F;
+$beige: #E8DCC8;
 
-// Variables CSS para accesibilidad
+// ===============================
+// VARIABLES CSS GLOBALES
+// ===============================
 :root {
   --base-font-size: 14px;
   --primary-color: #{$primary-black};
@@ -18,9 +27,13 @@ $white: #FFFFFF;
   --light-bg: #{$light-bg};
   --success: #{$success-green};
   --error: #{$error-red};
+  --olive-green: #{$olive-green};
+  --beige: #{$beige};
 }
 
-// Tipografía global
+// ===============================
+// RESET Y BASE
+// ===============================
 * {
   margin: 0;
   padding: 0;
@@ -32,40 +45,44 @@ html, body {
   background: $light-bg;
   color: $text-dark;
   font-size: var(--base-font-size);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, font-size 0.3s ease;
+  line-height: 1.6;
 }
 
-// Configuración de Ionic
+// ===============================
+// IONIC DEFAULTS
+// ===============================
 ion-app {
   --ion-background-color: #{$light-bg};
   --ion-text-color: #{$text-dark};
 }
 
-// Botones por defecto
 ion-button {
   font-weight: 600;
   letter-spacing: 0.3px;
 }
 
-// Inputs por defecto
 ion-input {
   font-family: inherit;
 }
 
-// Cards por defecto
 ion-card {
   --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   border-radius: 16px;
 }
 
-/**
- * MODO OSCURO - ISO 25010: Usabilidad
- * Mejora la experiencia visual en ambientes con poca luz
- */
-.dark-mode {
+// ===============================
+// 🌙 DARK MODE - Modo Oscuro
+// Cumple con ISO 25010 - Mejora en ambientes con poca luz
+// ===============================
+:root.dark-mode,
+:root.dark-mode html,
+:root.dark-mode body {
   --ion-background-color: #1a1a1a;
   --ion-text-color: #f5f5f5;
+}
 
+:root.dark-mode {
   background-color: #1a1a1a;
   color: #f5f5f5;
 
@@ -82,80 +99,200 @@ ion-card {
   ion-input {
     --background: #2a2a2a;
     --color: #f5f5f5;
-    --placeholder-color: #999;
+    --placeholder-color: #999999;
   }
 
   ion-button {
     --color: #f5f5f5;
   }
-}
 
-/**
- * ALTO CONTRASTE - ISO 25010: Accesibilidad
- * Mejora la legibilidad para usuarios con discapacidad visual
- */
-.high-contrast {
-  --primary-color: #000000;
-  --accent-color: #ffff00;
-
-  * {
-    border-width: 2px !important;
+  // Aplicar al login
+  .login-wrapper {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%) !important;
   }
 
-  body {
-    background-color: #ffffff;
-    color: #000000;
+  .login-container {
+    background: #2a2a2a !important;
+    color: #f5f5f5 !important;
+  }
+
+  .form-input {
+    background: #3a3a3a !important;
+    color: #f5f5f5 !important;
+    border-color: #4a4a4a !important;
+  }
+
+  .form-input::placeholder {
+    color: #888 !important;
+  }
+
+  .btn-google {
+    background: #3a3a3a !important;
+    color: #f5f5f5 !important;
+    border-color: $accent-gold !important;
+  }
+
+  .login-footer {
+    border-color: #4a4a4a !important;
+    color: #ccc !important;
+
+    a {
+      color: $accent-gold !important;
+    }
+  }
+}
+
+// ===============================
+// 👁️ ALTO CONTRASTE - High Contrast
+// Cumple con ISO 25010 - Mayor contraste visual
+// ===============================
+:root.high-contrast {
+  --primary-color: #000000;
+  --accent-color: #FFD700;
+}
+
+:root.high-contrast,
+:root.high-contrast html,
+:root.high-contrast body {
+  background-color: $white !important;
+  color: #000000 !important;
+}
+
+:root.high-contrast {
+  .login-wrapper {
+    background: $white !important;
+  }
+
+  .login-container {
+    background: $white !important;
+    color: #000 !important;
+    border: 3px solid #000 !important;
+  }
+
+  .form-input {
+    border: 3px solid #000 !important;
+    color: #000 !important;
+    background: $white !important;
+  }
+
+  .btn-primary {
+    background: #000 !important;
+    color: #FFD700 !important;
+    border: 3px solid #000 !important;
+    font-weight: 700 !important;
+  }
+
+  .btn-google {
+    background: $white !important;
+    color: #000 !important;
+    border: 3px solid #000 !important;
+    font-weight: 700 !important;
+  }
+
+  .form-label {
+    color: #000 !important;
+    font-weight: 700 !important;
+  }
+
+  .error-text {
+    color: #C62828 !important;
+    font-weight: 700 !important;
   }
 
   ion-card {
-    --background: #ffffff;
-    --color: #000000;
-    border: 3px solid #000000;
+    border: 3px solid #000 !important;
   }
 
   ion-input {
-    --background: #ffffff;
-    --color: #000000;
-    border: 2px solid #000000;
-  }
-
-  ion-button {
-    border: 2px solid #000000;
-    font-weight: 700;
-  }
-
-  &.dark-mode {
-    background-color: #000000;
-    color: #ffff00;
-
-    body {
-      background-color: #000000;
-      color: #ffff00;
-    }
-
-    ion-card {
-      --background: #000000;
-      --color: #ffff00;
-      border: 3px solid #ffff00;
-    }
-
-    ion-input {
-      --background: #000000;
-      --color: #ffff00;
-      border: 2px solid #ffff00;
-    }
+    border: 3px solid #000 !important;
   }
 }
 
-/**
- * REDUCIR MOVIMIENTO - ISO 25010: Accesibilidad
- * Desactiva animaciones para usuarios sensibles al movimiento
- */
-.reduce-motion,
-.reduce-motion * {
+// ===============================
+// 📝 TAMAÑO DE FUENTE - Font Size
+// Cumple con ISO 25010 - Ajuste de legibilidad
+// ===============================
+:root.font-small {
+  --base-font-size: 12px;
+}
+
+:root.font-medium {
+  --base-font-size: 14px;
+}
+
+:root.font-large {
+  --base-font-size: 16px;
+}
+
+:root.font-extra-large {
+  --base-font-size: 18px;
+}
+
+html, body {
+  font-size: var(--base-font-size);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-size: calc(var(--base-font-size) * 1.5);
+}
+
+p, span, label, button {
+  font-size: var(--base-font-size);
+}
+
+// ===============================
+// ⏸️ REDUCIR MOVIMIENTO - Reduce Motion
+// Cumple con ISO 25010 - Accesibilidad para usuarios sensibles
+// ================================
+:root.reduce-motion * {
   animation: none !important;
   transition: none !important;
 }
+
+:root.reduce-motion {
+  .accessibility-menu {
+    animation: none !important;
+  }
+
+  .login-container {
+    animation: none !important;
+  }
+
+  button, input, select {
+    transition: none !important;
+  }
+}
+
+// ===============================
+// 📱 RESPONSIVE
+// ================================
+@media (max-width: 480px) {
+  html, body {
+    font-size: calc(var(--base-font-size) * 0.95);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-size: calc(var(--base-font-size) * 1.4);
+  }
+}
+
+// ===============================
+// 🎯 UTILIDADES
+// ================================
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #000;
+  color: #fff;
+  padding: 8px;
+  z-index: 100;
+
+  &:focus {
+    top: 0;
+  }
+}
+
 
 /**
  * Media queries accesibles

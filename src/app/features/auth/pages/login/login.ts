@@ -1,9 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonCard, IonInput, IonLabel } from '@ionic/angular/standalone';
-import { trigger, transition, style, animate } from '@angular/animations';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -15,57 +13,22 @@ declare global {
   }
 }
 
-/**
- * LoginComponent
- * Componente de login para empleados de Servly
- *
- * Características:
- * - Validación reactiva
- * - Integración con reCAPTCHA v3
- * - Manejo de errores del backend
- * - Tokens JWT con refresh automático
- * - Diseño premium restaurant
- * - Accesibilidad WCAG AA+
- */
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    IonCard,
-    IonInput,
-    IonLabel
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.html',
-  styleUrls: ['./login.scss'],
-  animations: [
-    trigger('fadeInUp', [
-      transition(':enter', [
-        style({ opacity: 0, transform: 'translateY(20px)' }),
-        animate('600ms cubic-bezier(0.34, 1.56, 0.64, 1)', style({ opacity: 1, transform: 'translateY(0)' }))
-      ])
-    ])
-  ]
+  styleUrls: ['./login.scss']
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('recaptchaContainer') recaptchaContainer!: ElementRef;
 
-  // Formulario reactivo
   loginForm!: FormGroup;
-
-  // Estados de UI
   isLoading = false;
   showPassword = false;
   loginError: string | null = null;
-  loginSuccess = false;  // ← AGREGAR: para mostrar pantalla de éxito
-  successUserName: string = '';  // ← AGREGAR: nombre del usuario que se logueó
-  recaptchaToken: string | null = null;
-
-  // reCAPTCHA
   recaptchaSiteKey = environment.recaptcha.siteKey;
-  recaptchaEnabled = environment.recaptcha.enabled;
 
-  // Cleanup
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -77,10 +40,14 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Cargar script de reCAPTCHA si está habilitado
-    if (this.recaptchaEnabled) {
-      this.loadRecaptchaScript();
-    }
+    this.loadRecaptchaScript();
+  }
+
+  ngAfterViewInit(): void {
+    // Esperar a que reCAPTCHA esté disponible
+    setTimeout(() => {
+      this.ensureRecaptchaLoaded();
+    }, 500);
   }
 
   ngOnDestroy(): void {
@@ -89,7 +56,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Inicializa el formulario con validadores
+   * Inicializa el formulario
    */
   private initializeForm(): void {
     this.loginForm = this.fb.group({
@@ -99,112 +66,112 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Carga el script de reCAPTCHA de Google
+   * Carga el script de reCAPTCHA
    */
   private loadRecaptchaScript(): void {
-    if (!window.grecaptcha) {
+    if (typeof window !== 'undefined' && !window.grecaptcha) {
       const script = document.createElement('script');
       script.src = 'https://www.google.com/recaptcha/api.js';
       script.async = true;
       script.defer = true;
-      // Callback global para reCAPTCHA v2
-      (window as any).onRecaptchaLoad = () => {
-        console.log('reCAPTCHA cargado correctamente');
-      };
       document.head.appendChild(script);
     }
   }
 
   /**
-   * Obtiene el token de reCAPTCHA v2 (desde el widget)
+   * Asegura que reCAPTCHA esté cargado
    */
-  private getRecaptchaToken(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      if (!this.recaptchaEnabled) {
-        resolve(''); // Token vacío si está deshabilitado
-        return;
+  private ensureRecaptchaLoaded(): void {
+    let attempts = 0;
+    const interval = setInterval(() => {
+      if (window.grecaptcha && this.recaptchaContainer) {
+        clearInterval(interval);
+        console.log('reCAPTCHA cargado correctamente');
+      } else if (attempts > 20) {
+        clearInterval(interval);
+        console.warn('reCAPTCHA no se cargó después de múltiples intentos');
       }
-
-      if (!window.grecaptcha) {
-        reject(new Error('reCAPTCHA no está cargado'));
-        return;
-      }
-
-      // Para v2, obtener el token del widget
-      const recaptchaToken = window.grecaptcha.getResponse();
-
-      if (recaptchaToken) {
-        resolve(recaptchaToken);
-      } else {
-        reject(new Error('Por favor, completa el reCAPTCHA'));
-      }
-    });
+      attempts++;
+    }, 100);
   }
 
   /**
-   * Getters para acceso a los controles
+   * Obtiene el control del email
    */
-  get emailControl() {
-    return this.loginForm.get('email');
-  }
-
-  get passwordControl() {
-    return this.loginForm.get('password');
+  get emailControl(): FormControl {
+    return this.loginForm.get('email') as FormControl;
   }
 
   /**
-   * Genera mensaje de error para email
+   * Obtiene el control de la contraseña
    */
-  get emailError(): string | null {
-    const control = this.emailControl;
-    if (control?.hasError('required') && control?.touched) {
+  get passwordControl(): FormControl {
+    return this.loginForm.get('password') as FormControl;
+  }
+
+  /**
+   * Mensaje de error de email
+   */
+  getEmailError(): string {
+    if (this.emailControl.hasError('required')) {
       return 'El correo es requerido';
     }
-    if (control?.hasError('email') && control?.touched) {
-      return 'Ingresa un correo válido';
+    if (this.emailControl.hasError('email')) {
+      return 'Correo inválido';
     }
-    return null;
+    return '';
   }
 
   /**
-   * Genera mensaje de error para contraseña
+   * Mensaje de error de contraseña
    */
-  get passwordError(): string | null {
-    const control = this.passwordControl;
-    if (control?.hasError('required') && control?.touched) {
+  getPasswordError(): string {
+    if (this.passwordControl.hasError('required')) {
       return 'La contraseña es requerida';
     }
-    if (control?.hasError('minlength') && control?.touched) {
-      return 'La contraseña debe tener mínimo 6 caracteres';
+    if (this.passwordControl.hasError('minlength')) {
+      return 'Mínimo 6 caracteres';
     }
-    return null;
+    return '';
   }
 
   /**
-   * Alterna visibilidad de la contraseña
+   * Toggle de visibilidad de contraseña
    */
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
 
   /**
-   * Realiza el login llamando al backend
-   *
-   * Proceso:
-   * 1. Validar formulario
-   * 2. Obtener token de reCAPTCHA
-   * 3. Llamar a AuthService.login()
-   * 4. Si éxito: guardar tokens y navegar a dashboard
-   * 5. Si error: mostrar mensaje según código de error
+   * Obtiene el token de reCAPTCHA
    */
-  async login(): Promise<void> {
-    // Marcar todos los campos como tocados para mostrar errores
-    Object.keys(this.loginForm.controls).forEach(key => {
-      this.loginForm.get(key)?.markAsTouched();
+  private getRecaptchaToken(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      try {
+        if (!window.grecaptcha) {
+          reject(new Error('reCAPTCHA no está cargado'));
+          return;
+        }
+        const token = window.grecaptcha.getResponse();
+        if (token) {
+          resolve(token);
+        } else {
+          reject(new Error('Por favor, completa el reCAPTCHA'));
+        }
+      } catch (error) {
+        reject(error);
+      }
     });
+  }
 
-    // Validar formulario
+  /**
+   * Envía el formulario
+   */
+  async onSubmit(): Promise<void> {
     if (this.loginForm.invalid) {
+      Object.keys(this.loginForm.controls).forEach(key => {
+        this.loginForm.get(key)?.markAsTouched();
+      });
       return;
     }
 
@@ -215,9 +182,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       // Obtener token de reCAPTCHA
       const recaptchaToken = await this.getRecaptchaToken();
 
-      // Obtener valores del formulario
-      const email = this.loginForm.get('email')?.value;
-      const password = this.loginForm.get('password')?.value;
+      const { email, password } = this.loginForm.value;
 
       // Llamar al servicio de autenticación
       this.authService
@@ -225,47 +190,31 @@ export class LoginComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response) => {
-            console.log('Login exitoso:', response.email);
-
-            // ✅ Mostrar pantalla de éxito
-            this.isLoading = false;
-            this.loginSuccess = true;
-            this.successUserName = response.name || response.email;
-
-            // Navegar después de 2 segundos
+            console.log('Login exitoso:', response);
+            // Redirigir después de 1 segundo
             setTimeout(() => {
-              if (response.mustChangePassword) {
-                this.router.navigate(['/auth/change-password']);
-              } else {
-                this.router.navigate(['/dashboard']);
-              }
-            }, 2000);
+              this.router.navigate(['/dashboard']);
+            }, 1000);
           },
           error: (error) => {
             this.isLoading = false;
-            this.loginError = error.message || 'Error al iniciar sesión. Intenta nuevamente.';
+            this.loginError = error.message || 'Error al iniciar sesión';
             console.error('Login error:', error);
-          },
-          complete: () => {
-            this.isLoading = false;
           }
         });
-
-    } catch (error) {
+    } catch (error: any) {
       this.isLoading = false;
-      this.loginError = 'Error al obtener token de reCAPTCHA. Intenta nuevamente.';
-      console.error('reCAPTCHA error:', error);
+      this.loginError = error.message || 'Error al procesar el login';
+      console.error('Error:', error);
     }
   }
 
   /**
-   * Placeholder para login con Google (OAuth)
-   * Implementar según tu configuración de Google OAuth
+   * Login con Google (placeholder)
    */
   loginWithGoogle(): void {
-    console.log('Implementar Google OAuth');
+    console.log('Google login - a implementar');
     // TODO: Implementar Google OAuth
   }
 }
-
 
