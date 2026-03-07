@@ -48,7 +48,7 @@
 
     <!-- Low Stock Filter Empty -->
     <div class="empty-state" *ngIf="!isLoading && showLowStockOnly && lowStockItems.length === 0">
-      <div class="empty-icon">✅</div>
+      <div class="empty-icon">Todo en orden</div>
       <h3>¡Todo en orden!</h3>
       <p>No hay productos con stock bajo en este momento</p>
       <button class="btn btn-secondary" (click)="toggleLowStockFilter()">
