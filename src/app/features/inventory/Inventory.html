@@ -2,74 +2,7 @@
   <!-- Background -->
   <div class="inventory-background"></div>
 
-  <!-- Navbar -->
-  <nav class="inventory-navbar">
-    <!-- Dropdown Menú Principal (Izquierda) -->
-    <div class="nav-dropdown-main">
-      <button class="btn-nav-dropdown" (click)="toggleDropdown('main')" [class.active]="dropdownOpen === 'main'">
-        <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-        </svg>
-        <span class="nav-text">Menú</span>
-        <svg class="dropdown-arrow" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-        </svg>
-      </button>
-      <div class="dropdown-menu" *ngIf="dropdownOpen === 'main'">
-        <a routerLink="/inventory/dashboard" routerLinkActive="active" class="dropdown-item">
-          <svg class="dropdown-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
-          </svg>
-          <span>Dashboard</span>
-        </a>
-        <a routerLink="/inventory" routerLinkActive="active" class="dropdown-item">
-          <svg class="dropdown-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M20 13H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zM7 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM20 3H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1zM7 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
-          </svg>
-          <span>Inventario</span>
-        </a>
-        <a routerLink="/inventory/providers" routerLinkActive="active" class="dropdown-item">
-          <svg class="dropdown-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-          </svg>
-          <span>Lista de Proveedores</span>
-        </a>
-        <a routerLink="/inventory/history/supply" routerLinkActive="active" class="dropdown-item">
-          <svg class="dropdown-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
-          </svg>
-          <span>Historial de Abastecimientos</span>
-        </a>
-      </div>
-    </div>
 
-    <!-- Logo (Centro) -->
-    <div class="navbar-brand">
-      <span class="brand-text">Servly</span>
-    </div>
-  </nav>
-
-  <!-- Header -->
-  <header class="inventory-header">
-    <div class="header-content">
-      <h1 class="inventory-title">Inventario</h1>
-      <p class="inventory-subtitle">Gestión de stock y productos</p>
-    </div>
-    <div class="header-actions">
-      <button class="btn btn-secondary" (click)="openCategoryModal()" [disabled]="isLoading">
-        <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-        </svg>
-        <span>Nueva Categoría</span>
-      </button>
-      <button class="btn btn-add" (click)="openCreateModal()" [disabled]="isLoading">
-        <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-        </svg>
-        <span>Nuevo Item</span>
-      </button>
-    </div>
-  </header>
 
   <!-- Main Content -->
   <main class="inventory-container">

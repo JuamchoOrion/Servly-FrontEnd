@@ -34,7 +34,6 @@
     "@ionic/angular": "^8.7.18",
     "@ionic/core": "^8.7.18",
     "@react-oauth/google": "^0.13.4",
-    "onsenui": "^2.12.8",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

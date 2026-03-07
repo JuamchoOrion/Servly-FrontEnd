@@ -1,4 +1,10 @@
-<ion-app>
-  <router-outlet></router-outlet>
+<ion-app class="app-wrapper">
+  <app-navbar *ngIf="showNavbar"></app-navbar>
+
+  <main class="app-main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <app-footer *ngIf="showFooter"></app-footer>
   <app-accessibility-menu></app-accessibility-menu>
 </ion-app>

@@ -1,0 +1,359 @@
+/* ═══════════════════════════════════════════════════════════════════════════════════
+   MAIN NAVBAR - REUTILIZABLE
+   ═══════════════════════════════════════════════════════════════════════════════════ */
+
+$primary-black: #1E1E1E;
+$accent-gold: #C8A951;
+$white: #FFFFFF;
+$text-light: rgba(255, 255, 255, 0.7);
+$text-light-secondary: rgba(0, 0, 0, 0.6);
+$hover-color: rgba($accent-gold, 0.1);
+$border-color: rgba($accent-gold, 0.2);
+
+.main-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, $primary-black 0%, #1a1a1a 100%);
+  border-bottom: 2px solid rgba($accent-gold, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  gap: 24px;
+
+  /* ═══════════════════════════════════════════════════════════════════════════════════
+     LEFT SECTION: LOGO + NAV ITEMS
+     ═══════════════════════════════════════════════════════════════════════════════════ */
+
+  .navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    flex: 1;
+  }
+
+  .navbar-logo {
+    flex-shrink: 0;
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: 900;
+      background: linear-gradient(135deg, $white 0%, $accent-gold 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+    }
+
+    &:hover .logo-text {
+      font-size: 26px;
+    }
+  }
+
+  /* NAV ITEMS */
+  .nav-items {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      color: $text-light;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+
+      &:hover {
+        background: rgba($accent-gold, 0.15);
+        color: $accent-gold;
+        transform: translateY(-2px);
+      }
+
+      .nav-icon {
+        font-size: 16px;
+      }
+
+      .nav-label {
+        @media (max-width: 768px) {
+          display: none;
+        }
+      }
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════════════════
+     RIGHT SECTION: BRAND + USER
+     ═══════════════════════════════════════════════════════════════════════════════════ */
+
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-shrink: 0;
+  }
+
+  .navbar-brand {
+    .brand-text {
+      font-size: 16px;
+      font-weight: 700;
+      color: $accent-gold;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+
+      @media (max-width: 768px) {
+        font-size: 12px;
+      }
+    }
+  }
+
+  /* USER SECTION */
+  .user-section {
+    position: relative;
+
+    .user-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: rgba($accent-gold, 0.1);
+      border: 2px solid rgba($accent-gold, 0.3);
+      border-radius: 10px;
+      color: $white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: rgba($accent-gold, 0.2);
+        border-color: $accent-gold;
+        box-shadow: 0 4px 16px rgba($accent-gold, 0.2);
+      }
+
+      .user-icon {
+        width: 20px;
+        height: 20px;
+        fill: $accent-gold;
+      }
+
+      .user-email {
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        @media (max-width: 768px) {
+          display: none;
+        }
+      }
+
+      .dropdown-arrow {
+        width: 16px;
+        height: 16px;
+        fill: $accent-gold;
+        transition: transform 0.3s ease;
+
+        &.open {
+          transform: rotate(180deg);
+        }
+      }
+    }
+
+    /* DROPDOWN MENU */
+    .user-dropdown {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      background: linear-gradient(135deg, rgba(30, 30, 30, 0.98) 0%, rgba(40, 40, 40, 0.98) 100%);
+      border: 2px solid rgba($accent-gold, 0.3);
+      border-radius: 12px;
+      min-width: 220px;
+      padding: 12px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      animation: slideDown 0.25s ease-out;
+      backdrop-filter: blur(10px);
+      z-index: 1001;
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .dropdown-header {
+        padding: 12px 8px;
+        border-bottom: 1px solid rgba($accent-gold, 0.2);
+        margin-bottom: 8px;
+
+        .role-badge {
+          display: inline-block;
+          padding: 6px 12px;
+          background: rgba($accent-gold, 0.2);
+          border: 1px solid $accent-gold;
+          border-radius: 8px;
+          color: $accent-gold;
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
+
+      .dropdown-item {
+        display: block;
+        width: 100%;
+        padding: 12px 16px;
+        margin: 4px 0;
+        background: transparent;
+        border: none;
+        color: $text-light;
+        text-decoration: none;
+        text-align: left;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background: rgba($accent-gold, 0.15);
+          color: $accent-gold;
+          padding-left: 20px;
+        }
+
+        &.logout-btn {
+          color: #ff6b6b;
+          margin-top: 12px;
+          padding-top: 12px;
+          border-top: 1px solid rgba($accent-gold, 0.2);
+
+          &:hover {
+            background: rgba(#ff6b6b, 0.15);
+            color: #ff6b6b;
+          }
+        }
+      }
+    }
+  }
+
+  /* LOGIN BUTTON */
+  .login-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, $accent-gold 0%, #D4B875 100%);
+    color: $primary-black;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 24px rgba($accent-gold, 0.3);
+    white-space: nowrap;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba($accent-gold, 0.4);
+    }
+  }
+
+  /* MOBILE MENU BUTTON */
+  .mobile-menu-btn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: $accent-gold;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px;
+
+    svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    @media (max-width: 768px) {
+      display: block;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .main-navbar {
+    padding: 12px 16px;
+    gap: 16px;
+
+    .navbar-left {
+      gap: 16px;
+    }
+
+    .navbar-right {
+      gap: 16px;
+    }
+
+    .nav-items {
+      gap: 8px;
+
+      .nav-item {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .main-navbar {
+    padding: 12px;
+
+    .navbar-left {
+      flex: 0;
+      gap: 12px;
+    }
+
+    .navbar-logo .logo-text {
+      font-size: 18px;
+    }
+
+    .nav-items {
+      display: none;
+    }
+
+    .navbar-right {
+      gap: 12px;
+
+      .navbar-brand {
+        display: none;
+      }
+    }
+
+    .user-section .user-btn {
+      padding: 8px 12px;
+      font-size: 12px;
+
+      .user-email {
+        display: none;
+      }
+    }
+  }
+}
+

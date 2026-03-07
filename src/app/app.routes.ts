@@ -1,37 +1,47 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './features/auth/pages/login/login';
-import { InventoryComponent } from './features/inventory/Inventory';
-import { SuppliersComponent } from './features/suppliers/Suppliers';
-import { OAuth2CallbackComponent } from './features/auth/pages/login/oauth2-callback/oauth2-callback.component';
-import { AccessDeniedComponent } from './features/auth/pages/access-denied/access-denied.component';
 import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role-guard.service';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
-  { path: 'login', component: LoginComponent },
-  { path: 'access-denied', component: AccessDeniedComponent },
+  // Auth routes
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/pages/login/login').then(m => m.LoginComponent)
+  },
+  {
+    path: 'access-denied',
+    loadComponent: () =>
+      import('./features/auth/pages/access-denied/access-denied.component').then(m => m.AccessDeniedComponent)
+  },
+  {
+    path: 'oauth2/callback',
+    loadComponent: () =>
+      import('./features/auth/pages/login/oauth2-callback/oauth2-callback.component').then(m => m.OAuth2CallbackComponent)
+  },
+
+  // Protected routes with lazy loading
   {
     path: 'dashboard',
     loadComponent: () =>
-      import('./features/dashboard/dashboard.component')
-        .then(m => m.DashboardComponent),
+      import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
     canActivate: [authGuard]
   },
   {
     path: 'inventory',
-    loadComponent: () => import('./features/inventory/Inventory').then(m => m.InventoryComponent),
-    canActivate: [authGuard]
+    loadComponent: () =>
+      import('./features/inventory/Inventory').then(m => m.InventoryComponent),
+    canActivate: [authGuard, roleGuard(['ADMIN', 'STOREKEEPER'])]
   },
-
   {
-    path: 'oauth2/callback',
-    component: OAuth2CallbackComponent
+    path: 'categories',
+    loadComponent: () =>
+      import('./features/categories/item-categories').then(m => m.ItemCategoriesComponent),
+    canActivate: [authGuard, roleGuard(['ADMIN', 'STOREKEEPER'])]
   },
 
-  { path: 'inventory', component: InventoryComponent },
-  { path: 'inventory/dashboard', component: InventoryComponent },
-  { path: 'inventory/providers', component: SuppliersComponent },
-  { path: 'inventory/history/supply', component: InventoryComponent },
-  { path: 'inventory/history/movements', component: InventoryComponent }
+  // Wildcard - must be last
+  { path: '**', redirectTo: 'login' }
 ];

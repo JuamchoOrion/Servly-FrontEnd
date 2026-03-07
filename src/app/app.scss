@@ -1,0 +1,59 @@
+/* ═══════════════════════════════════════════════════════════════════════════════════
+   APP GLOBAL LAYOUT
+   ═══════════════════════════════════════════════════════════════════════════════════ */
+
+:host {
+  --ion-background-color: #f5f5f5;
+}
+
+ion-app.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f5f5f5;
+
+  app-navbar {
+    flex-shrink: 0;
+  }
+
+  .app-main {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  app-footer {
+    flex-shrink: 0;
+  }
+
+  app-accessibility-menu {
+    position: fixed;
+    z-index: 2000;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
+   SCROLL BEHAVIOR
+   ═══════════════════════════════════════════════════════════════════════════════════ */
+
+.app-main {
+  scroll-behavior: smooth;
+
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(200, 169, 81, 0.5);
+    border-radius: 4px;
+
+    &:hover {
+      background: rgba(200, 169, 81, 0.7);
+    }
+  }
+}
+

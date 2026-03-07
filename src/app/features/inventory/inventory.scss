@@ -399,6 +399,49 @@ $white: #FFFFFF;
   }
 }
 
+.btn-categories {
+  background: linear-gradient(135deg, $accent-gold 0%, #D4B875 100%);
+  color: $primary-black;
+  box-shadow:
+    0 8px 24px rgba(200,169,81,0.3),
+    0 2px 8px rgba(0,0,0,0.1);
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .icon-categories {
+    width: 20px;
+    height: 20px;
+    fill: $primary-black;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 12px 32px rgba(200,169,81,0.4),
+      0 4px 12px rgba(0,0,0,0.15);
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
 .btn-primary {
   background: linear-gradient(135deg, $primary-black 0%, #2A2A2A 100%);
   color: $white;
