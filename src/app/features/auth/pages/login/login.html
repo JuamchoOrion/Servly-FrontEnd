@@ -1,42 +1,49 @@
+<!-- Language Selector (en la raíz, no dentro de wrapper) -->
+<div class="language-selector">
+  <select [value]="i18n.getCurrentLanguage()" (change)="onLanguageChange($any($event).target.value)" class="language-select">
+    <option *ngFor="let lang of availableLanguages" [value]="lang.code">
+      {{ lang.name }}
+    </option>
+  </select>
+</div>
+
 <div class="login-wrapper">
   <div class="login-container">
     <!-- Header -->
     <div class="login-header">
       <h1 class="login-title">Servly</h1>
-      <p class="login-subtitle">Sistema de Gestión para Restaurantes</p>
+      <p class="login-subtitle">{{ i18n.translate('auth.login.subtitle') }}</p>
     </div>
 
     <!-- Formulario -->
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-
-      <!-- Email -->
       <div class="form-group">
-        <label for="email" class="form-label">Email</label>
+        <label for="email" class="form-label">{{ i18n.translate('auth.login.email') }}</label>
         <input
           id="email"
           type="email"
           class="form-input"
-          [class.error]="emailControl?.invalid && emailControl?.touched"
+          [class.error]="emailControl.invalid && emailControl.touched"
           placeholder="tu@correo.com"
           formControlName="email"
-          (blur)="emailControl?.markAsTouched()">
-        <span class="error-text" *ngIf="emailControl?.invalid && emailControl?.touched">
+          (blur)="emailControl.markAsTouched()">
+        <span class="error-text" *ngIf="emailControl.invalid && emailControl.touched">
           {{ getEmailError() }}
         </span>
       </div>
 
       <!-- Contraseña -->
       <div class="form-group">
-        <label for="password" class="form-label">Contraseña</label>
+        <label for="password" class="form-label">{{ i18n.translate('auth.login.password') }}</label>
         <div class="password-wrapper">
           <input
             id="password"
             [type]="showPassword ? 'text' : 'password'"
             class="form-input"
-            [class.error]="passwordControl?.invalid && passwordControl?.touched"
+            [class.error]="passwordControl.invalid && passwordControl.touched"
             placeholder="••••••••"
             formControlName="password"
-            (blur)="passwordControl?.markAsTouched()">
+            (blur)="passwordControl.markAsTouched()">
           <button
             type="button"
             class="password-toggle"
@@ -46,7 +53,7 @@
             <span *ngIf="showPassword">👁️‍🗨️</span>
           </button>
         </div>
-        <span class="error-text" *ngIf="passwordControl?.invalid && passwordControl?.touched">
+        <span class="error-text" *ngIf="passwordControl.invalid && passwordControl.touched">
           {{ getPasswordError() }}
         </span>
       </div>
@@ -58,32 +65,45 @@
 
       <!-- Error General -->
       <div class="error-alert" *ngIf="loginError">
+        <span class="alert-icon">⚠️</span>
         {{ loginError }}
+      </div>
+
+      <!-- Éxito -->
+      <div class="success-alert" *ngIf="loginSuccess">
+        <span class="alert-icon">✅</span>
+        {{ loginSuccess }}
+      </div>
+
+      <!-- Rate Limit Warning -->
+      <div class="warning-alert" *ngIf="isRateLimited">
+        <span class="alert-icon">🔒</span>
+        {{ i18n.translate('rateLimit.message', { remaining: lockoutTimeRemaining }) }}
       </div>
 
       <!-- Botones -->
       <button
         type="submit"
         class="btn btn-primary"
-        [disabled]="isLoading || loginForm.invalid">
-        <span *ngIf="!isLoading">Iniciar Sesión</span>
-        <span *ngIf="isLoading">Conectando...</span>
+        [disabled]="isLoading || loginForm.invalid || isRateLimited">
+        <span *ngIf="!isLoading">{{ i18n.translate('auth.login.button') }}</span>
+        <span *ngIf="isLoading">{{ i18n.translate('common.loading') }}</span>
       </button>
 
       <!-- Google Sign-In Button -->
       <button
         type="button"
         class="btn btn-google"
+        [disabled]="isRateLimited"
         (click)="loginWithGoogle()">
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" class="google-logo">
-        <span>Continuar con Google</span>
+        <span>{{ i18n.translate('auth.login.google') }}</span>
       </button>
     </form>
 
     <!-- Footer -->
     <div class="login-footer">
-      <p>¿Problemas para iniciar sesión? <a href="#">Contactar soporte</a></p>
+      <p>{{ i18n.translate('common.home') }} <a href="#">{{ i18n.translate('common.profile') }}</a></p>
     </div>
   </div>
 </div>
-

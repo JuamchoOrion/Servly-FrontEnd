@@ -98,6 +98,62 @@ $error-red: #C62828;
     display: block;
     width: 60px;
     height: 3px;
+    background: $gold;
+    margin: 20px auto 0;
+    border-radius: 2px;
+  }
+}
+
+/* =======================================
+   🌍 LANGUAGE SELECTOR
+================================ */
+
+.language-selector {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+
+  .language-select {
+    padding: 10px 14px;
+    border: 2px solid $gold;
+    border-radius: 8px;
+    background: $cream;
+    color: $text-dark;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    box-shadow: 0 4px 12px rgba($gold, 0.2);
+
+    &:hover {
+      border-color: $olive-green;
+      background: rgba($gold, 0.1);
+      box-shadow: 0 6px 16px rgba($gold, 0.3);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $olive-green;
+      box-shadow: 0 0 0 3px rgba($gold, 0.3);
+    }
+
+    option {
+      background: $cream;
+      color: $text-dark;
+      padding: 10px;
+      font-weight: 500;
+    }
+  }
+}
+
+/* =======================================
+   🏷 HEADER (continuación)
+================================ */
+
+.login-header {
+  &::after {
     background: linear-gradient(90deg, transparent, $gold, transparent);
     margin: 16px auto 0;
   }
@@ -210,18 +266,55 @@ $error-red: #C62828;
 }
 
 /* =======================================
-   ⚠️ ERROR ALERT
+   ⚠️ ALERTS
 ================================ */
 
-.error-alert {
-  padding: 12px 16px;
-  background: rgba(198, 40, 40, 0.08);
-  border-left: 4px solid $error-red;
+.error-alert,
+.success-alert,
+.warning-alert {
+  padding: 14px 16px;
   border-radius: 8px;
   font-size: 13px;
-  color: $error-red;
   margin: 12px 0;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideDown 0.3s ease-out;
+
+  .alert-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error-alert {
+  background: rgba(198, 40, 40, 0.08);
+  border-left: 4px solid $error-red;
+  color: $error-red;
+}
+
+.success-alert {
+  background: rgba(46, 125, 50, 0.08);
+  border-left: 4px solid #2E7D32;
+  color: #2E7D32;
+}
+
+.warning-alert {
+  background: rgba(245, 127, 23, 0.08);
+  border-left: 4px solid #F57F17;
+  color: #F57F17;
 }
 
 /* =======================================

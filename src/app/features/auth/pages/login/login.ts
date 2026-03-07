@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { SecurityService } from '../../../../core/services/security.service';
+import { RateLimitService } from '../../../../core/services/rate-limit.service';
+import { ErrorHandlingService } from '../../../../core/services/error-handling.service';
+import { I18nService } from '../../../../core/services/i18n.service';
 import { environment } from '../../../../../enviroments/enviroment';
 
 declare global {
@@ -25,12 +29,22 @@ export class LoginComponent implements OnInit, OnDestroy {
   isLoading = false;
   showPassword = false;
   loginError: string | null = null;
+  loginSuccess: string | null = null;
   recaptchaSiteKey = environment.recaptcha.siteKey;
+  isRateLimited = false;
+  remainingAttempts = 0;
+  lockoutTimeRemaining = 0;
+  availableLanguages: Array<{ code: string; name: string }> = [];
+
   private recaptchaToken: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private securityService: SecurityService,
+    private rateLimitService: RateLimitService,
+    private errorHandlingService: ErrorHandlingService,
+    public i18n: I18nService,
     private router: Router
   ) {
     this.initializeForm();
@@ -40,14 +54,39 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadRecaptchaScript();
+    this.setupRateLimitListener();
+    this.availableLanguages = this.i18n.getSupportedLanguages();
+  }
+
+  /**
+   * Configura el listener de rate limit
+   */
+  private setupRateLimitListener(): void {
+    this.rateLimitService.isLockedOut$().subscribe(isLocked => {
+      this.isRateLimited = isLocked;
+    });
+
+    this.rateLimitService.getRemainingTime$().subscribe(seconds => {
+      this.lockoutTimeRemaining = seconds;
+    });
   }
 
   /**
    * Login con Google OAuth2
-   * Redirige al backend para iniciar el flujo OAuth2
    */
   loginWithGoogle(): void {
+    if (this.isRateLimited) {
+      this.showRateLimitError();
+      return;
+    }
     this.authService.loginWithGoogle();
+  }
+
+  /**
+   * Cambia el idioma de la aplicación
+   */
+  onLanguageChange(language: string): void {
+    this.i18n.setLanguage(language as any);
   }
 
   /**
@@ -81,11 +120,11 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Callback cuando reCAPTCHA se resuelve exitosamente
+   * Callback cuando reCAPTCHA se resuelve
    */
   onRecaptchaResolved(token: string): void {
     this.recaptchaToken = token;
-    console.log('🔵 reCAPTCHA token obtenido:', token ? 'OK' : 'NULL');
+    console.log('🔵 reCAPTCHA token obtenido');
   }
 
   /**
@@ -96,27 +135,27 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Mensaje de error de email
+   * Mensaje de error de email con i18n
    */
   getEmailError(): string {
     if (this.emailControl.hasError('required')) {
-      return 'El correo es requerido';
+      return this.i18n.translate('validation.email.required');
     }
     if (this.emailControl.hasError('email')) {
-      return 'Correo inválido';
+      return this.i18n.translate('validation.email.invalid');
     }
     return '';
   }
 
   /**
-   * Mensaje de error de contraseña
+   * Mensaje de error de contraseña con i18n
    */
   getPasswordError(): string {
     if (this.passwordControl.hasError('required')) {
-      return 'La contraseña es requerida';
+      return this.i18n.translate('validation.password.required');
     }
     if (this.passwordControl.hasError('minlength')) {
-      return 'Mínimo 6 caracteres';
+      return this.i18n.translate('validation.password.minLength');
     }
     return '';
   }
@@ -129,9 +168,26 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Muestra error de rate limit
+   */
+  private showRateLimitError(): void {
+    const remaining = this.rateLimitService.getLockoutTimeRemaining();
+    this.loginError = this.i18n.translate('rateLimit.message', {
+      remaining: remaining
+    });
+  }
+
+  /**
    * Envía el formulario
    */
   async onSubmit(): Promise<void> {
+    // Verificar si está bloqueado por rate limit
+    if (this.rateLimitService.isLocked()) {
+      this.showRateLimitError();
+      return;
+    }
+
+    // Validar formulario
     if (this.loginForm.invalid) {
       Object.keys(this.loginForm.controls).forEach(key => {
         this.loginForm.get(key)?.markAsTouched();
@@ -139,54 +195,105 @@ export class LoginComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Verificar reCAPTCHA
     if (!this.recaptchaToken) {
-      this.loginError = 'Por favor, completa el reCAPTCHA';
+      this.loginError = this.i18n.translate('validation.recaptcha');
       return;
     }
 
     try {
       this.isLoading = true;
       this.loginError = null;
+      this.loginSuccess = null;
 
       const { email, password } = this.loginForm.value;
 
-      // Llamar al servicio de autenticación con token fresco
-      this.authService
-        .login(email, password, this.recaptchaToken)
-        .subscribe({
-          next: (response) => {
-            console.log('Login exitoso:', response);
-            // Resetear token después del login exitoso
-            this.recaptchaToken = null;
-            if (window.grecaptcha) {
-              window.grecaptcha.reset();
-            }
-            // Redirigir después de 1 segundo
-            setTimeout(() => {
-              this.router.navigate(['/dashboard']);
-            }, 1000);
-          },
-          error: (error) => {
-            this.isLoading = false;
-            this.loginError = error.message || 'Error al iniciar sesión';
-            console.error('Login error:', error);
-            // Resetear reCAPTCHA para intentar de nuevo
-            this.recaptchaToken = null;
-            if (window.grecaptcha) {
-              window.grecaptcha.reset();
-            }
+      // Validar email y contraseña con SecurityService
+      if (!this.securityService.validateEmail(email)) {
+        this.loginError = this.i18n.translate('validation.email.invalid');
+        this.isLoading = false;
+        return;
+      }
+
+      const passwordValidation = this.securityService.validatePassword(password);
+      if (!passwordValidation.isValid) {
+        this.loginError = passwordValidation.errors[0];
+        this.isLoading = false;
+        return;
+      }
+
+      // Realizar login
+      this.authService.login(email, password, this.recaptchaToken).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.loginSuccess = this.i18n.translate('success.login');
+
+          // Limpiar intentos fallidos
+          this.rateLimitService.clearFailedAttempts();
+
+          // Resetear token reCAPTCHA
+          this.recaptchaToken = null;
+          if (window.grecaptcha) {
+            window.grecaptcha.reset();
           }
-        });
+
+          // Redirigir según rol
+          setTimeout(() => {
+            const userRole = response.role?.toUpperCase();
+            if (userRole === 'STOREKEEPER') {
+              this.router.navigate(['/inventory']);
+            } else {
+              this.router.navigate(['/dashboard']);
+            }
+          }, 1500);
+        },
+        error: (error) => {
+          this.isLoading = false;
+
+          // Registrar intento fallido para rate limiting
+          this.rateLimitService.recordFailedAttempt('/api/auth/login');
+
+          // Manejar error con granularidad
+          const errorMessage = this.handleLoginError(error);
+          this.loginError = errorMessage;
+
+          // Resetear reCAPTCHA
+          this.recaptchaToken = null;
+          if (window.grecaptcha) {
+            window.grecaptcha.reset();
+          }
+        }
+      });
     } catch (error: any) {
       this.isLoading = false;
-      this.loginError = error.message || 'Error al procesar el login';
-      console.error('Error:', error);
-      // Resetear reCAPTCHA
+      const appError = this.errorHandlingService.handleNetworkError(
+        error,
+        '/api/auth/login',
+        'login'
+      );
+      this.loginError = appError.userMessage;
       this.recaptchaToken = null;
       if (window.grecaptcha) {
         window.grecaptcha.reset();
       }
     }
+  }
+
+  /**
+   * Maneja errores de login con granularidad
+   */
+  private handleLoginError(error: any): string {
+    const status = error.status || 0;
+    const body = error.error || {};
+
+    const appError = this.errorHandlingService.handleHttpError(
+      status,
+      body,
+      '/api/auth/login',
+      'login'
+    );
+
+    return appError.userMessage;
   }
 
   ngOnDestroy(): void {

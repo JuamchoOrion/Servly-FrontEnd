@@ -72,13 +72,19 @@ export class AuthService {
 
     return this.http.post<LoginResponseDTO>(this.AUTH_ENDPOINT, request, { withCredentials: true }).pipe(
       tap((response: LoginResponseDTO) => {
+        // Normalizar el token (puede venir como 'token' o 'accessToken')
+        const accessToken = response.token || response.accessToken;
+        if (!accessToken) {
+          throw new Error('No access token in response');
+        }
+
         // Guardar tokens en sessionStorage
-        this.setTokens(response.token, response.refreshToken);
+        this.setTokens(accessToken, response.refreshToken);
         // Guardar usuario actual
         this.setCurrentUser({
           email: response.email,
           name: response.name,
-          roles: response.roles,
+          roles: response.roles || (response.role ? [response.role] : []),
           mustChangePassword: response.mustChangePassword
         });
         // Actualizar estado
@@ -106,13 +112,19 @@ export class AuthService {
 
     return this.http.post<LoginResponseDTO>(this.REFRESH_ENDPOINT, request, { withCredentials: true }).pipe(
       tap((response: LoginResponseDTO) => {
+        // Normalizar el token (puede venir como 'token' o 'accessToken')
+        const accessToken = response.token || response.accessToken;
+        if (!accessToken) {
+          throw new Error('No access token in response');
+        }
+
         // Actualizar tokens en sessionStorage
-        this.setTokens(response.token, response.refreshToken);
+        this.setTokens(accessToken, response.refreshToken);
         // Actualizamos el usuario si cambió
         this.setCurrentUser({
           email: response.email,
           name: response.name,
-          roles: response.roles,
+          roles: response.roles || (response.role ? [response.role] : []),
           mustChangePassword: response.mustChangePassword
         });
       }),

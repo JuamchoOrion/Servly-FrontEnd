@@ -7,8 +7,10 @@ export interface LoginResponseDTO {
   /**
    * Token JWT de acceso válido por 24 horas
    * Usar en header: Authorization: Bearer {token}
+   * (Puede venir como 'token' o 'accessToken' según el backend)
    */
-  token: string;
+  token?: string;
+  accessToken?: string;
 
   /**
    * Token JWT de refresco válido por 7 días
@@ -30,13 +32,29 @@ export interface LoginResponseDTO {
    * Lista de roles del usuario
    * Ejemplos: ['ADMIN'], ['STAFF'], ['ADMIN', 'STAFF']
    */
-  roles: string[];
+  roles?: string[];
+
+  /**
+   * Role individual del usuario (singular)
+   * Ejemplos: 'ADMIN', 'STAFF', 'STOREKEEPER'
+   */
+  role?: string;
+
+  /**
+   * ID único del usuario
+   */
+  userId?: string;
 
   /**
    * Flag indicando si el usuario debe cambiar la contraseña
    * Si es true, mostrar pantalla de cambio de contraseña obligatorio
    */
   mustChangePassword: boolean;
+
+  /**
+   * Flag indicando si el usuario completó el primer login
+   */
+  firstLoginCompleted?: boolean;
 }
 
 /**
