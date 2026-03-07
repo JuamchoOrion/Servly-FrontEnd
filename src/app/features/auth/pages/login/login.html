@@ -53,7 +53,7 @@
 
       <!-- reCAPTCHA -->
       <div class="recaptcha-wrapper">
-        <div #recaptchaContainer class="g-recaptcha" [attr.data-sitekey]="recaptchaSiteKey"></div>
+        <div #recaptchaContainer class="g-recaptcha" [attr.data-sitekey]="recaptchaSiteKey" data-callback="onRecaptchaResolved"></div>
       </div>
 
       <!-- Error General -->
@@ -70,8 +70,14 @@
         <span *ngIf="isLoading">Conectando...</span>
       </button>
 
-      <!-- Google Sign-In Button (renderizado automáticamente por Google) -->
-      <div id="google-login-button" class="google-button-container"></div>
+      <!-- Google Sign-In Button -->
+      <button
+        type="button"
+        class="btn btn-google"
+        (click)="loginWithGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" class="google-logo">
+        <span>Continuar con Google</span>
+      </button>
     </form>
 
     <!-- Footer -->
@@ -80,7 +86,4 @@
     </div>
   </div>
 </div>
-
-<!-- Script de reCAPTCHA -->
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 

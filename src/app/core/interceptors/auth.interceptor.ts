@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 /**
  * AuthInterceptor
  * Intercepta todas las solicitudes HTTP para:
- * 1. Adjuntar el access token en headers
+ * 1. Adjuntar el access token en headers (Authorization: Bearer)
  * 2. Enviar/recibir cookies (withCredentials: true)
  * 3. Manejar refresh automático cuando el token expira (401)
  * 4. Redirigir a login si ambos tokens están inválidos
@@ -15,6 +15,11 @@ import { Router } from '@angular/router';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  const excludedUrls = ['/oauth2/', '/login/oauth2/'];
+  const isExcluded = excludedUrls.some(url => req.url.includes(url));
+  if (isExcluded) {
+    return next(req);
+  }
 
   const token = authService.getAccessToken();
 
@@ -36,17 +41,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-
       if (error.status === 401) {
-
         // No hacer refresh si la solicitud ya es al endpoint de refresh
         if (req.url.includes('/api/auth/refresh')) {
           authService.logout().subscribe({
             next: () => router.navigate(['/login']),
-            error: () => {
-              sessionStorage.clear();
-              router.navigate(['/login']);
-            }
+            error: () => router.navigate(['/login'])
           });
           return throwError(() => new Error('Token expirado'));
         }
@@ -57,7 +57,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           return authService.refreshToken(refreshToken).pipe(
             switchMap(() => {
               // Reintentar la request original con el nuevo token
-              // también con withCredentials
               const newToken = authService.getAccessToken();
               const retryReq = req.clone({
                 withCredentials: true,
@@ -71,10 +70,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             catchError((refreshError) => {
               authService.logout().subscribe({
                 next: () => router.navigate(['/login']),
-                error: () => {
-                  sessionStorage.clear();
-                  router.navigate(['/login']);
-                }
+                error: () => router.navigate(['/login'])
               });
               return throwError(() => refreshError || new Error('Sesión expirada'));
             })

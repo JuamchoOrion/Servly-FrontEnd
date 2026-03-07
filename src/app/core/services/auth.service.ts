@@ -19,8 +19,8 @@ export interface CurrentUser {
 
 /**
  * AuthService
- * Servicio centralizado para autenticación y gestión de tokens
- * Maneja login, refresh de tokens, logout y persistencia de sesión
+ * Servicio centralizado para autenticación y gestión de sesión
+ * Maneja login, refresh de tokens, logout usando cookies HttpOnly
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -40,7 +40,7 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<CurrentUser | null>(this.getUserFromStorage());
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasValidToken());
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(!!this.getUserFromStorage());
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
   constructor(private http: HttpClient) {
@@ -70,9 +70,9 @@ export class AuthService {
       recaptchaToken
     };
 
-    return this.http.post<LoginResponseDTO>(this.AUTH_ENDPOINT, request).pipe(
-      tap(response => {
-        // Guardar tokens
+    return this.http.post<LoginResponseDTO>(this.AUTH_ENDPOINT, request, { withCredentials: true }).pipe(
+      tap((response: LoginResponseDTO) => {
+        // Guardar tokens en sessionStorage
         this.setTokens(response.token, response.refreshToken);
         // Guardar usuario actual
         this.setCurrentUser({
@@ -104,9 +104,11 @@ export class AuthService {
 
     const request = { refreshToken: token };
 
-    return this.http.post<LoginResponseDTO>(this.REFRESH_ENDPOINT, request).pipe(
-      tap(response => {
+    return this.http.post<LoginResponseDTO>(this.REFRESH_ENDPOINT, request, { withCredentials: true }).pipe(
+      tap((response: LoginResponseDTO) => {
+        // Actualizar tokens en sessionStorage
         this.setTokens(response.token, response.refreshToken);
+        // Actualizamos el usuario si cambió
         this.setCurrentUser({
           email: response.email,
           name: response.name,
@@ -122,12 +124,12 @@ export class AuthService {
   }
 
   /**
-   * Realiza logout limpiando tokens y sesión
+   * Realiza logout limpiando sesión
    *
    * @returns Observable<void>
    */
   logout(): Observable<void> {
-    return this.http.post<void>(this.LOGOUT_ENDPOINT, {}).pipe(
+    return this.http.post<void>(this.LOGOUT_ENDPOINT, {}, { withCredentials: true }).pipe(
       tap(() => this.clearSession()),
       catchError(() => {
         // Si el servidor falla, limpiar sesión localmente de todas formas
@@ -139,10 +141,9 @@ export class AuthService {
 
   /**
    * Guarda los tokens en sessionStorage
-   * sessionStorage se limpia cuando cierra el navegador (seguridad)
    *
-   * @param accessToken Token JWT de 24 horas
-   * @param refreshToken Token JWT de 7 días
+   * @param accessToken Token JWT de acceso
+   * @param refreshToken Token JWT de refresco
    */
   setTokens(accessToken: string, refreshToken: string): void {
     sessionStorage.setItem(this.TOKEN_KEY, accessToken);
@@ -168,21 +169,21 @@ export class AuthService {
   }
 
   /**
-   * Verifica si el usuario está autenticado
-   *
-   * @returns true si tiene un token válido
-   */
-  isAuthenticated(): boolean {
-    return this.hasValidToken();
-  }
-
-  /**
-   * Obtiene el usuario autenticado actual
+   * Obtiene el usuario autenticado actual (síncrono, desde state)
    *
    * @returns Usuario actual o null
    */
   getCurrentUser(): CurrentUser | null {
     return this.currentUserSubject.value;
+  }
+
+  /**
+   * Verifica si el usuario está autenticado localmente
+   *
+   * @returns true si tiene usuario en storage
+   */
+  isAuthenticated(): boolean {
+    return !!this.currentUserSubject.value;
   }
 
   /**
@@ -240,7 +241,8 @@ export class AuthService {
    */
   private restoreSessionFromStorage(): void {
     const user = this.getUserFromStorage();
-    if (user && this.hasValidToken()) {
+    const token = this.getAccessToken();
+    if (user && token) {
       this.currentUserSubject.next(user);
       this.isAuthenticatedSubject.next(true);
     }
@@ -252,27 +254,6 @@ export class AuthService {
   private getUserFromStorage(): CurrentUser | null {
     const userJson = sessionStorage.getItem(this.USER_KEY);
     return userJson ? JSON.parse(userJson) : null;
-  }
-
-  /**
-   * Verifica si hay un token válido
-   */
-  private hasValidToken(): boolean {
-    const token = sessionStorage.getItem(this.TOKEN_KEY);
-    return !!token && !this.isTokenExpired(token);
-  }
-
-  /**
-   * Verifica si un token JWT está expirado
-   */
-  private isTokenExpired(token: string): boolean {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const expirationTime = payload.exp * 1000; // Convertir a ms
-      return Date.now() >= expirationTime;
-    } catch {
-      return true;
-    }
   }
 
   /**
@@ -291,7 +272,7 @@ export class AuthService {
 
       switch (status) {
         case 400:
-          errorMessage = body.message || 'reCAPTCHA inválido o validación fallida';
+          errorMessage = body?.message || 'reCAPTCHA inválido o validación fallida';
           break;
         case 401:
           errorMessage = 'Email o contraseña incorrectos';
@@ -300,7 +281,7 @@ export class AuthService {
           errorMessage = 'Cuenta deshabilitada. Contacta con administración';
           break;
         case 422:
-          errorMessage = body.message || 'Datos de entrada inválidos';
+          errorMessage = body?.message || 'Datos de entrada inválidos';
           break;
         case 429:
           errorMessage = 'Demasiados intentos. Intenta más tarde';
@@ -309,7 +290,7 @@ export class AuthService {
           errorMessage = 'Error del servidor. Intenta más tarde';
           break;
         default:
-          errorMessage = body.message || 'Error al procesar la solicitud';
+          errorMessage = body?.message || 'Error al procesar la solicitud';
       }
     }
 
@@ -318,33 +299,19 @@ export class AuthService {
   }
 
   /**
-   * Login con Google OAuth
-   * Envía el tokenId de Google al backend
+   * Login con Google OAuth2
+   * Inicia el flujo OAuth2 redirigiendo al backend
    *
-   * @param tokenId Token JWT de Google
-   * @returns Observable<LoginResponseDTO> con tokens y datos del usuario
-   *
-   * El backend valida el token con Google y crea una sesión
+   * El backend se encarga de:
+   * 1. Redirigir a Google para autenticación
+   * 2. Recibir el callback con el código de autorización
+   * 3. Intercambiar el código por tokens
+   * 4. Redirigir al frontend con los tokens
    */
-  loginWithGoogle(tokenId: string): Observable<LoginResponseDTO> {
-    const request = { tokenId };
-    const googleAuthEndpoint = `${this.API_URL}/api/auth/google`;
-
-    return this.http.post<LoginResponseDTO>(googleAuthEndpoint, request).pipe(
-      tap(response => {
-        // Guardar tokens en sessionStorage
-        this.setTokens(response.token, response.refreshToken);
-        // Guardar usuario actual
-        this.setCurrentUser({
-          email: response.email,
-          name: response.name,
-          roles: response.roles,
-          mustChangePassword: response.mustChangePassword
-        });
-        // Actualizar estado
-        this.isAuthenticatedSubject.next(true);
-      }),
-      catchError(error => this.handleError(error))
-    );
+  loginWithGoogle(): void {
+    const url = `${this.API_URL}/oauth2/authorize/google`;
+    console.log('🔵 Iniciando login con Google...');
+    console.log('🔵 URL:', `${this.API_URL}/oauth2/authorize/google`);
+    window.location.href = url;
   }
 }
