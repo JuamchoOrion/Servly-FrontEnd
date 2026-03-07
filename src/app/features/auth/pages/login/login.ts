@@ -44,15 +44,100 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Esperar a que reCAPTCHA esté disponible
+    // Esperar a que reCAPTCHA y Google estén disponibles
     setTimeout(() => {
-      this.ensureRecaptchaLoaded();
-    }, 500);
+      this.initializeGoogleSignIn();
+    }, 800);
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  /**
+   * Inicializa Google Sign-In
+   */
+  private initializeGoogleSignIn(): void {
+    const google = (window as any).google;
+
+    if (!google) {
+      console.warn('Google Identity Services no cargado aún');
+      return;
+    }
+
+    const clientId = environment.google.clientId;
+    if (!clientId || clientId.includes('TU_CLIENT_ID')) {
+      console.warn('Google CLIENT_ID no configurado');
+      return;
+    }
+
+    try {
+      // Inicializar Google
+      google.accounts.id.initialize({
+        client_id: clientId,
+        callback: (response: any) => {
+          this.handleGoogleResponse(response);
+        }
+      });
+
+      // Renderizar el botón de Google EN el elemento HTML
+      const googleButton = document.getElementById('google-login-button');
+      if (googleButton) {
+        google.accounts.id.renderButton(googleButton, {
+          theme: 'outline',
+          size: 'large',
+          width: '100%',
+          locale: 'es'
+        });
+      }
+    } catch (error) {
+      console.error('Error inicializando Google Sign-In:', error);
+    }
+  }
+
+  /**
+   * Login con Google - Simplemente dejar que Google maneje el click
+   * El botón renderizado por Google manejará todo automáticamente
+   */
+  loginWithGoogle(): void {
+    // Este método ya no hace nada porque el botón de Google
+    // renderizado en initializeGoogleSignIn() maneja todo automáticamente
+    // Pero lo mantenemos para compatibilidad con el HTML
+  }
+
+  /**
+   * Maneja la respuesta del login de Google
+   */
+  private handleGoogleResponse(response: any): void {
+    try {
+      if (response.credential) {
+        const tokenId = response.credential;
+
+        this.isLoading = true;
+        this.loginError = null;
+
+        // Llamar al servicio de autenticación con el token de Google
+        this.authService
+          .loginWithGoogle(tokenId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              console.log('Google login exitoso:', response);
+              // Redirigir después de 1 segundo
+              setTimeout(() => {
+                this.router.navigate(['/dashboard']);
+              }, 1000);
+            },
+            error: (error) => {
+              this.isLoading = false;
+              this.loginError = error.message || 'Error al iniciar sesión con Google';
+              console.error('Google login error:', error);
+            }
+          });
+      } else {
+        this.loginError = 'No se pudo obtener el token de Google';
+      }
+    } catch (error: any) {
+      this.isLoading = false;
+      this.loginError = 'Error al procesar login de Google';
+      console.error('Error:', error);
+    }
   }
 
   /**
@@ -76,23 +161,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       script.defer = true;
       document.head.appendChild(script);
     }
-  }
-
-  /**
-   * Asegura que reCAPTCHA esté cargado
-   */
-  private ensureRecaptchaLoaded(): void {
-    let attempts = 0;
-    const interval = setInterval(() => {
-      if (window.grecaptcha && this.recaptchaContainer) {
-        clearInterval(interval);
-        console.log('reCAPTCHA cargado correctamente');
-      } else if (attempts > 20) {
-        clearInterval(interval);
-        console.warn('reCAPTCHA no se cargó después de múltiples intentos');
-      }
-      attempts++;
-    }, 100);
   }
 
   /**
@@ -209,12 +277,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  /**
-   * Login con Google (placeholder)
-   */
-  loginWithGoogle(): void {
-    console.log('Google login - a implementar');
-    // TODO: Implementar Google OAuth
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
-

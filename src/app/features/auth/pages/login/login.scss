@@ -269,6 +269,34 @@ $error-red: #C62828;
 }
 
 /* =======================================
+   🔗 GOOGLE BUTTON CONTAINER
+================================ */
+
+.google-button-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+
+  :deep(.g_id_signin) {
+    width: 100%;
+  }
+
+  :deep(.g_id_signin div) {
+    width: 100%;
+  }
+
+  :deep(button) {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  :deep(div[data-button_type='standard']) {
+    width: 100%;
+  }
+}
+
+/* =======================================
    🔗 FOOTER
 ================================ */
 

@@ -30,6 +30,13 @@ export const environment = {
     version: 'v2' // v2 con checkbox
   },
 
+  // Google OAuth
+  google: {
+    clientId: '619549576770-oj20nuhmqcqu6c09qim0v6fj952jm93a.apps.googleusercontent.com', // Reemplaza con tu CLIENT_ID
+    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+    scopes: 'profile email'
+  },
+
   // Application
   app: {
     name: 'Servly',

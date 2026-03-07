@@ -316,6 +316,35 @@ export class AuthService {
     console.error('Auth error:', error);
     return throwError(() => new Error(errorMessage));
   }
+
+  /**
+   * Login con Google OAuth
+   * Envía el tokenId de Google al backend
+   *
+   * @param tokenId Token JWT de Google
+   * @returns Observable<LoginResponseDTO> con tokens y datos del usuario
+   *
+   * El backend valida el token con Google y crea una sesión
+   */
+  loginWithGoogle(tokenId: string): Observable<LoginResponseDTO> {
+    const request = { tokenId };
+    const googleAuthEndpoint = `${this.API_URL}/api/auth/google`;
+
+    return this.http.post<LoginResponseDTO>(googleAuthEndpoint, request).pipe(
+      tap(response => {
+        // Guardar tokens en sessionStorage
+        this.setTokens(response.token, response.refreshToken);
+        // Guardar usuario actual
+        this.setCurrentUser({
+          email: response.email,
+          name: response.name,
+          roles: response.roles,
+          mustChangePassword: response.mustChangePassword
+        });
+        // Actualizar estado
+        this.isAuthenticatedSubject.next(true);
+      }),
+      catchError(error => this.handleError(error))
+    );
+  }
 }
-
-
