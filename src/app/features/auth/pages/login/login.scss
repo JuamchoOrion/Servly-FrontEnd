@@ -35,12 +35,39 @@ $error-red: #C62828;
 .login-container {
   width: 100%;
   max-width: 420px;
+  max-height: 90vh;
   background: $cream;
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(85, 107, 47, 0.15), 0 10px 30px rgba(0, 0, 0, 0.1);
   padding: 44px;
   box-sizing: border-box;
   border: 2px solid rgba($gold, 0.2);
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Scroll elegante */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba($gold, 0.05);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $gold;
+    border-radius: 10px;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: $olive-green;
+    }
+  }
+
+  /* Para Firefox */
+  scrollbar-color: $gold rgba($gold, 0.05);
+  scrollbar-width: thin;
 }
 
 /* ===============================
@@ -333,6 +360,7 @@ $error-red: #C62828;
   .login-container {
     padding: 32px 24px;
     border-radius: 14px;
+    max-height: 95vh;
   }
 
   .login-header {
