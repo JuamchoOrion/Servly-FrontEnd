@@ -404,14 +404,6 @@ export class InventoryComponent implements OnInit {
   }
 
   /**
-   * Abre el modal para nuevo proveedor
-   */
-  openProviderModal(): void {
-    console.log('Abrir modal de nuevo proveedor');
-    // TODO: Implementar modal de proveedor
-  }
-
-  /**
    * Elimina un item del inventario
    */
   deleteItem(itemStock: ItemStockDTO): void {

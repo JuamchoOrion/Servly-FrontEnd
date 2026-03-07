@@ -1,0 +1,235 @@
+<div class="suppliers-page">
+  <!-- Background -->
+  <div class="suppliers-background"></div>
+
+  <!-- Navbar -->
+  <nav class="suppliers-navbar">
+    <!-- Dropdown Menú Principal (Izquierda) -->
+    <div class="nav-dropdown-main">
+      <button class="btn-nav-dropdown" (click)="toggleDropdown('main')" [class.active]="dropdownOpen === 'main'">
+        <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+        </svg>
+        <span class="nav-text">Menú</span>
+        <svg class="dropdown-arrow" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+        </svg>
+      </button>
+      <div class="dropdown-menu" *ngIf="dropdownOpen === 'main'">
+        <a routerLink="/inventory/dashboard" routerLinkActive="active" class="dropdown-item">
+          <svg class="dropdown-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a routerLink="/inventory" routerLinkActive="active" class="dropdown-item">
+          <svg class="dropdown-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 13H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zM7 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM20 3H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1zM7 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+          </svg>
+          <span>Inventario</span>
+        </a>
+        <a routerLink="/inventory/providers" routerLinkActive="active" class="dropdown-item">
+          <svg class="dropdown-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+          </svg>
+          <span>Lista de Proveedores</span>
+        </a>
+        <a routerLink="/inventory/history/supply" routerLinkActive="active" class="dropdown-item">
+          <svg class="dropdown-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+          </svg>
+          <span>Historial de Abastecimientos</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Logo (Derecha) -->
+    <div class="navbar-brand">
+      <span class="brand-text">Servly</span>
+      <span class="brand-logo">📦</span>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header class="suppliers-header">
+    <div class="header-content">
+      <h1 class="suppliers-title">Proveedores</h1>
+      <p class="suppliers-subtitle">Gestión de proveedores y contactos</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-add" (click)="openCreateModal()" [disabled]="isLoading">
+        <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+        </svg>
+        <span>Nuevo Proveedor</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="suppliers-container">
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="loading-spinner"></div>
+      <p>Cargando proveedores...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && suppliers.length === 0">
+      <div class="empty-icon">📋</div>
+      <h3>No hay proveedores registrados</h3>
+      <p>Comienza agregando tu primer proveedor</p>
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        <span class="btn-text">Agregar primer proveedor</span>
+      </button>
+    </div>
+
+    <!-- Suppliers List -->
+    <div class="suppliers-list" *ngIf="!isLoading && suppliers.length > 0">
+      <div class="suppliers-grid">
+        <div class="supplier-card" *ngFor="let supplier of suppliers">
+          <div class="supplier-card-header">
+            <div class="supplier-info">
+              <h3 class="supplier-name">{{ supplier.name }}</h3>
+            </div>
+            <div class="supplier-actions">
+              <button class="btn-icon" (click)="editSupplier(supplier)" title="Editar">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                </svg>
+              </button>
+              <button class="btn-icon btn-delete" (click)="deleteSupplier(supplier)" title="Eliminar">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="supplier-card-body">
+            <div class="supplier-details">
+              <p class="supplier-description">{{ supplier.description || 'Sin descripción' }}</p>
+              <div class="detail-row">
+                <svg class="detail-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                </svg>
+                <span class="detail-text">{{ supplier.contactNumber || 'Sin teléfono' }}</span>
+              </div>
+              <div class="detail-row">
+                <svg class="detail-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                </svg>
+                <span class="detail-text">{{ supplier.email || 'Sin email' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal Crear/Editar Proveedor -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditing ? 'Editar Proveedor' : 'Nuevo Proveedor' }}</h2>
+        <button class="btn-close" (click)="closeModal()" aria-label="Cerrar modal">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+      </div>
+
+      <form [formGroup]="supplierForm" (ngSubmit)="onSubmit()" class="modal-body">
+        <!-- Nombre -->
+        <div class="form-group">
+          <label for="name" class="form-label">Nombre *</label>
+          <input
+            id="name"
+            type="text"
+            class="form-input"
+            [class.error]="nameControl?.invalid && nameControl?.touched"
+            placeholder="Ej: Distribuidora Central"
+            formControlName="name"
+            (blur)="nameControl?.markAsTouched()">
+          <span class="error-text" *ngIf="nameControl?.invalid && nameControl?.touched">
+            {{ getNameError() }}
+          </span>
+        </div>
+
+        <!-- Descripción -->
+        <div class="form-group">
+          <label for="description" class="form-label">Descripción</label>
+          <textarea
+            id="description"
+            class="form-input form-textarea"
+            placeholder="Descripción del proveedor"
+            rows="3"
+            formControlName="description">
+          </textarea>
+        </div>
+
+        <!-- Número de Contacto -->
+        <div class="form-group">
+          <label for="contactNumber" class="form-label">Número de Contacto</label>
+          <input
+            id="contactNumber"
+            type="tel"
+            class="form-input"
+            [class.error]="contactNumberControl?.invalid && contactNumberControl?.touched"
+            placeholder="Ej: +1234567890"
+            formControlName="contactNumber"
+            (blur)="contactNumberControl?.markAsTouched()">
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email" class="form-label">Email</label>
+          <input
+            id="email"
+            type="email"
+            class="form-input"
+            [class.error]="emailControl?.invalid && emailControl?.touched"
+            placeholder="ejemplo@correo.com"
+            formControlName="email"
+            (blur)="emailControl?.markAsTouched()">
+          <span class="error-text" *ngIf="emailControl?.invalid && emailControl?.touched">
+            {{ getEmailError() }}
+          </span>
+        </div>
+
+        <!-- Logo URL -->
+        <div class="form-group">
+          <label for="logoUrl" class="form-label">URL del Logo</label>
+          <input
+            id="logoUrl"
+            type="url"
+            class="form-input"
+            [class.error]="logoUrlControl?.invalid && logoUrlControl?.touched"
+            placeholder="https://ejemplo.com/logo.png"
+            formControlName="logoUrl"
+            (blur)="logoUrlControl?.markAsTouched()">
+        </div>
+
+        <!-- Error General -->
+        <div class="error-alert" *ngIf="formError">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+          {{ formError }}
+        </div>
+
+        <!-- Botones -->
+        <div class="modal-buttons">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()" [disabled]="isSubmitting">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSubmitting || supplierForm.invalid">
+            <span *ngIf="!isSubmitting">{{ isEditing ? 'Actualizar' : 'Crear' }}</span>
+            <span *ngIf="isSubmitting">Guardando...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
