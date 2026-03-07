@@ -1,9 +1,7 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../../../core/services/auth.service';
 import { environment } from '../../../../../enviroments/enviroment';
 
@@ -20,7 +18,7 @@ declare global {
   templateUrl: './login.html',
   styleUrls: ['./login.scss']
 })
-export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
+export class LoginComponent implements OnInit, OnDestroy {
   @ViewChild('recaptchaContainer') recaptchaContainer!: ElementRef;
 
   loginForm!: FormGroup;
@@ -28,8 +26,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   showPassword = false;
   loginError: string | null = null;
   recaptchaSiteKey = environment.recaptcha.siteKey;
-
-  private destroy$ = new Subject<void>();
+  private recaptchaToken: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -37,107 +34,20 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     private router: Router
   ) {
     this.initializeForm();
+    // Exponer el callback globalmente para reCAPTCHA
+    (window as any).onRecaptchaResolved = this.onRecaptchaResolved.bind(this);
   }
 
   ngOnInit(): void {
     this.loadRecaptchaScript();
   }
 
-  ngAfterViewInit(): void {
-    // Esperar a que reCAPTCHA y Google estén disponibles
-    setTimeout(() => {
-      this.initializeGoogleSignIn();
-    }, 800);
-  }
-
   /**
-   * Inicializa Google Sign-In
-   */
-  private initializeGoogleSignIn(): void {
-    const google = (window as any).google;
-
-    if (!google) {
-      console.warn('Google Identity Services no cargado aún');
-      return;
-    }
-
-    const clientId = environment.google.clientId;
-    if (!clientId || clientId.includes('TU_CLIENT_ID')) {
-      console.warn('Google CLIENT_ID no configurado');
-      return;
-    }
-
-    try {
-      // Inicializar Google
-      google.accounts.id.initialize({
-        client_id: clientId,
-        callback: (response: any) => {
-          this.handleGoogleResponse(response);
-        }
-      });
-
-      // Renderizar el botón de Google EN el elemento HTML
-      const googleButton = document.getElementById('google-login-button');
-      if (googleButton) {
-        google.accounts.id.renderButton(googleButton, {
-          theme: 'outline',
-          size: 'large',
-          width: '100%',
-          locale: 'es'
-        });
-      }
-    } catch (error) {
-      console.error('Error inicializando Google Sign-In:', error);
-    }
-  }
-
-  /**
-   * Login con Google - Simplemente dejar que Google maneje el click
-   * El botón renderizado por Google manejará todo automáticamente
+   * Login con Google OAuth2
+   * Redirige al backend para iniciar el flujo OAuth2
    */
   loginWithGoogle(): void {
-    // Este método ya no hace nada porque el botón de Google
-    // renderizado en initializeGoogleSignIn() maneja todo automáticamente
-    // Pero lo mantenemos para compatibilidad con el HTML
-  }
-
-  /**
-   * Maneja la respuesta del login de Google
-   */
-  private handleGoogleResponse(response: any): void {
-    try {
-      if (response.credential) {
-        const tokenId = response.credential;
-
-        this.isLoading = true;
-        this.loginError = null;
-
-        // Llamar al servicio de autenticación con el token de Google
-        this.authService
-          .loginWithGoogle(tokenId)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (response) => {
-              console.log('Google login exitoso:', response);
-              // Redirigir después de 1 segundo
-              setTimeout(() => {
-                this.router.navigate(['/dashboard']);
-              }, 1000);
-            },
-            error: (error) => {
-              this.isLoading = false;
-              this.loginError = error.message || 'Error al iniciar sesión con Google';
-              console.error('Google login error:', error);
-            }
-          });
-      } else {
-        this.loginError = 'No se pudo obtener el token de Google';
-      }
-    } catch (error: any) {
-      this.isLoading = false;
-      this.loginError = 'Error al procesar login de Google';
-      console.error('Error:', error);
-    }
+    this.authService.loginWithGoogle();
   }
 
   /**
@@ -168,6 +78,14 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   get emailControl(): FormControl {
     return this.loginForm.get('email') as FormControl;
+  }
+
+  /**
+   * Callback cuando reCAPTCHA se resuelve exitosamente
+   */
+  onRecaptchaResolved(token: string): void {
+    this.recaptchaToken = token;
+    console.log('🔵 reCAPTCHA token obtenido:', token ? 'OK' : 'NULL');
   }
 
   /**
@@ -211,28 +129,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
-   * Obtiene el token de reCAPTCHA
-   */
-  private getRecaptchaToken(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      try {
-        if (!window.grecaptcha) {
-          reject(new Error('reCAPTCHA no está cargado'));
-          return;
-        }
-        const token = window.grecaptcha.getResponse();
-        if (token) {
-          resolve(token);
-        } else {
-          reject(new Error('Por favor, completa el reCAPTCHA'));
-        }
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
-
-  /**
    * Envía el formulario
    */
   async onSubmit(): Promise<void> {
@@ -243,22 +139,28 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    if (!this.recaptchaToken) {
+      this.loginError = 'Por favor, completa el reCAPTCHA';
+      return;
+    }
+
     try {
       this.isLoading = true;
       this.loginError = null;
 
-      // Obtener token de reCAPTCHA
-      const recaptchaToken = await this.getRecaptchaToken();
-
       const { email, password } = this.loginForm.value;
 
-      // Llamar al servicio de autenticación
+      // Llamar al servicio de autenticación con token fresco
       this.authService
-        .login(email, password, recaptchaToken)
-        .pipe(takeUntil(this.destroy$))
+        .login(email, password, this.recaptchaToken)
         .subscribe({
           next: (response) => {
             console.log('Login exitoso:', response);
+            // Resetear token después del login exitoso
+            this.recaptchaToken = null;
+            if (window.grecaptcha) {
+              window.grecaptcha.reset();
+            }
             // Redirigir después de 1 segundo
             setTimeout(() => {
               this.router.navigate(['/dashboard']);
@@ -268,17 +170,26 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
             this.isLoading = false;
             this.loginError = error.message || 'Error al iniciar sesión';
             console.error('Login error:', error);
+            // Resetear reCAPTCHA para intentar de nuevo
+            this.recaptchaToken = null;
+            if (window.grecaptcha) {
+              window.grecaptcha.reset();
+            }
           }
         });
     } catch (error: any) {
       this.isLoading = false;
       this.loginError = error.message || 'Error al procesar el login';
       console.error('Error:', error);
+      // Resetear reCAPTCHA
+      this.recaptchaToken = null;
+      if (window.grecaptcha) {
+        window.grecaptcha.reset();
+      }
     }
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    // Limpieza
   }
 }
