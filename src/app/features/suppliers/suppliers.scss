@@ -51,26 +51,40 @@ $white: #FFFFFF;
   position: sticky;
   top: 0;
   z-index: 100;
-  background: linear-gradient(135deg, $primary-black 0%, #2A2A2A 100%);
-  padding: 12px 24px;
+  background: linear-gradient(135deg, $primary-black 0%, #1a1a1a 100%);
+  padding: 16px 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  gap: 24px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 2px 12px rgba(200,169,81,0.1);
+  gap: 32px;
+  border-bottom: 2px solid rgba($accent-gold, 0.15);
 }
 
 .navbar-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
+  justify-content: center;
+  flex: 1;
+  min-width: 200px;
 
   .brand-text {
-    font-size: 22px;
-    font-weight: 800;
-    color: $white;
-    letter-spacing: -0.5px;
+    font-size: 28px;
+    font-weight: 900;
+    background: linear-gradient(135deg, $white 0%, $accent-gold 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+    tracking: 1.5;
+    transition: all 0.3s ease;
+    text-shadow: 0 4px 12px rgba($accent-gold, 0.2);
+
+    &:hover {
+      font-size: 30px;
+      letter-spacing: 0px;
+    }
   }
 
   .brand-logo {
@@ -81,26 +95,29 @@ $white: #FFFFFF;
 .nav-dropdown-main {
   position: relative;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 
   .btn-nav-dropdown {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border: none;
-    background: rgba(255,255,255,0.1);
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color: rgba(255,255,255,0.8);
+    gap: 10px;
+    padding: 12px 20px;
+    background: rgba($accent-gold, 0.1);
+    border: 2px solid rgba($accent-gold, 0.3);
+    border-radius: 12px;
+    color: $white;
+    font-weight: 600;
     font-size: 14px;
-    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 
     .menu-icon {
       width: 20px;
       height: 20px;
-      fill: currentColor;
-      flex-shrink: 0;
+      stroke-width: 2;
+      transition: all 0.3s ease;
     }
 
     .nav-text {
@@ -108,67 +125,103 @@ $white: #FFFFFF;
     }
 
     .dropdown-arrow {
-      width: 20px;
-      height: 20px;
-      fill: currentColor;
-      transition: transform 0.2s ease;
+      width: 18px;
+      height: 18px;
+      transition: transform 0.3s ease;
     }
 
     &:hover {
-      background: rgba(255,255,255,0.15);
-      color: $white;
-    }
-
-    &.active {
-      background: rgba(200,169,81,0.2);
-      color: $accent-gold;
+      background: rgba($accent-gold, 0.2);
+      border-color: $accent-gold;
+      box-shadow: 0 4px 16px rgba($accent-gold, 0.2);
+      transform: translateY(-2px);
 
       .dropdown-arrow {
         transform: rotate(180deg);
+      }
+    }
+
+    &.active {
+      background: $accent-gold;
+      color: $primary-black;
+      border-color: $accent-gold;
+
+      .menu-icon,
+      .dropdown-arrow {
+        color: $primary-black;
       }
     }
   }
 
   .dropdown-menu {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 12px);
     left: 0;
-    margin-top: 8px;
-    background: $white;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    background: linear-gradient(135deg, rgba(30,30,30,0.98) 0%, rgba(40,40,40,0.98) 100%);
+    border: 2px solid rgba($accent-gold, 0.3);
+    border-radius: 16px;
     min-width: 280px;
-    max-height: calc(100vh - 200px);
-    overflow-y: auto;
-    animation: slideDown 0.2s ease;
-    z-index: 1000;
+    padding: 12px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 4px 16px rgba($accent-gold, 0.15);
+    animation: slideDown 0.25s ease-out;
+    backdrop-filter: blur(10px);
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
     .dropdown-item {
       display: flex;
       align-items: center;
       gap: 12px;
       padding: 14px 16px;
-      color: $text_dark;
+      color: $text-light;
       text-decoration: none;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      font-weight: 500;
       font-size: 14px;
-      transition: all 0.2s ease;
 
       &:hover {
-        background: rgba(200,169,81,0.1);
+        background: rgba($accent-gold, 0.15);
         color: $accent-gold;
+        padding-left: 20px;
+        box-shadow: inset 0 0 12px rgba($accent-gold, 0.1);
+
+        .dropdown-icon {
+          color: $accent-gold;
+          transform: scale(1.1);
+        }
       }
 
       &.active {
-        background: rgba(200,169,81,0.15);
+        background: rgba($accent-gold, 0.25);
         color: $accent-gold;
-        font-weight: 600;
+        border-left: 3px solid $accent-gold;
+        padding-left: 13px;
+
+        .dropdown-icon {
+          color: $accent-gold;
+        }
       }
 
       .dropdown-icon {
         width: 20px;
         height: 20px;
-        fill: currentColor;
         flex-shrink: 0;
+        color: $text-light;
+        transition: all 0.3s ease;
+      }
+
+      span {
+        flex: 1;
       }
     }
   }
