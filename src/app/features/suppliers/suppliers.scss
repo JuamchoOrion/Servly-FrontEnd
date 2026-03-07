@@ -1,6 +1,5 @@
 /* ===============================
    🎨 PALETA PREMIUM RESTAURANTE
-   (Misma paleta que login.scss)
 ================================ */
 
 $primary-black: #1E1E1E;
@@ -9,8 +8,8 @@ $light-bg: #F5F5F5;
 $success-green: #2E7D32;
 $warning-orange: #F57C00;
 $error-red: #C62828;
-$text-dark: #2C2C2C;
-$text-light: #666666;
+$text_dark: #2C2C2C;
+$text_light: #666666;
 $text-muted: #999999;
 $border-light: #EFEFEF;
 $white: #FFFFFF;
@@ -20,7 +19,7 @@ $white: #FFFFFF;
    🌍 PAGE LAYOUT
 ================================ */
 
-.inventory-page {
+.suppliers-page {
   min-height: 100vh;
   background: $light-bg;
   position: relative;
@@ -33,7 +32,7 @@ $white: #FFFFFF;
    🎭 BACKGROUND PREMIUM
 ================================ */
 
-.inventory-background {
+.suppliers-background {
   position: absolute;
   inset: 0;
   background:
@@ -48,7 +47,7 @@ $white: #FFFFFF;
    📱 NAVBAR
 ================================ */
 
-.inventory-navbar {
+.suppliers-navbar {
   position: sticky;
   top: 0;
   z-index: 100;
@@ -149,7 +148,7 @@ $white: #FFFFFF;
       align-items: center;
       gap: 12px;
       padding: 14px 16px;
-      color: $text-dark;
+      color: $text_dark;
       text-decoration: none;
       font-size: 14px;
       transition: all 0.2s ease;
@@ -180,7 +179,7 @@ $white: #FFFFFF;
    📋 HEADER
 ================================ */
 
-.inventory-header {
+.suppliers-header {
   position: relative;
   z-index: 2;
   background: linear-gradient(135deg, $primary-black 0%, #2A2A2A 100%);
@@ -196,7 +195,7 @@ $white: #FFFFFF;
     gap: 4px;
   }
 
-  .inventory-title {
+  .suppliers-title {
     font-size: 28px;
     font-weight: 800;
     letter-spacing: -1px;
@@ -204,7 +203,7 @@ $white: #FFFFFF;
     margin: 0;
   }
 
-  .inventory-subtitle {
+  .suppliers-subtitle {
     font-size: 13px;
     color: rgba(255,255,255,0.7);
     margin: 0;
@@ -216,69 +215,6 @@ $white: #FFFFFF;
     gap: 12px;
     flex-wrap: wrap;
     align-items: center;
-  }
-}
-
-
-/* ===============================
-   🔍 FILTER BAR (White Area)
-================================ */
-
-.filter-bar {
-  display: flex;
-  justify-content: flex-end;
-  padding: 16px 24px;
-  background: $white;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-
-.btn-filter-stock-inline {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border: none;
-  background: $light-bg;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: $text-light;
-  font-size: 14px;
-  font-weight: 500;
-
-  svg {
-    width: 20px;
-    height: 20px;
-    fill: currentColor;
-    flex-shrink: 0;
-  }
-
-  .filter-text {
-    white-space: nowrap;
-  }
-
-  .badge {
-    background: $error-red;
-    color: $white;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 10px;
-    min-width: 20px;
-    text-align: center;
-  }
-
-  &:hover {
-    background: rgba(200,169,81,0.15);
-    color: $accent-gold;
-  }
-
-  &.active {
-    background: rgba(245,124,0,0.15);
-    color: $warning-orange;
-    border: 1px solid rgba(245,124,0,0.5);
   }
 }
 
@@ -405,7 +341,7 @@ $white: #FFFFFF;
 
   &:hover:not(:disabled) {
     background: $light-bg;
-    border-color: $text-muted;
+    border-color: $text_light;
   }
 }
 
@@ -414,7 +350,7 @@ $white: #FFFFFF;
    📦 CONTAINER
 ================================ */
 
-.inventory-container {
+.suppliers-container {
   position: relative;
   z-index: 2;
   max-width: 1400px;
@@ -445,70 +381,6 @@ $white: #FFFFFF;
 
 
 /* ===============================
-   🚨 LOW STOCK ALERT BANNER
-================================ */
-
-.low-stock-alert {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px 20px;
-  background: linear-gradient(135deg, rgba(245,124,0,0.1) 0%, rgba(198,40,40,0.08) 100%);
-  border-left: 4px solid $warning-orange;
-  border-radius: 12px;
-  margin-bottom: 24px;
-  animation: slideInDown 0.3s ease;
-
-  svg {
-    width: 24px;
-    height: 24px;
-    fill: $warning-orange;
-    flex-shrink: 0;
-  }
-
-  span {
-    flex: 1;
-    font-size: 14px;
-    color: $text-dark;
-    font-weight: 500;
-
-    strong {
-      color: $warning-orange;
-      font-weight: 700;
-    }
-  }
-
-  .btn-close-alert {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: transparent;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-
-    svg {
-      width: 20px;
-      height: 20px;
-      fill: $text-light;
-    }
-
-    &:hover {
-      background: rgba(0,0,0,0.05);
-
-      svg {
-        fill: $error-red;
-      }
-    }
-  }
-}
-
-
-/* ===============================
    ⏳ LOADING STATE
 ================================ */
 
@@ -522,7 +394,7 @@ $white: #FFFFFF;
 
   p {
     font-size: 16px;
-    color: $text-light;
+    color: $text_light;
     font-weight: 500;
   }
 }
@@ -558,13 +430,13 @@ $white: #FFFFFF;
   h3 {
     font-size: 24px;
     font-weight: 700;
-    color: $text-dark;
+    color: $text_dark;
     margin: 0;
   }
 
   p {
     font-size: 15px;
-    color: $text-light;
+    color: $text_light;
     margin: 0;
     max-width: 400px;
   }
@@ -572,14 +444,14 @@ $white: #FFFFFF;
 
 
 /* ===============================
-   📋 INVENTORY LIST
+   📋 SUPPLIERS LIST
 ================================ */
 
-.inventory-list {
+.suppliers-list {
   animation: fadeInUp 0.5s ease;
 }
 
-.inventory-grid {
+.suppliers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
   gap: 24px;
@@ -587,10 +459,10 @@ $white: #FFFFFF;
 
 
 /* ===============================
-   📦 ITEM CARD
+   📦 SUPPLIER CARD
 ================================ */
 
-.item-card {
+.supplier-card {
   background: $white;
   border-radius: 16px;
   overflow: hidden;
@@ -609,7 +481,7 @@ $white: #FFFFFF;
   }
 }
 
-.item-card-header {
+.supplier-card-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -618,58 +490,36 @@ $white: #FFFFFF;
   border-bottom: 1px solid $border-light;
 }
 
-.item-card-body {
+.supplier-card-body {
   padding: 20px;
 }
 
 
 /* ===============================
-   📝 ITEM INFO
+   📝 SUPPLIER INFO
 ================================ */
 
-.item-info {
+.supplier-info {
   flex: 1;
   min-width: 0;
 }
 
-.item-name {
+.supplier-name {
   font-size: 18px;
   font-weight: 700;
-  color: $text-dark;
+  color: $text_dark;
   margin: 0 0 6px 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.item-description {
-  font-size: 13px;
-  color: $text-light;
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.item-category {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 600;
-  color: $accent-gold;
-  background: rgba(200,169,81,0.1);
-  padding: 4px 10px;
-  border-radius: 6px;
-  margin-top: 6px;
-  text-transform: capitalize;
-}
-
 
 /* ===============================
-   🔘 ITEM ACTIONS
+   🔘 SUPPLIER ACTIONS
 ================================ */
 
-.item-actions {
+.supplier-actions {
   display: flex;
   gap: 8px;
   flex-shrink: 0;
@@ -691,7 +541,7 @@ $white: #FFFFFF;
   svg {
     width: 20px;
     height: 20px;
-    fill: $text-light;
+    fill: $text_light;
     transition: fill 0.2s ease;
   }
 
@@ -718,121 +568,38 @@ $white: #FFFFFF;
 
 
 /* ===============================
-   📊 STOCK INFO
+   📊 SUPPLIER DETAILS
 ================================ */
 
-.stock-info {
+.supplier-details {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-bottom: 16px;
 }
 
-.stock-row {
+.supplier-description {
+  font-size: 14px;
+  color: $text_dark;
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+.detail-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
 }
 
-.stock-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: $text-muted;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.detail-icon {
+  width: 20px;
+  height: 20px;
+  fill: $accent-gold;
+  flex-shrink: 0;
 }
 
-.stock-value {
-  font-size: 15px;
-  font-weight: 600;
-  color: $text-dark;
-
-  &.low-stock {
-    color: $error-red;
-    font-weight: 700;
-  }
-
-  &.supplier {
-    color: $accent-gold;
-  }
-}
-
-
-/* ===============================
-   📈 STOCK LEVEL INDICATOR
-================================ */
-
-.stock-level {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.stock-level-bar {
-  height: 8px;
-  background: $border-light;
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-
-  &.low {
-    .stock-level-fill {
-      background: linear-gradient(90deg, $error-red 0%, #EF5350 100%);
-    }
-  }
-
-  &.medium {
-    .stock-level-fill {
-      background: linear-gradient(90deg, $warning-orange 0%, #FFA726 100%);
-    }
-  }
-
-  &.high {
-    .stock-level-fill {
-      background: linear-gradient(90deg, $success-green 0%, #66BB6A 100%);
-    }
-  }
-}
-
-.stock-level-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.5s ease;
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255,255,255,0.3),
-      transparent
-    );
-    animation: shimmer 2s infinite;
-  }
-}
-
-.stock-level-text {
-  font-size: 12px;
-  font-weight: 600;
-  text-align: right;
-
-  .stock-level.low & {
-    color: $error-red;
-  }
-
-  .stock-level.medium & {
-    color: $warning-orange;
-  }
-
-  .stock-level.high & {
-    color: $success-green;
-  }
+.detail-text {
+  font-size: 14px;
+  color: $text_light;
 }
 
 
@@ -877,7 +644,7 @@ $white: #FFFFFF;
   h2 {
     font-size: 22px;
     font-weight: 700;
-    color: $text-dark;
+    color: $text_dark;
     margin: 0;
   }
 }
@@ -897,7 +664,7 @@ $white: #FFFFFF;
   svg {
     width: 24px;
     height: 24px;
-    fill: $text-light;
+    fill: $text_light;
   }
 
   &:hover {
@@ -945,7 +712,7 @@ $white: #FFFFFF;
   font-size: 15px;
   font-family: 'Inter', 'Roboto', sans-serif;
   background: $white;
-  color: $text-dark;
+  color: $text_dark;
   transition: all 0.25s ease;
 
   &::placeholder {
@@ -973,16 +740,6 @@ $white: #FFFFFF;
 .form-textarea {
   resize: vertical;
   min-height: 80px;
-}
-
-select.form-input {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 20px;
-  padding-right: 44px;
 }
 
 
@@ -1034,22 +791,12 @@ select.form-input {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
-
-  .btn {
-    min-width: 120px;
-  }
 }
 
 
 /* ===============================
-   🎞 ANIMATIONS
+   🎬 ANIMATIONS
 ================================ */
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
 
 @keyframes fadeIn {
   from {
@@ -1060,47 +807,42 @@ select.form-input {
   }
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes slideInUp {
   from {
-    opacity: 0;
     transform: translateY(40px);
+    opacity: 0;
   }
   to {
-    opacity: 1;
     transform: translateY(0);
+    opacity: 1;
   }
 }
 
 @keyframes slideDown {
   from {
-    opacity: 0;
     transform: translateY(-10px);
+    opacity: 0;
   }
   to {
-    opacity: 1;
     transform: translateY(0);
+    opacity: 1;
   }
 }
 
-@keyframes slideInDown {
+@keyframes fadeInUp {
   from {
+    transform: translateY(20px);
     opacity: 0;
-    transform: translateY(-20px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -1119,322 +861,28 @@ select.form-input {
 ================================ */
 
 @media (max-width: 768px) {
-  .inventory-header {
+  .suppliers-header {
     flex-direction: column;
-    gap: 20px;
-    padding: 24px 20px;
-    text-align: center;
+    gap: 16px;
+    padding: 16px 20px;
 
     .header-content {
-      align-items: center;
+      width: 100%;
     }
 
-    .inventory-title {
-      font-size: 28px;
+    .header-actions {
+      width: 100%;
+      justify-content: center;
     }
+  }
+
+  .suppliers-grid {
+    grid-template-columns: 1fr;
   }
 
   .btn-add {
     width: 100%;
     justify-content: center;
-  }
-
-  .inventory-container {
-    padding: 24px 16px;
-  }
-
-  .inventory-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .modal-container {
-    max-height: 95vh;
-    margin: 10px;
-  }
-
-  .modal-header {
-    padding: 20px;
-  }
-
-  .modal-body {
-    padding: 20px;
-  }
-
-  .modal-buttons {
-    flex-direction: column-reverse;
-
-    .btn {
-      width: 100%;
-    }
-  }
-}
-
-@media (max-width: 480px) {
-  .inventory-header {
-    .inventory-title {
-      font-size: 24px;
-    }
-
-    .inventory-subtitle {
-      font-size: 13px;
-    }
-  }
-
-  .item-card-header {
-    padding: 16px;
-  }
-
-  .item-card-body {
-    padding: 16px;
-  }
-
-  .item-name {
-    font-size: 16px;
-  }
-
-  .item-description {
-    font-size: 12px;
-  }
-}
-
-
-/* ===============================
-   🌓 MODO OSCURO - ISO 25010
-================================ */
-
-:host-context(.dark-mode) {
-  .inventory-page {
-    background: #1a1a1a;
-  }
-
-  .inventory-background {
-    background:
-      radial-gradient(circle at 20% 20%, rgba(200,169,81,0.05), transparent 40%),
-      radial-gradient(circle at 80% 80%, rgba(200,169,81,0.02), transparent 40%),
-      #1a1a1a;
-  }
-
-  .inventory-header {
-    background: linear-gradient(135deg, $accent-gold 0%, #D4B875 100%);
-
-    .inventory-title {
-      color: $primary-black;
-    }
-
-    .inventory-subtitle {
-      color: rgba(30,30,30,0.7);
-    }
-  }
-
-  .item-card {
-    background: #2a2a2a;
-    border-color: rgba(200,169,81,0.2);
-
-    &:hover {
-      border-color: rgba(200,169,81,0.4);
-    }
-  }
-
-  .item-card-header {
-    background: linear-gradient(135deg, rgba(200,169,81,0.1) 0%, transparent 100%);
-    border-bottom-color: rgba(200,169,81,0.2);
-  }
-
-  .item-name {
-    color: #e0e0e0;
-  }
-
-  .item-description {
-    color: #999999;
-  }
-
-  .btn-icon {
-    background: #333333;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-
-    svg {
-      fill: #999999;
-    }
-
-    &:hover {
-      background: $accent-gold;
-
-      svg {
-        fill: $primary-black;
-      }
-    }
-  }
-
-  .stock-label {
-    color: #666666;
-  }
-
-  .stock-value {
-    color: #e0e0e0;
-  }
-
-  .modal-container {
-    background: #2a2a2a;
-  }
-
-  .modal-header {
-    border-bottom-color: rgba(200,169,81,0.2);
-    background: linear-gradient(135deg, rgba(200,169,81,0.1) 0%, transparent 100%);
-
-    h2 {
-      color: #e0e0e0;
-    }
-  }
-
-  .btn-close {
-    svg {
-      fill: #999999;
-    }
-
-    &:hover {
-      background: rgba(255,255,255,0.1);
-    }
-  }
-
-  .form-input {
-    background: #333333;
-    border-color: rgba(200,169,81,0.3);
-    color: #e0e0e0;
-
-    &::placeholder {
-      color: #666666;
-    }
-
-    &:focus {
-      border-color: $accent-gold;
-      box-shadow: 0 0 0 3px rgba(200,169,81,0.2);
-    }
-
-    &.error {
-      border-color: #ef5350;
-      background: rgba(239,83,80,0.1);
-    }
-  }
-
-  .form-label {
-    color: #e0e0e0;
-  }
-
-  .error-text {
-    color: #ef5350;
-  }
-
-  .error-alert {
-    background: rgba(239,83,80,0.1);
-    border-left-color: #ef5350;
-    color: #ef5350;
-
-    svg {
-      fill: #ef5350;
-    }
-  }
-
-  .btn-secondary {
-    background: #333333;
-    color: #e0e0e0;
-    border-color: rgba(200,169,81,0.3);
-
-    &:hover {
-      background: #3a3a3a;
-      border-color: $accent-gold;
-    }
-  }
-
-  .stock-level-bar {
-    background: #333333;
-  }
-}
-
-
-/* ===============================
-   🔆 ALTO CONTRASTE - ISO 25010
-================================ */
-
-:host-context(.high-contrast) {
-  .inventory-header {
-    background: $primary-black;
-    border-bottom: 3px solid $accent-gold;
-  }
-
-  .item-card {
-    border: 2px solid $primary-black;
-    box-shadow: none;
-
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 4px 0 $primary-black;
-    }
-  }
-
-  .item-card-header {
-    background: $light-bg;
-    border-bottom: 2px solid $primary-black;
-  }
-
-  .item-name {
-    font-weight: 900;
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 4px;
-  }
-
-  .btn-icon {
-    border: 2px solid $primary-black;
-    border-radius: 8px;
-
-    &:hover {
-      background: $primary-black;
-
-      svg {
-        fill: $white;
-      }
-    }
-  }
-
-  .stock-value.low-stock {
-    color: $error-red;
-    font-weight: 900;
-    text-decoration: underline;
-  }
-
-  .stock-level-bar {
-    border: 2px solid $primary-black;
-  }
-
-  .form-input {
-    border-width: 2px;
-
-    &:focus {
-      border-color: $primary-black;
-      box-shadow: 0 0 0 3px $accent-gold;
-    }
-
-    &.error {
-      border-color: $error-red;
-      box-shadow: 0 0 0 3px rgba(198,40,40,0.2);
-    }
-  }
-
-  .form-label {
-    font-weight: 700;
-  }
-
-  .btn-primary {
-    background: $primary-black;
-    color: $accent-gold;
-    border: 2px solid $primary-black;
-  }
-
-  .btn-add {
-    background: $accent-gold;
-    color: $primary-black;
-    border: 2px solid $primary-black;
   }
 }
 
@@ -1444,7 +892,7 @@ select.form-input {
 ================================ */
 
 :host-context(.reduce-motion) {
-  .item-card {
+  .supplier-card {
     &:hover {
       transform: none;
       transition: none;
@@ -1465,21 +913,15 @@ select.form-input {
   }
 
   .loading-spinner {
-    animation: none;
+    animation: spin 2s linear infinite;
     border-top-color: rgba(200,169,81,0.5);
-  }
-
-  .stock-level-fill {
-    &::after {
-      animation: none;
-    }
   }
 
   .modal-container {
     animation: none;
   }
 
-  .inventory-list {
+  .dropdown-menu {
     animation: none;
   }
 }
