@@ -101,7 +101,8 @@ export class ItemsComponent implements OnInit, OnDestroy {
       description: ['', [Validators.required, Validators.minLength(5)]],
       unitOfMeasurement: ['', [Validators.required]],
       expirationDays: [0, [Validators.required, Validators.min(1)]],
-      category: ['', [Validators.required]]
+      category: ['', [Validators.required]],
+      idealStock: [0, [Validators.required, Validators.min(1)]]
     });
   }
 
@@ -178,7 +179,8 @@ export class ItemsComponent implements OnInit, OnDestroy {
       description: item.description,
       unitOfMeasurement: item.unitOfMeasurement,
       expirationDays: item.expirationDays,
-      category: item.category
+      category: item.category,
+      idealStock: item.idealStock
     });
     this.isFormVisible = true;
     this.errorMessage = null;

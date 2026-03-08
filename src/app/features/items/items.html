@@ -60,6 +60,7 @@
             <th>Descripción</th>
             <th>Unidad</th>
             <th>Días Expiración</th>
+            <th>Stock Ideal</th>
             <th>Categoría</th>
             <th>Acciones</th>
           </tr>
@@ -71,6 +72,7 @@
             <td class="description-cell">{{ item.description }}</td>
             <td class="unit-cell">{{ item.unitOfMeasurement }}</td>
             <td class="expiration-cell">{{ item.expirationDays }} días</td>
+            <td class="ideal-stock-cell">{{ item.idealStock }}</td>
             <td class="category-cell">
               {{ getCategoryName(item.category) }}
             </td>
@@ -233,23 +235,42 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="category">Categoría *</label>
-            <select
-              id="category"
-              formControlName="category"
-              class="form-input"
-              [class.error]="itemForm.get('category')?.invalid && itemForm.get('category')?.touched">
-              <option value="">Seleccionar categoría</option>
-              <option *ngFor="let category of categories" [value]="category.id">
-                {{ category.name }}
-              </option>
-            </select>
-            <span
-              class="error-text"
-              *ngIf="itemForm.get('category')?.invalid && itemForm.get('category')?.touched">
-              La categoría es requerida
-            </span>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="idealStock">Stock Ideal *</label>
+              <input
+                type="number"
+                id="idealStock"
+                formControlName="idealStock"
+                class="form-input"
+                [class.error]="itemForm.get('idealStock')?.invalid && itemForm.get('idealStock')?.touched"
+                placeholder="100"
+                min="1">
+              <span
+                class="error-text"
+                *ngIf="itemForm.get('idealStock')?.invalid && itemForm.get('idealStock')?.touched">
+                El stock ideal es requerido (mínimo 1)
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="category">Categoría *</label>
+              <select
+                id="category"
+                formControlName="category"
+                class="form-input"
+                [class.error]="itemForm.get('category')?.invalid && itemForm.get('category')?.touched">
+                <option value="">Seleccionar categoría</option>
+                <option *ngFor="let category of categories" [value]="category.id">
+                  {{ category.name }}
+                </option>
+              </select>
+              <span
+                class="error-text"
+                *ngIf="itemForm.get('category')?.invalid && itemForm.get('category')?.touched">
+                La categoría es requerida
+              </span>
+            </div>
           </div>
 
           <div class="modal-buttons">

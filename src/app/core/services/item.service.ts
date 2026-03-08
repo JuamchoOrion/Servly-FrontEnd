@@ -9,6 +9,7 @@ export interface CreateItemRequest {
   unitOfMeasurement: string;
   expirationDays: number;
   category: string;
+  idealStock: number;
 }
 
 export interface UpdateItemRequest {
@@ -17,6 +18,7 @@ export interface UpdateItemRequest {
   unitOfMeasurement?: string;
   expirationDays?: number;
   category?: string;
+  idealStock?: number;
 }
 
 export interface ItemResponse {
@@ -26,6 +28,7 @@ export interface ItemResponse {
   unitOfMeasurement: string;
   expirationDays: number;
   category: string;
+  idealStock: number;
   createdAt: string;
   updatedAt: string;
 }

@@ -37,13 +37,10 @@
     </div>
 
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="!isLoading && (!inventory || !inventory.itemStockList || inventory.itemStockList.length === 0)">
+    <div class="empty-state" *ngIf="!isLoading && (!inventoryItems || inventoryItems.length === 0)">
       <div class="empty-icon">📦</div>
       <h3>Inventario vacío</h3>
       <p>No hay productos registrados en el inventario</p>
-      <button class="btn btn-primary" (click)="openCreateModal()">
-        <span class="btn-text">Agregar primer item</span>
-      </button>
     </div>
 
     <!-- Low Stock Filter Empty -->
@@ -57,25 +54,25 @@
     </div>
 
     <!-- Inventory List -->
-    <div class="inventory-list" *ngIf="!isLoading && inventory && inventory.itemStockList && inventory.itemStockList.length > 0">
+    <div class="inventory-list" *ngIf="!isLoading && inventoryItems && inventoryItems.length > 0">
       <!-- Cards de items -->
       <div class="inventory-grid">
         <div class="item-card" *ngFor="let itemStock of displayItems">
           <div class="item-card-header">
             <div class="item-info">
-              <h3 class="item-name">{{ getItemName(itemStock.itemId) }}</h3>
-              <p class="item-description">{{ getItemDescription(itemStock.itemId) }}</p>
-              <span class="item-category" *ngIf="getItemCategory(itemStock.itemId)">{{ getItemCategory(itemStock.itemId) }}</span>
+              <h3 class="item-name">{{ itemStock.name }}</h3>
+              <p class="item-description">{{ itemStock.description }}</p>
+              <span class="item-category" *ngIf="itemStock.category">{{ itemStock.category }}</span>
             </div>
             <div class="item-actions">
-              <button class="btn-icon" (click)="editItem(itemStock)" title="Editar">
+              <button class="btn-icon btn-increase" (click)="openIncreaseStockModal(itemStock)" title="Aumentar stock">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
                 </svg>
               </button>
-              <button class="btn-icon btn-delete" (click)="deleteItem(itemStock)" title="Eliminar">
+              <button class="btn-icon btn-decrease" (click)="openDecreaseStockModal(itemStock)" title="Disminuir stock">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                  <path d="M19 13H5v-2h14v2z"/>
                 </svg>
               </button>
             </div>
@@ -86,16 +83,16 @@
               <div class="stock-row">
                 <span class="stock-label">Cantidad:</span>
                 <span class="stock-value" [class.low-stock]="itemStock.quantity <= 5">
-                  {{ itemStock.quantity }} {{ getItemUnit(itemStock.itemId) }}
+                  {{ itemStock.quantity }} {{ itemStock.unitOfMeasurement }}
                 </span>
               </div>
               <div class="stock-row">
                 <span class="stock-label">Proveedor:</span>
-                <span class="stock-value supplier">{{ getSupplierName(itemStock.supplier) }}</span>
+                <span class="stock-value supplier">{{ itemStock.supplierName }}</span>
               </div>
-              <div class="stock-row" *ngIf="getItemExpirationDays(itemStock.itemId)">
+              <div class="stock-row" *ngIf="itemStock.expirationDays">
                 <span class="stock-label">Días expiración:</span>
-                <span class="stock-value">{{ getItemExpirationDays(itemStock.itemId) }} días</span>
+                <span class="stock-value">{{ itemStock.expirationDays }} días</span>
               </div>
             </div>
 
@@ -112,158 +109,57 @@
     </div>
   </main>
 
-  <!-- Modal Crear/Editar Item -->
-  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <!-- Modal de Ajuste de Stock -->
+  <div class="modal-overlay" *ngIf="showStockModal" (click)="closeStockModal()">
     <div class="modal-container" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{ isEditing ? 'Editar Item' : 'Nuevo Item' }}</h2>
-        <button class="btn-close" (click)="closeModal()" aria-label="Cerrar modal">
+        <h2>{{ stockAction === 'increase' ? 'Aumentar Stock' : 'Disminuir Stock' }}</h2>
+        <button class="btn-close" (click)="closeStockModal()" aria-label="Cerrar modal">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
           </svg>
         </button>
       </div>
 
-      <form [formGroup]="itemForm" (ngSubmit)="onSubmit()" class="modal-body">
-        <!-- Nombre -->
+      <form [formGroup]="stockForm" (ngSubmit)="onAdjustStockSubmit()" class="modal-body">
+        <!-- Información del item -->
+        <div class="stock-item-info">
+          <strong>Item:</strong> {{ getAdjustingItemStock()?.name }}
+          <br>
+          <strong>Stock actual:</strong> {{ getAdjustingItemStock()?.quantity }} {{ getAdjustingItemStock()?.unitOfMeasurement }}
+        </div>
+
+        <!-- Cantidad -->
         <div class="form-group">
-          <label for="name" class="form-label">Nombre *</label>
+          <label for="stock-quantity" class="form-label">Cantidad a {{ stockAction === 'increase' ? 'agregar' : 'retirar' }} *</label>
           <input
-            id="name"
-            type="text"
-            class="form-input"
-            [class.error]="nameControl?.invalid && nameControl?.touched"
-            placeholder="Ej: Harina de trigo"
-            formControlName="name"
-            (blur)="nameControl?.markAsTouched()">
-          <span class="error-text" *ngIf="nameControl?.invalid && nameControl?.touched">
-            {{ getNameError() }}
-          </span>
-        </div>
-
-        <!-- Categoría -->
-        <div class="form-group">
-          <label for="category" class="form-label">Categoría</label>
-          <select
-            id="category"
-            class="form-input"
-            formControlName="category">
-            <option value="">Seleccionar categoría</option>
-            <option value="granos">Granos y Cereales</option>
-            <option value="lacteos">Lácteos</option>
-            <option value="carnes">Carnes</option>
-            <option value="verduras">Verduras</option>
-            <option value="condimentos">Condimentos</option>
-            <option value="bebidas">Bebidas</option>
-            <option value="otros">Otros</option>
-          </select>
-        </div>
-
-        <!-- Descripción -->
-        <div class="form-group">
-          <label for="description" class="form-label">Descripción</label>
-          <textarea
-            id="description"
-            class="form-input form-textarea"
-            [class.error]="descriptionControl?.invalid && descriptionControl?.touched"
-            placeholder="Descripción del producto"
-            rows="3"
-            formControlName="description"
-            (blur)="descriptionControl?.markAsTouched()">
-          </textarea>
-        </div>
-
-        <!-- Unidad de Medida -->
-        <div class="form-group">
-          <label for="unitOfMeasurement" class="form-label">Unidad de Medida *</label>
-          <select
-            id="unitOfMeasurement"
-            class="form-input"
-            [class.error]="unitControl?.invalid && unitControl?.touched"
-            formControlName="unitOfMeasurement">
-            <option value="">Seleccionar unidad</option>
-            <option value="kg">Kilogramos (kg)</option>
-            <option value="g">Gramos (g)</option>
-            <option value="l">Litros (l)</option>
-            <option value="ml">Mililitros (ml)</option>
-            <option value="unit">Unidades (unit)</option>
-            <option value="pz">Piezas (pz)</option>
-            <option value="pqt">Paquetes (pqt)</option>
-          </select>
-          <span class="error-text" *ngIf="unitControl?.invalid && unitControl?.touched">
-            {{ getUnitError() }}
-          </span>
-        </div>
-
-        <!-- Días de Expiración -->
-        <div class="form-group">
-          <label for="expirationDays" class="form-label">Días de Expiración</label>
-          <input
-            id="expirationDays"
+            id="stock-quantity"
             type="number"
             class="form-input"
-            [class.error]="expirationControl?.invalid && expirationControl?.touched"
-            placeholder="Ej: 30"
-            min="0"
-            formControlName="expirationDays"
-            (blur)="expirationControl?.markAsTouched()">
-          <span class="error-text" *ngIf="expirationControl?.invalid && expirationControl?.touched">
-            {{ getExpirationError() }}
-          </span>
-        </div>
-
-        <!-- Cantidad en Stock -->
-        <div class="form-group">
-          <label for="quantity" class="form-label">Cantidad en Stock *</label>
-          <input
-            id="quantity"
-            type="number"
-            class="form-input"
-            [class.error]="quantityControl?.invalid && quantityControl?.touched"
-            placeholder="Ej: 100"
-            min="0"
+            [class.error]="stockQuantityControl.invalid && stockQuantityControl.touched"
+            placeholder="Ej: 10"
+            min="1"
             formControlName="quantity"
-            (blur)="quantityControl?.markAsTouched()">
-          <span class="error-text" *ngIf="quantityControl?.invalid && quantityControl?.touched">
-            {{ getQuantityError() }}
+            (blur)="stockQuantityControl.markAsTouched()">
+          <span class="error-text" *ngIf="stockQuantityControl.invalid && stockQuantityControl.touched">
+            {{ getStockQuantityError() }}
           </span>
-        </div>
-
-        <!-- Proveedor -->
-        <div class="form-group">
-          <label for="supplier" class="form-label">Proveedor *</label>
-          <select
-            id="supplier"
-            class="form-input"
-            [class.error]="supplierControl?.invalid && supplierControl?.touched"
-            formControlName="supplier">
-            <option value="">Seleccionar proveedor</option>
-            <option value="Distribuidora Central">Distribuidora Central</option>
-            <option value="Lácteos del Valle">Lácteos del Valle</option>
-            <option value="Granja El Sol">Granja El Sol</option>
-            <option value="Importadora SA">Importadora SA</option>
-            <option value="Mercado Local">Mercado Local</option>
-          </select>
-          <span class="error-text" *ngIf="supplierControl?.invalid && supplierControl?.touched">
-            {{ getSupplierError() }}
-          </span>
-        </div>
-
-        <!-- Error General -->
-        <div class="error-alert" *ngIf="formError">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-          </svg>
-          {{ formError }}
         </div>
 
         <!-- Botones -->
         <div class="modal-buttons">
-          <button type="button" class="btn btn-secondary" (click)="closeModal()" [disabled]="isSubmitting">
+          <button type="button" class="btn btn-secondary" (click)="closeStockModal()" [disabled]="isSubmitting">
             Cancelar
           </button>
-          <button type="submit" class="btn btn-primary" [disabled]="isSubmitting || itemForm.invalid">
-            <span *ngIf="!isSubmitting">{{ isEditing ? 'Actualizar' : 'Crear' }}</span>
+          <button
+            type="submit"
+            class="btn"
+            [class.btn-primary]="stockAction === 'increase'"
+            [class.btn-danger]="stockAction === 'decrease'"
+            [disabled]="isSubmitting || stockForm.invalid">
+            <span *ngIf="!isSubmitting">
+              {{ stockAction === 'increase' ? 'Aumentar' : 'Disminuir' }}
+            </span>
             <span *ngIf="isSubmitting">Guardando...</span>
           </button>
         </div>
