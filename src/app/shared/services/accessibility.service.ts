@@ -89,14 +89,17 @@ export class AccessibilityService {
       root.classList.remove('dark-mode');
     }
 
-    // Aplicar tamaño de fuente
-    const fontSizeMap = {
-      small: '12px',
-      medium: '14px',
-      large: '16px',
-      'extra-large': '18px'
+    // Aplicar tamaño de fuente como clase
+    const fontSizeClasses = ['font-size-small', 'font-size-medium', 'font-size-large', 'font-size-extra-large'];
+    fontSizeClasses.forEach(cls => root.classList.remove(cls));
+
+    const fontSizeClassMap = {
+      small: 'font-size-small',
+      medium: 'font-size-medium',
+      large: 'font-size-large',
+      'extra-large': 'font-size-extra-large'
     };
-    root.style.setProperty('--base-font-size', fontSizeMap[settings.fontSize]);
+    root.classList.add(fontSizeClassMap[settings.fontSize]);
 
     // Aplicar alto contraste
     if (settings.highContrast) {
