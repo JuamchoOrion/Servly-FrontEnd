@@ -1,7 +1,6 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
-import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SupplierService, SupplierDTO, SupplierCreateRequest, MessageResponse } from '../../core/services/supplier.service';
@@ -9,7 +8,7 @@ import { SupplierService, SupplierDTO, SupplierCreateRequest, MessageResponse } 
 @Component({
   selector: 'app-suppliers',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './Suppliers.html',
   styleUrls: ['./suppliers.scss']
 })
@@ -21,9 +20,8 @@ export class SuppliersComponent implements OnInit {
   isEditing = false;
   formError: string | null = null;
   editingSupplierId: number | null = null;
-
-  // Dropdown de navegación
-  dropdownOpen: string | null = null;
+  selectedLogoFile: File | null = null;
+  logoPreviewUrl: string | null = null;
 
   supplierForm!: FormGroup;
 
@@ -44,6 +42,9 @@ export class SuppliersComponent implements OnInit {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    if (this.logoPreviewUrl) {
+      URL.revokeObjectURL(this.logoPreviewUrl);
+    }
   }
 
   /**
@@ -55,7 +56,7 @@ export class SuppliersComponent implements OnInit {
       description: ['', [Validators.maxLength(500)]],
       contactNumber: ['', [Validators.maxLength(20)]],
       email: ['', [Validators.email, Validators.maxLength(200)]],
-      logoUrl: ['', [Validators.maxLength(500)]]
+      logo: [null]
     });
   }
 
@@ -110,17 +111,10 @@ export class SuppliersComponent implements OnInit {
   }
 
   /**
-   * Obtiene el control de logo URL
+   * Obtiene el control de logo
    */
-  get logoUrlControl(): FormControl {
-    return this.supplierForm.get('logoUrl') as FormControl;
-  }
-
-  /**
-   * Alterna el dropdown de navegación
-   */
-  toggleDropdown(menu: string): void {
-    this.dropdownOpen = this.dropdownOpen === menu ? null : menu;
+  get logoControl(): FormControl {
+    return this.supplierForm.get('logo') as FormControl;
   }
 
   /**
@@ -156,6 +150,8 @@ export class SuppliersComponent implements OnInit {
     this.isEditing = false;
     this.editingSupplierId = null;
     this.formError = null;
+    this.selectedLogoFile = null;
+    this.logoPreviewUrl = null;
     this.supplierForm.reset();
     this.showModal = true;
   }
@@ -167,13 +163,14 @@ export class SuppliersComponent implements OnInit {
     this.isEditing = true;
     this.editingSupplierId = supplier.id;
     this.formError = null;
+    this.selectedLogoFile = null;
+    this.logoPreviewUrl = supplier.logoUrl;
 
     this.supplierForm.patchValue({
       name: supplier.name,
       description: supplier.description,
       contactNumber: supplier.contactNumber,
-      email: supplier.email,
-      logoUrl: supplier.logoUrl
+      email: supplier.email
     });
 
     this.showModal = true;
@@ -187,7 +184,22 @@ export class SuppliersComponent implements OnInit {
     this.isEditing = false;
     this.editingSupplierId = null;
     this.formError = null;
+    this.selectedLogoFile = null;
+    if (this.logoPreviewUrl && !this.logoPreviewUrl.startsWith('http')) {
+      URL.revokeObjectURL(this.logoPreviewUrl);
+    }
+    this.logoPreviewUrl = null;
     this.supplierForm.reset();
+  }
+
+  /**
+   * Cierra el modal con la tecla Escape
+   */
+  @HostListener('document:keydown.escape')
+  handleEscapeKey(): void {
+    if (this.showModal) {
+      this.closeModal();
+    }
   }
 
   /**
@@ -206,6 +218,54 @@ export class SuppliersComponent implements OnInit {
           }
         });
     }
+  }
+
+  /**
+   * Maneja la selección de archivo de logo
+   */
+  onLogoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+
+      // Validar tipo de archivo
+      if (!file.type.startsWith('image/')) {
+        this.formError = 'El archivo debe ser una imagen';
+        return;
+      }
+
+      // Validar tamaño (máx 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.formError = 'La imagen no debe superar 5MB';
+        return;
+      }
+
+      this.selectedLogoFile = file;
+      this.formError = null;
+
+      // Crear URL de preview
+      if (this.logoPreviewUrl && this.logoPreviewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(this.logoPreviewUrl);
+      }
+      this.logoPreviewUrl = URL.createObjectURL(file);
+      this.cdr.detectChanges();
+    }
+  }
+
+  /**
+   * Elimina el logo seleccionado
+   */
+  removeLogo(): void {
+    this.selectedLogoFile = null;
+    if (this.logoPreviewUrl && this.logoPreviewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(this.logoPreviewUrl);
+    }
+    this.logoPreviewUrl = null;
+    const logoInput = document.getElementById('logo') as HTMLInputElement;
+    if (logoInput) {
+      logoInput.value = '';
+    }
+    this.supplierForm.patchValue({ logo: null });
   }
 
   /**
@@ -229,7 +289,7 @@ export class SuppliersComponent implements OnInit {
         description: formValue.description,
         contactNumber: formValue.contactNumber,
         email: formValue.email,
-        logoUrl: formValue.logoUrl
+        logo: this.selectedLogoFile
       };
 
       if (this.isEditing && this.editingSupplierId) {

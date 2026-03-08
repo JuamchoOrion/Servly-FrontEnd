@@ -12,6 +12,12 @@ export const routes: Routes = [
       import('./features/auth/pages/login/login').then(m => m.LoginComponent)
   },
   {
+    path: 'provider',
+    loadComponent: () =>
+      import('./features/suppliers/Suppliers').then(m => m.SuppliersComponent)
+  },
+
+  {
     path: 'access-denied',
     loadComponent: () =>
       import('./features/auth/pages/access-denied/access-denied.component').then(m => m.AccessDeniedComponent)

@@ -1,61 +1,82 @@
-<div class="suppliers-page">
+<div class="suppliers-page" role="main" aria-labelledby="page-title">
   <!-- Background -->
   <div class="suppliers-background"></div>
-
 
   <!-- Header -->
   <header class="suppliers-header">
     <div class="header-content">
-      <h1 class="suppliers-title">Proveedores</h1>
+      <h1 class="suppliers-title" id="page-title">Proveedores</h1>
       <p class="suppliers-subtitle">Gestión de proveedores y contactos</p>
     </div>
     <div class="header-actions">
-      <button class="btn btn-add" (click)="openCreateModal()" [disabled]="isLoading">
+      <button class="btn btn-add" (click)="openCreateModal()" [disabled]="isLoading" aria-label="Crear nuevo proveedor">
         <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
         </svg>
-        <span>Nuevo Proveedor</span>
+        <span aria-hidden="true">Nuevo Proveedor</span>
       </button>
     </div>
   </header>
 
   <!-- Main Content -->
-  <main class="suppliers-container">
+  <main class="suppliers-container" aria-label="Lista de proveedores">
     <!-- Loading State -->
-    <div class="loading-state" *ngIf="isLoading">
-      <div class="loading-spinner"></div>
+    <div class="loading-state" *ngIf="isLoading" role="status" aria-live="polite" aria-busy="true">
+      <div class="loading-spinner" aria-hidden="true"></div>
       <p>Cargando proveedores...</p>
     </div>
 
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="!isLoading && suppliers.length === 0">
-      <div class="empty-icon">📋</div>
+    <div class="empty-state" *ngIf="!isLoading && suppliers.length === 0" role="status" aria-live="polite">
+      <div class="empty-icon" aria-hidden="true">📋</div>
       <h3>No hay proveedores registrados</h3>
       <p>Comienza agregando tu primer proveedor</p>
-      <button class="btn btn-primary" (click)="openCreateModal()">
+      <button class="btn btn-primary" (click)="openCreateModal()" aria-label="Agregar primer proveedor">
         <span class="btn-text">Agregar primer proveedor</span>
       </button>
     </div>
 
     <!-- Suppliers List -->
     <div class="suppliers-list" *ngIf="!isLoading && suppliers.length > 0">
-      <div class="suppliers-grid">
-        <div class="supplier-card" *ngFor="let supplier of suppliers">
+      <div class="suppliers-grid" role="list" aria-label="Proveedores registrados">
+        <div class="supplier-card" *ngFor="let supplier of suppliers" role="listitem" [attr.aria-label]="'Proveedor: ' + supplier.name">
           <div class="supplier-card-header">
-            <div class="supplier-info">
-              <h3 class="supplier-name">{{ supplier.name }}</h3>
+            <!-- Logo del proveedor -->
+            <div class="supplier-logo-container" *ngIf="supplier.logoUrl; else noLogo">
+              <img [src]="supplier.logoUrl" [alt]="'Logo de ' + supplier.name" class="supplier-logo">
             </div>
-            <div class="supplier-actions">
-              <button class="btn-icon" (click)="editSupplier(supplier)" title="Editar">
+            <ng-template #noLogo>
+              <div class="supplier-logo-placeholder" aria-hidden="true">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
                 </svg>
-              </button>
-              <button class="btn-icon btn-delete" (click)="deleteSupplier(supplier)" title="Eliminar">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                </svg>
-              </button>
+              </div>
+            </ng-template>
+
+            <div class="supplier-info-with-actions">
+              <div class="supplier-info">
+                <h3 class="supplier-name">{{ supplier.name }}</h3>
+              </div>
+              <div class="supplier-actions" role="group" aria-label="Acciones para {{ supplier.name }}">
+                <button
+                  class="btn-icon"
+                  (click)="editSupplier(supplier)"
+                  [attr.aria-label]="'Editar proveedor ' + supplier.name"
+                  title="Editar">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                  </svg>
+                </button>
+                <button
+                  class="btn-icon btn-delete"
+                  (click)="deleteSupplier(supplier)"
+                  [attr.aria-label]="'Eliminar proveedor ' + supplier.name"
+                  title="Eliminar">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -66,13 +87,19 @@
                 <svg class="detail-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
                 </svg>
-                <span class="detail-text">{{ supplier.contactNumber || 'Sin teléfono' }}</span>
+                <span class="detail-text">
+                  <span class="visually-hidden">Teléfono: </span>
+                  {{ supplier.contactNumber || 'Sin teléfono' }}
+                </span>
               </div>
               <div class="detail-row">
                 <svg class="detail-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
                 </svg>
-                <span class="detail-text">{{ supplier.email || 'Sin email' }}</span>
+                <span class="detail-text">
+                  <span class="visually-hidden">Email: </span>
+                  {{ supplier.email || 'Sin email' }}
+                </span>
               </div>
             </div>
           </div>
@@ -82,10 +109,16 @@
   </main>
 
   <!-- Modal Crear/Editar Proveedor -->
-  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
-    <div class="modal-container" (click)="$event.stopPropagation()">
+  <div
+    class="modal-overlay"
+    *ngIf="showModal"
+    (click)="closeModal()"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="isEditing ? 'edit-modal-title' : 'create-modal-title'">
+    <div class="modal-container" (click)="$event.stopPropagation()" role="document">
       <div class="modal-header">
-        <h2>{{ isEditing ? 'Editar Proveedor' : 'Nuevo Proveedor' }}</h2>
+        <h2 id="{{ isEditing ? 'edit-modal-title' : 'create-modal-title' }}">{{ isEditing ? 'Editar Proveedor' : 'Nuevo Proveedor' }}</h2>
         <button class="btn-close" (click)="closeModal()" aria-label="Cerrar modal">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -93,7 +126,7 @@
         </button>
       </div>
 
-      <form [formGroup]="supplierForm" (ngSubmit)="onSubmit()" class="modal-body">
+      <form [formGroup]="supplierForm" (ngSubmit)="onSubmit()" class="modal-body" aria-label="Formulario de proveedor">
         <!-- Nombre -->
         <div class="form-group">
           <label for="name" class="form-label">Nombre *</label>
@@ -104,8 +137,11 @@
             [class.error]="nameControl?.invalid && nameControl?.touched"
             placeholder="Ej: Distribuidora Central"
             formControlName="name"
-            (blur)="nameControl?.markAsTouched()">
-          <span class="error-text" *ngIf="nameControl?.invalid && nameControl?.touched">
+            (blur)="nameControl?.markAsTouched()"
+            aria-required="true"
+            aria-invalid="nameControl?.invalid && nameControl?.touched"
+            aria-describedby="name-error">
+          <span class="error-text" id="name-error" *ngIf="nameControl?.invalid && nameControl?.touched" role="alert">
             {{ getNameError() }}
           </span>
         </div>
@@ -118,8 +154,10 @@
             class="form-input form-textarea"
             placeholder="Descripción del proveedor"
             rows="3"
-            formControlName="description">
+            formControlName="description"
+            aria-describedby="description-hint">
           </textarea>
+          <span id="description-hint" class="visually-hidden">Máximo 500 caracteres</span>
         </div>
 
         <!-- Número de Contacto -->
@@ -132,7 +170,8 @@
             [class.error]="contactNumberControl?.invalid && contactNumberControl?.touched"
             placeholder="Ej: +1234567890"
             formControlName="contactNumber"
-            (blur)="contactNumberControl?.markAsTouched()">
+            (blur)="contactNumberControl?.markAsTouched()"
+            aria-invalid="contactNumberControl?.invalid && contactNumberControl?.touched">
         </div>
 
         <!-- Email -->
@@ -145,27 +184,56 @@
             [class.error]="emailControl?.invalid && emailControl?.touched"
             placeholder="ejemplo@correo.com"
             formControlName="email"
-            (blur)="emailControl?.markAsTouched()">
-          <span class="error-text" *ngIf="emailControl?.invalid && emailControl?.touched">
+            (blur)="emailControl?.markAsTouched()"
+            aria-invalid="emailControl?.invalid && emailControl?.touched"
+            aria-describedby="email-error">
+          <span class="error-text" id="email-error" *ngIf="emailControl?.invalid && emailControl?.touched" role="alert">
             {{ getEmailError() }}
           </span>
         </div>
 
-        <!-- Logo URL -->
+        <!-- Logo Upload -->
         <div class="form-group">
-          <label for="logoUrl" class="form-label">URL del Logo</label>
-          <input
-            id="logoUrl"
-            type="url"
-            class="form-input"
-            [class.error]="logoUrlControl.invalid && logoUrlControl.touched"
-            placeholder="https://ejemplo.com/logo.png"
-            formControlName="logoUrl"
-            (blur)="logoUrlControl.markAsTouched()">
+          <label class="form-label" id="logo-label">Logo del Proveedor</label>
+
+          <!-- Vista previa del logo -->
+          <div class="logo-preview-container" *ngIf="logoPreviewUrl" role="img" aria-labelledby="logo-preview-label">
+            <span id="logo-preview-label" class="visually-hidden">Vista previa del logo</span>
+            <div class="logo-preview">
+              <img [src]="logoPreviewUrl" alt="Vista previa del logo seleccionado" class="logo-preview-image">
+            </div>
+            <button type="button" class="btn-remove-logo" (click)="removeLogo()" title="Eliminar logo" aria-label="Eliminar logo seleccionado">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Input de archivo -->
+          <div class="file-upload-container" *ngIf="!logoPreviewUrl">
+            <label for="logo" class="file-upload-label">
+              <div class="file-upload-content">
+                <svg class="file-upload-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+                </svg>
+                <span class="file-upload-text">Haz clic para subir el logo</span>
+                <span class="file-upload-hint">PNG, JPG, GIF - Máx 5MB</span>
+              </div>
+              <input
+                id="logo"
+                type="file"
+                class="file-upload-input"
+                accept="image/*"
+                (change)="onLogoSelected($event)"
+                formControlName="logo"
+                aria-describedby="logo-hint">
+            </label>
+            <span id="logo-hint" class="visually-hidden">Sube una imagen en formato PNG, JPG o GIF. Tamaño máximo 5 megabytes.</span>
+          </div>
         </div>
 
         <!-- Error General -->
-        <div class="error-alert" *ngIf="formError">
+        <div class="error-alert" *ngIf="formError" role="alert" aria-live="assertive">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
           </svg>
@@ -173,11 +241,11 @@
         </div>
 
         <!-- Botones -->
-        <div class="modal-buttons">
-          <button type="button" class="btn btn-secondary" (click)="closeModal()" [disabled]="isSubmitting">
+        <div class="modal-buttons" role="group" aria-label="Acciones del formulario">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()" [disabled]="isSubmitting" aria-label="Cancelar y cerrar">
             Cancelar
           </button>
-          <button type="submit" class="btn btn-primary" [disabled]="isSubmitting || supplierForm.invalid">
+          <button type="submit" class="btn btn-primary" [disabled]="isSubmitting || supplierForm.invalid" aria-busy="isSubmitting">
             <span *ngIf="!isSubmitting">{{ isEditing ? 'Actualizar' : 'Crear' }}</span>
             <span *ngIf="isSubmitting">Guardando...</span>
           </button>

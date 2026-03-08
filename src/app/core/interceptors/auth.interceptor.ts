@@ -23,20 +23,26 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   const token = authService.getAccessToken();
 
+  // Verificar si es FormData (multipart/form-data)
+  const isFormData = req.body instanceof FormData;
+
   // Adjuntar token + withCredentials en todas las requests
+  // NO establecer Content-Type para FormData (Angular lo hace automáticamente)
   const authReq = token
     ? req.clone({
         withCredentials: true,
-        setHeaders: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        setHeaders: isFormData
+          ? { Authorization: `Bearer ${token}` }
+          : {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
       })
     : req.clone({
         withCredentials: true,
-        setHeaders: {
-          'Content-Type': 'application/json'
-        }
+        setHeaders: isFormData
+          ? {}
+          : { 'Content-Type': 'application/json' }
       });
 
   return next(authReq).pipe(
@@ -58,11 +64,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             switchMap(() => {
               // Reintentar la request original con el nuevo token
               const newToken = authService.getAccessToken();
+              // Mantener el mismo Content-Type que la request original
               const retryReq = req.clone({
                 withCredentials: true,
                 setHeaders: {
-                  Authorization: `Bearer ${newToken}`,
-                  'Content-Type': 'application/json'
+                  Authorization: `Bearer ${newToken}`
                 }
               });
               return next(retryReq);
