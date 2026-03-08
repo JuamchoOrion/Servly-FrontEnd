@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../enviroments/enviroment';
 
 export interface SupplierDTO {
   id: number;
@@ -27,29 +28,29 @@ export interface MessageResponse {
   providedIn: 'root'
 })
 export class SupplierService {
-  private readonly API_URL = '/api/staff/inventory/suppliers';
+  private readonly API_URL = `${environment.apiUrl}/api/staff/inventory/suppliers`;
 
   constructor(private http: HttpClient) {}
 
   /**
    * Obtiene todos los proveedores
-   * GET /api/inventory/suppliers
+   * GET /api/staff/inventory/suppliers
    */
   getAll(): Observable<SupplierDTO[]> {
-    return this.http.get<SupplierDTO[]>(this.API_URL);
+    return this.http.get<SupplierDTO[]>(this.API_URL, { withCredentials: true });
   }
 
   /**
    * Obtiene un proveedor por ID
-   * GET /api/inventory/suppliers/{id}
+   * GET /api/staff/inventory/suppliers/{id}
    */
   getById(id: number): Observable<SupplierDTO> {
-    return this.http.get<SupplierDTO>(`${this.API_URL}/${id}`);
+    return this.http.get<SupplierDTO>(`${this.API_URL}/${id}`, { withCredentials: true });
   }
 
   /**
    * Crea un nuevo proveedor
-   * POST /api/inventory/suppliers
+   * POST /api/staff/inventory/suppliers
    * Content-Type: multipart/form-data
    * Requiere rol: STOREKEEPER
    */
@@ -82,12 +83,12 @@ export class SupplierService {
       console.log('Image size:', request.logo.size);
     }
 
-    return this.http.post<SupplierDTO>(this.API_URL, formData);
+    return this.http.post<SupplierDTO>(this.API_URL, formData, { withCredentials: true });
   }
 
   /**
    * Actualiza un proveedor existente
-   * PUT /api/inventory/suppliers/{id}
+   * PUT /api/staff/inventory/suppliers/{id}
    * Content-Type: multipart/form-data
    * Requiere rol: STOREKEEPER
    */
@@ -120,15 +121,15 @@ export class SupplierService {
       console.log('Image size:', request.logo.size);
     }
 
-    return this.http.put<SupplierDTO>(`${this.API_URL}/${id}`, formData);
+    return this.http.put<SupplierDTO>(`${this.API_URL}/${id}`, formData, { withCredentials: true });
   }
 
   /**
    * Elimina un proveedor
-   * DELETE /api/inventory/suppliers/{id}
+   * DELETE /api/staff/inventory/suppliers/{id}
    * Requiere rol: STOREKEEPER
    */
   delete(id: number): Observable<MessageResponse> {
-    return this.http.delete<MessageResponse>(`${this.API_URL}/${id}`);
+    return this.http.delete<MessageResponse>(`${this.API_URL}/${id}`, { withCredentials: true });
   }
 }

@@ -5,15 +5,17 @@
 $primary-black: #1E1E1E;
 $accent-gold: #C8A951;
 $white: #FFFFFF;
-$text-light: rgba(255, 255, 255, 0.6);
-$text-light-secondary: rgba(255, 255, 255, 0.4);
+$light-bg: #F5F5F5;
+$border-light: #E0E0E0;
+$text-dark: #2C2C2C;
+$text-light: #666666;
 
 .main-footer {
   width: 100%;
   padding: 20px 16px;
-  background: linear-gradient(135deg, $primary-black 0%, #0f0f0f 100%);
-  border-top: 2px solid rgba($accent-gold, 0.15);
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3);
+  background: $white;
+  border-top: 1px solid $border-light;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
   margin: 0;
 
@@ -47,10 +49,7 @@ $text-light-secondary: rgba(255, 255, 255, 0.4);
       .footer-logo {
         font-size: 16px;
         font-weight: 900;
-        background: linear-gradient(135deg, $white 0%, $accent-gold 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: $accent-gold;
         letter-spacing: -0.5px;
         text-transform: uppercase;
 
@@ -61,7 +60,7 @@ $text-light-secondary: rgba(255, 255, 255, 0.4);
 
       .footer-year {
         font-size: 11px;
-        color: $text-light-secondary;
+        color: $text-light;
         font-weight: 500;
 
         @media (min-width: 768px) {
@@ -76,7 +75,7 @@ $text-light-secondary: rgba(255, 255, 255, 0.4);
       .footer-contact {
         padding: 8px 16px;
         background: transparent;
-        border: 1px solid rgba($accent-gold, 0.5);
+        border: 1px solid $accent-gold;
         color: $accent-gold;
         border-radius: 8px;
         font-size: 12px;
@@ -92,7 +91,7 @@ $text-light-secondary: rgba(255, 255, 255, 0.4);
         &:hover {
           background: rgba($accent-gold, 0.1);
           border-color: $accent-gold;
-          box-shadow: 0 4px 12px rgba($accent-gold, 0.2);
+          box-shadow: 0 2px 8px rgba($accent-gold, 0.2);
         }
 
         span {

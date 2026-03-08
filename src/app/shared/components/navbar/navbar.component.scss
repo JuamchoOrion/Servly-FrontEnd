@@ -3,12 +3,13 @@
    ═══════════════════════════════════════════════════════════════════════════════════ */
 
 $primary-black: #1E1E1E;
+$dark-gray: #404040;
 $accent-gold: #C8A951;
 $white: #FFFFFF;
-$text-light: rgba(255, 255, 255, 0.7);
-$text-light-secondary: rgba(0, 0, 0, 0.6);
-$hover-color: rgba($accent-gold, 0.1);
-$border-color: rgba($accent-gold, 0.2);
+$light-bg: #F5F5F5;
+$border-light: #E0E0E0;
+$text-dark: #2C2C2C;
+$text-light: #666666;
 
 .main-navbar {
   position: sticky;
@@ -18,10 +19,21 @@ $border-color: rgba($accent-gold, 0.2);
   align-items: center;
   justify-content: space-between;
   padding: 12px 24px;
-  background: linear-gradient(135deg, $primary-black 0%, #1a1a1a 100%);
-  border-bottom: 2px solid rgba($accent-gold, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  background: $dark-gray;
+  border-bottom: 1px solid rgba($accent-gold, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   gap: 24px;
+
+  @media (max-width: 768px) {
+    padding: 12px 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px 12px;
+    gap: 8px;
+  }
 
   /* ═══════════════════════════════════════════════════════════════════════════════════
      LEFT SECTION: LOGO + NAV ITEMS
@@ -32,6 +44,11 @@ $border-color: rgba($accent-gold, 0.2);
     align-items: center;
     gap: 32px;
     flex: 1;
+
+    @media (max-width: 768px) {
+      gap: 16px;
+      flex: 0;
+    }
   }
 
   .navbar-logo {
@@ -40,10 +57,7 @@ $border-color: rgba($accent-gold, 0.2);
     .logo-text {
       font-size: 24px;
       font-weight: 900;
-      background: linear-gradient(135deg, $white 0%, $accent-gold 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: $accent-gold;
       letter-spacing: -0.5px;
       text-transform: uppercase;
       transition: all 0.3s ease;
@@ -60,12 +74,16 @@ $border-color: rgba($accent-gold, 0.2);
     gap: 12px;
     flex-wrap: wrap;
 
+    @media (max-width: 768px) {
+      display: none;
+    }
+
     .nav-item {
       display: flex;
       align-items: center;
       gap: 8px;
       padding: 10px 16px;
-      color: $text-light;
+      color: rgba($white, 0.7);
       text-decoration: none;
       border-radius: 8px;
       font-size: 14px;
@@ -134,6 +152,19 @@ $border-color: rgba($accent-gold, 0.2);
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
+      white-space: nowrap;
+
+      @media (max-width: 768px) {
+        padding: 8px 12px;
+        font-size: 11px;
+        gap: 8px;
+      }
+
+      @media (max-width: 480px) {
+        padding: 6px 10px;
+        font-size: 10px;
+        gap: 4px;
+      }
 
       &:hover {
         background: rgba($accent-gold, 0.2);
@@ -145,14 +176,19 @@ $border-color: rgba($accent-gold, 0.2);
         width: 20px;
         height: 20px;
         fill: $accent-gold;
+
+        @media (max-width: 768px) {
+          width: 16px;
+          height: 16px;
+        }
+
+        @media (max-width: 480px) {
+          width: 14px;
+          height: 14px;
+        }
       }
 
       .user-email {
-        max-width: 150px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-
         @media (max-width: 768px) {
           display: none;
         }
@@ -164,47 +200,86 @@ $border-color: rgba($accent-gold, 0.2);
         fill: $accent-gold;
         transition: transform 0.3s ease;
 
+        @media (max-width: 768px) {
+          width: 12px;
+          height: 12px;
+        }
+
         &.open {
           transform: rotate(180deg);
         }
       }
     }
 
-    /* DROPDOWN MENU */
+    /* USER MENU DROPDOWN */
     .user-dropdown {
       position: absolute;
-      top: calc(100% + 12px);
+      top: 100%;
       right: 0;
-      background: linear-gradient(135deg, rgba(30, 30, 30, 0.98) 0%, rgba(40, 40, 40, 0.98) 100%);
-      border: 2px solid rgba($accent-gold, 0.3);
+      margin-top: 8px;
+      width: 200px;
+      background: $white;
+      border: 1px solid $border-light;
       border-radius: 12px;
-      min-width: 220px;
-      padding: 12px;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-      animation: slideDown 0.25s ease-out;
-      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
       z-index: 1001;
 
-      @keyframes slideDown {
-        from {
-          opacity: 0;
-          transform: translateY(-10px);
+      &.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .dropdown-item {
+        padding: 12px 16px;
+        color: $text-dark;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+        font-weight: 500;
+        border-bottom: 1px solid $border-light;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: none;
+        border: none;
+        text-align: left;
+        width: 100%;
+
+        &:hover {
+          background: $light-bg;
+          color: $accent-gold;
+          padding-left: 20px;
         }
-        to {
-          opacity: 1;
-          transform: translateY(0);
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &.logout-btn {
+          color: #ff6b6b;
+
+          &:hover {
+            background: rgba(#ff6b6b, 0.1);
+            color: #ff6b6b;
+          }
         }
       }
 
       .dropdown-header {
-        padding: 12px 8px;
-        border-bottom: 1px solid rgba($accent-gold, 0.2);
+        padding: 12px 16px;
+        border-bottom: 1px solid $border-light;
         margin-bottom: 8px;
 
         .role-badge {
           display: inline-block;
           padding: 6px 12px;
-          background: rgba($accent-gold, 0.2);
+          background: rgba($accent-gold, 0.1);
           border: 1px solid $accent-gold;
           border-radius: 8px;
           color: $accent-gold;
@@ -214,81 +289,6 @@ $border-color: rgba($accent-gold, 0.2);
           letter-spacing: 0.5px;
         }
       }
-
-      .dropdown-item {
-        display: block;
-        width: 100%;
-        padding: 12px 16px;
-        margin: 4px 0;
-        background: transparent;
-        border: none;
-        color: $text-light;
-        text-decoration: none;
-        text-align: left;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-
-        &:hover {
-          background: rgba($accent-gold, 0.15);
-          color: $accent-gold;
-          padding-left: 20px;
-        }
-
-        &.logout-btn {
-          color: #ff6b6b;
-          margin-top: 12px;
-          padding-top: 12px;
-          border-top: 1px solid rgba($accent-gold, 0.2);
-
-          &:hover {
-            background: rgba(#ff6b6b, 0.15);
-            color: #ff6b6b;
-          }
-        }
-      }
-    }
-  }
-
-  /* LOGIN BUTTON */
-  .login-btn {
-    padding: 10px 20px;
-    background: linear-gradient(135deg, $accent-gold 0%, #D4B875 100%);
-    color: $primary-black;
-    text-decoration: none;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 24px rgba($accent-gold, 0.3);
-    white-space: nowrap;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba($accent-gold, 0.4);
-    }
-  }
-
-  /* MOBILE MENU BUTTON */
-  .mobile-menu-btn {
-    display: none;
-    background: transparent;
-    border: none;
-    color: $accent-gold;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 8px;
-
-    svg {
-      width: 24px;
-      height: 24px;
-      fill: currentColor;
-    }
-
-    @media (max-width: 768px) {
-      display: block;
     }
   }
 }
@@ -425,4 +425,5 @@ $border-color: rgba($accent-gold, 0.2);
     }
   }
 }
+
 

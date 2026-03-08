@@ -25,6 +25,7 @@
   "packageManager": "npm@11.9.0",
   "dependencies": {
     "@angular/animations": "^21.2.0",
+    "@angular/cdk": "^21.2.1",
     "@angular/common": "^21.1.0",
     "@angular/compiler": "^21.1.0",
     "@angular/core": "^21.1.0",
@@ -34,6 +35,8 @@
     "@ionic/angular": "^8.7.18",
     "@ionic/core": "^8.7.18",
     "@react-oauth/google": "^0.13.4",
+    "chart.js": "^4.5.1",
+    "ng2-charts": "^10.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

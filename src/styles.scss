@@ -77,11 +77,50 @@ ion-button {
 
 ion-input {
   font-family: inherit;
+  --background: #{$white};
+  --color: #{$text-dark};
+  --placeholder-color: #{$text-light};
+}
+
+ion-select {
+  --background: #{$white};
+  --color: #{$text-dark};
 }
 
 ion-card {
   --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   border-radius: 16px;
+  --background: #{$white};
+}
+
+input, textarea, select {
+  background: #{$white} !important;
+  color: #{$text-dark} !important;
+  border: 1px solid #ddd !important;
+}
+
+// ===============================
+// INPUT/FORM STYLES
+// ===============================
+.form-input,
+.form-field,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+  background: $white !important;
+  color: $text-dark !important;
+  border: 1px solid #ddd !important;
+  font-family: inherit;
+  font-size: var(--base-font-size);
+}
+
+.form-label,
+label {
+  color: $text-dark !important;
+  font-weight: 500;
 }
 
 /*
@@ -100,115 +139,7 @@ ion-card {
   }
 */
 
-/*
-  ion-card {
-    --background: #2a2a2a;
-    --color: #f5f5f5;
-  }
-
-  ion-input {
-    --background: #2a2a2a;
-    --color: #f5f5f5;
-    --placeholder-color: #999999;
-  }
-
-  ion-button {
-    --color: #f5f5f5;
-  }
-
-  // GLOBAL - Todos los contenedores principales
-  main {
-    background: #1a1a1a !important;
-    color: #f5f5f5 !important;
-  }
-
-  router-outlet {
-    background: #1a1a1a !important;
-  }
-
-  // LOADING STATE - Contenedor de carga
-  .loading-state,
-  .spinner-container,
-  [class*="loading"],
-  [class*="spinner"] {
-    background: #1a1a1a !important;
-    color: #f5f5f5 !important;
-
-    .spinner {
-      border-color: #4a4a4a !important;
-      border-top-color: $accent-gold !important;
-    }
-
-    p {
-      color: #ccc !important;
-    }
-  }
-
-  // TABLAS - Todas las tablas
-  table,
-  .table,
-  [class*="table"] {
-    background: #2a2a2a !important;
-    color: #f5f5f5 !important;
-    border-color: #4a4a4a !important;
-
-    thead {
-      background: #333333 !important;
-      color: #f5f5f5 !important;
-
-      th {
-        color: #f5f5f5 !important;
-        border-color: #4a4a4a !important;
-        background: #333333 !important;
-      }
-    }
-
-    tbody {
-      tr {
-        border-color: #4a4a4a !important;
-
-        td {
-          color: #f5f5f5 !important;
-          border-color: #4a4a4a !important;
-        }
-
-        &:hover {
-          background: #3a3a3a !important;
-        }
-      }
-    }
-  }
-
-  // HEADERS - Todos los headers
-  .header,
-  [class*="header"],
-  [class*="heading"] {
-    background: #2a2a2a !important;
-    color: #f5f5f5 !important;
-    border-color: #4a4a4a !important;
-
-    h1, h2, h3, h4, h5, h6 {
-      color: #f5f5f5 !important;
-    }
-
-    p {
-      color: #ccc !important;
-    }
-  }
-
-  // CARDS Y CONTENEDORES
-  .card,
-  [class*="card"],
-  [class*="container"],
-  [class*="wrapper"] {
-    background: #2a2a2a !important;
-    color: #f5f5f5 !important;
-    border-color: #4a4a4a !important;
-  }
-*/
-
-// RESTO DEL DARK MODE COMENTADO PARA EVITAR FONDO NEGRO
-/* TODO DARK MODE DISABLED */
+/* DARK MODE COMPLETAMENTE DESHABILITADO */
 
 // ===============================
 // 👁️ ALTO CONTRASTE - High Contrast
@@ -217,62 +148,63 @@ ion-card {
 :root.high-contrast {
   --primary-color: #000000;
   --accent-color: #FFD700;
-}
 
-:root.high-contrast,
-:root.high-contrast html,
-:root.high-contrast body {
-  background-color: $white !important;
-  color: #000000 !important;
-}
-
-:root.high-contrast {
-  .login-wrapper {
-    background: $white !important;
+  html, body {
+    background-color: $white !important;
+    color: #000000 !important;
   }
 
-  .login-container {
-    background: $white !important;
-    color: #000 !important;
-    border: 3px solid #000 !important;
+  ion-app {
+    --ion-background-color: #{$white} !important;
+    --ion-text-color: #000000 !important;
   }
 
-  .form-input {
-    border: 3px solid #000 !important;
-    color: #000 !important;
+  main, .app-main, .app-content, router-outlet {
     background: $white !important;
+    color: #000000 !important;
   }
 
-  .btn-primary {
-    background: #000 !important;
+  .dashboard-page {
+    background: $white !important;
+    color: #000000 !important;
+  }
+
+  .dashboard-container, .dashboard-header, .stat-card, .analytics-card,
+  .activity-card, .quick-actions-card, .empty-dashboard, .loading-state {
+    background: $white !important;
+    color: #000000 !important;
+    border: 3px solid #000000 !important;
+
+    h1, h2, h3, h4, h5, h6, .stat-number {
+      color: #000000 !important;
+    }
+
+    p, span, .stat-label, .card-subtitle {
+      color: #000000 !important;
+    }
+  }
+
+  input, textarea, select, ion-input, ion-select, ion-card {
+    background: $white !important;
+    color: #000000 !important;
+    border: 3px solid #000000 !important;
+  }
+
+  .btn-refresh, button, .btn-primary {
+    background: #000000 !important;
     color: #FFD700 !important;
-    border: 3px solid #000 !important;
+    border: 3px solid #000000 !important;
     font-weight: 700 !important;
   }
 
-  .btn-google {
-    background: $white !important;
-    color: #000 !important;
-    border: 3px solid #000 !important;
-    font-weight: 700 !important;
-  }
-
-  .form-label {
-    color: #000 !important;
+  .form-label, label {
+    color: #000000 !important;
     font-weight: 700 !important;
   }
 
   .error-text {
     color: #C62828 !important;
     font-weight: 700 !important;
-  }
-
-  ion-card {
-    border: 3px solid #000 !important;
-  }
-
-  ion-input {
-    border: 3px solid #000 !important;
   }
 }
 
@@ -282,20 +214,53 @@ ion-card {
 // ===============================
 :root.font-small {
   --base-font-size: 12px;
+
+  html, body {
+    font-size: 12px;
+  }
+
+  h1, h2, h3 { font-size: 18px; }
+  h4, h5, h6 { font-size: 16px; }
+  p, span, label, button { font-size: 12px; }
 }
 
 :root.font-medium {
   --base-font-size: 14px;
+
+  html, body {
+    font-size: 14px;
+  }
+
+  h1, h2, h3 { font-size: 21px; }
+  h4, h5, h6 { font-size: 18px; }
+  p, span, label, button { font-size: 14px; }
 }
 
 :root.font-large {
   --base-font-size: 16px;
+
+  html, body {
+    font-size: 16px;
+  }
+
+  h1, h2, h3 { font-size: 24px; }
+  h4, h5, h6 { font-size: 20px; }
+  p, span, label, button { font-size: 16px; }
 }
 
 :root.font-extra-large {
   --base-font-size: 18px;
+
+  html, body {
+    font-size: 18px;
+  }
+
+  h1, h2, h3 { font-size: 27px; }
+  h4, h5, h6 { font-size: 22px; }
+  p, span, label, button { font-size: 18px; }
 }
 
+// Base font sizing
 html, body {
   font-size: var(--base-font-size);
 }
@@ -314,20 +279,30 @@ p, span, label, button {
 // ================================
 :root.reduce-motion * {
   animation: none !important;
+  animation-duration: 0.01ms !important;
   transition: none !important;
+  transition-duration: 0.01ms !important;
 }
 
 :root.reduce-motion {
-  .accessibility-menu {
-    animation: none !important;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 
-  .login-container {
-    animation: none !important;
-  }
-
+  .accessibility-menu,
+  .login-container,
   button, input, select {
+    animation: none !important;
     transition: none !important;
+  }
+
+  html {
+    scroll-behavior: auto !important;
   }
 }
 

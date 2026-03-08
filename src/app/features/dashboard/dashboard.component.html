@@ -1,11 +1,11 @@
 <div class="dashboard-page">
   <div class="dashboard-container">
 
-    <!-- Header -->
+    <!-- ══ Header ══════════════════════════════════════════════════════════ -->
     <div class="dashboard-header">
       <div class="header-content">
         <h1>{{ getGreeting() }}, {{ userName }}</h1>
-        <p>Panel de control - {{ userRoles.join(', ') }}</p>
+        <p>Panel de control — {{ userRoles.join(', ') }}</p>
       </div>
       <button
         class="btn btn-refresh"
@@ -16,23 +16,24 @@
       </button>
     </div>
 
-    <!-- Loading State -->
+    <!-- ══ Loading State ════════════════════════════════════════════════════ -->
     <div class="loading-state" *ngIf="isLoading">
       <div class="spinner"></div>
       <p>Cargando estadísticas...</p>
     </div>
 
-    <!-- Error Message -->
+    <!-- ══ Error Message ════════════════════════════════════════════════════ -->
     <div class="alert alert-error" *ngIf="errorMessage">
       <div class="alert-icon">❌</div>
       <span>{{ errorMessage }}</span>
     </div>
 
-    <!-- Dashboard Content -->
+    <!-- ══ Dashboard Content ════════════════════════════════════════════════ -->
     <div class="dashboard-content" *ngIf="!isLoading && stats">
 
       <!-- Stats Cards -->
       <div class="stats-grid">
+
         <div class="stat-card stat-primary">
           <div class="stat-icon">📦</div>
           <div class="stat-content">
@@ -76,126 +77,98 @@
             <a routerLink="/inventory/providers" class="stat-link">Ver todos →</a>
           </div>
         </div>
+
       </div>
 
-      <!-- Charts and Analytics -->
+      <!-- ── Charts ─────────────────────────────────────────────────────── -->
       <div class="analytics-grid">
 
-        <!-- Category Distribution Chart -->
+        <!-- Bar Chart: Distribución por Categorías -->
         <div class="analytics-card">
           <div class="card-header">
             <h3>📊 Distribución por Categorías</h3>
             <span class="card-subtitle">Items por categoría</span>
           </div>
           <div class="chart-container">
-            <div class="chart-content">
-              <!-- Simple bar chart -->
-              <div class="bar-chart">
-                <div
-                  *ngFor="let item of chartData"
-                  class="bar-item"
-                  [style.height.%]="(item.value / (stats?.totalItems || 1)) * 100"
-                  [style.background-color]="item.color"
-                  [title]="item.label + ': ' + item.value + ' items'">
-                  <div class="bar-value">{{ item.value }}</div>
-                  <div class="bar-label">{{ item.label }}</div>
-                </div>
-              </div>
-            </div>
-            <div class="chart-legend">
-              <div
-                *ngFor="let item of chartData"
-                class="legend-item">
-                <div class="legend-color" [style.background-color]="item.color"></div>
-                <span class="legend-text">{{ item.label }} ({{ item.value }})</span>
-              </div>
-            </div>
+            <canvas baseChart
+                    [data]="barChartData"
+                    [type]="barChartType"
+                    [options]="barChartOptions">
+            </canvas>
           </div>
         </div>
 
-        <!-- Expiration Alerts -->
+        <!-- Pie Chart: Estado de Expiración -->
         <div class="analytics-card">
           <div class="card-header">
-            <h3>⏰ Alertas de Expiración</h3>
-            <span class="card-subtitle">Items próximos a vencer</span>
+            <h3>🥧 Estado de Expiración</h3>
+            <span class="card-subtitle">Distribución de items</span>
           </div>
-          <div class="alerts-container">
-            <div
-              *ngFor="let alert of stats.expirationAlerts"
-              class="alert-item"
-              [class]="getExpirationStatusClass(alert)">
-              <div class="alert-info">
-                <div class="alert-name">{{ alert.name }}</div>
-                <div class="alert-category">{{ alert.category }}</div>
-              </div>
-              <div class="alert-status">
-                {{ getExpirationStatusText(alert) }}
-              </div>
-            </div>
-            <div *ngIf="stats.expirationAlerts.length === 0" class="no-alerts">
-              ✅ No hay alertas de expiración
-            </div>
+          <div class="chart-container">
+            <canvas baseChart
+                    [data]="pieChartData"
+                    [type]="pieChartType"
+                    [options]="pieChartOptions">
+            </canvas>
           </div>
         </div>
 
       </div>
 
-      <!-- Recent Activity and Quick Actions -->
-      <div class="bottom-grid">
-
-        <!-- Recent Activity -->
-        <div class="activity-card">
-          <div class="card-header">
-            <h3>📝 Actividad Reciente</h3>
-            <span class="card-subtitle">Últimas acciones</span>
-          </div>
-          <div class="activity-list">
-            <div
-              *ngFor="let activity of stats.recentActivity"
-              class="activity-item">
-              <div class="activity-icon">{{ getActivityIcon(activity.type) }}</div>
-              <div class="activity-content">
-                <div class="activity-description">{{ activity.description }}</div>
-                <div class="activity-meta">{{ activity.user }} • {{ formatTimeAgo(activity.timestamp) }}</div>
-              </div>
+      <!-- ── Expiration Alerts ───────────────────────────────────────────── -->
+      <div class="alerts-section">
+        <div class="section-header">
+          <h3>⏰ Próximos a Expirar (menos de 2 semanas)</h3>
+          <span class="alert-count">{{ getExpiringItems().length }} items</span>
+        </div>
+        <div class="alerts-container">
+          <div
+            *ngFor="let alert of getExpiringItems()"
+            class="alert-item"
+            [class]="getExpirationStatusClass(alert)">
+            <div class="alert-info">
+              <div class="alert-name">{{ alert.name }}</div>
+              <div class="alert-category">{{ alert.category }}</div>
             </div>
-            <div *ngIf="stats.recentActivity.length === 0" class="no-activity">
-              📋 No hay actividad reciente
+            <div class="alert-status">
+              {{ getExpirationStatusText(alert) }}
             </div>
           </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="quick-actions-card">
-          <div class="card-header">
-            <h3>⚡ Acciones Rápidas</h3>
-            <span class="card-subtitle">Tareas comunes</span>
-          </div>
-          <div class="quick-actions-grid">
-            <a routerLink="/items" class="quick-action" *ngIf="canViewItems()">
-              <div class="action-icon">➕</div>
-              <div class="action-text">Crear Item</div>
-            </a>
-            <a routerLink="/categories" class="quick-action" *ngIf="canManageCategories()">
-              <div class="action-icon">🏷️</div>
-              <div class="action-text">Nueva Categoría</div>
-            </a>
-            <a routerLink="/inventory" class="quick-action" *ngIf="canViewInventory()">
-              <div class="action-icon">📋</div>
-              <div class="action-text">Revisar Inventario</div>
-            </a>
-            <a routerLink="/inventory/providers" class="quick-action" *ngIf="canViewInventory()">
-              <div class="action-icon">🤝</div>
-              <div class="action-text">Gestionar Proveedores</div>
-            </a>
+          <div *ngIf="getExpiringItems().length === 0" class="no-alerts">
+            ✅ No hay items próximos a expirar en las próximas 2 semanas
           </div>
         </div>
+      </div>
 
+      <!-- ── Quick Actions ──────────────────────────────────────────────── -->
+      <div class="quick-actions-card">
+        <div class="card-header">
+          <h3>⚡ Acciones Rápidas</h3>
+          <span class="card-subtitle">Tareas comunes</span>
+        </div>
+        <div class="quick-actions-grid">
+          <a routerLink="/items" class="quick-action" *ngIf="canViewItems()">
+            <div class="action-icon">➕</div>
+            <div class="action-text">Crear Item</div>
+          </a>
+          <a routerLink="/categories" class="quick-action" *ngIf="canManageCategories()">
+            <div class="action-icon">🏷️</div>
+            <div class="action-text">Nueva Categoría</div>
+          </a>
+          <a routerLink="/inventory" class="quick-action" *ngIf="canViewInventory()">
+            <div class="action-icon">📋</div>
+            <div class="action-text">Revisar Inventario</div>
+          </a>
+          <a routerLink="/inventory/providers" class="quick-action" *ngIf="canViewInventory()">
+            <div class="action-icon">🤝</div>
+            <div class="action-text">Gestionar Proveedores</div>
+          </a>
+        </div>
       </div>
 
     </div>
 
-    <!-- Empty State -->
+    <!-- ══ Empty State ══════════════════════════════════════════════════════ -->
     <div class="empty-dashboard" *ngIf="!isLoading && !stats && !errorMessage">
       <div class="empty-icon">📊</div>
       <h3>Dashboard no disponible</h3>

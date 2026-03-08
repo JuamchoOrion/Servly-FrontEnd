@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../enviroments/enviroment';
 
@@ -30,6 +30,15 @@ export interface ItemResponse {
   updatedAt: string;
 }
 
+export interface PaginatedItemResponse {
+  content: ItemResponse[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  isLast: boolean;
+}
+
 /**
  * Servicio para gestionar items
  * Handles all HTTP requests related to items
@@ -54,13 +63,72 @@ export class ItemService {
   }
 
   /**
-   * Obtener todos los items
+   * Obtener todos los items (sin paginación)
    * GET /api/items
    */
   getAllItems(): Observable<ItemResponse[]> {
     return this.http.get<ItemResponse[]>(
       this.ITEMS_ENDPOINT,
       { withCredentials: true }
+    );
+  }
+
+  /**
+   * Obtener items con paginación
+   * GET /api/items/paginated?page=0&size=10&sort=id,asc
+   */
+  getItemsPaginated(
+    page: number = 0,
+    size: number = 10,
+    sort: string = 'id,asc'
+  ): Observable<PaginatedItemResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', sort);
+
+    return this.http.get<PaginatedItemResponse>(
+      `${this.ITEMS_ENDPOINT}/paginated`,
+      { withCredentials: true, params }
+    );
+  }
+
+  /**
+   * Obtener items de una categoría con paginación
+   * GET /api/items/category-paginated/{categoryId}?page=0&size=10
+   */
+  getItemsByCategoryPaginated(
+    categoryId: number,
+    page: number = 0,
+    size: number = 10
+  ): Observable<PaginatedItemResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.http.get<PaginatedItemResponse>(
+      `${this.ITEMS_ENDPOINT}/category-paginated/${categoryId}`,
+      { withCredentials: true, params }
+    );
+  }
+
+  /**
+   * Buscar items por nombre con paginación
+   * GET /api/items/search-paginated?name=Arroz&page=0&size=10
+   */
+  searchItemsPaginated(
+    name: string,
+    page: number = 0,
+    size: number = 10
+  ): Observable<PaginatedItemResponse> {
+    let params = new HttpParams()
+      .set('name', name)
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.http.get<PaginatedItemResponse>(
+      `${this.ITEMS_ENDPOINT}/search-paginated`,
+      { withCredentials: true, params }
     );
   }
 

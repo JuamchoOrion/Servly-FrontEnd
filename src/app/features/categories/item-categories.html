@@ -91,6 +91,59 @@
       </table>
     </div>
 
+    <!-- Pagination Controls -->
+    <div class="pagination-controls" *ngIf="categories.length > 0">
+      <div class="pagination-info">
+        <span class="page-info">
+          Página {{ currentPage + 1 }} de {{ totalPages }}
+          ({{ totalElements }} categorías totales)
+        </span>
+        <div class="page-size-selector">
+          <label for="pageSizeCategories">Mostrar:</label>
+          <select
+            id="pageSizeCategories"
+            [value]="pageSize"
+            (change)="changePageSize($any($event.target).value)"
+            class="page-size-select">
+            <option value="5">5 por página</option>
+            <option value="10">10 por página</option>
+            <option value="20">20 por página</option>
+            <option value="50">50 por página</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="pagination-buttons">
+        <button
+          class="btn btn-pagination"
+          (click)="previousPage()"
+          [disabled]="currentPage === 0">
+          ← Anterior
+        </button>
+
+        <div class="page-numbers">
+          <button
+            *ngFor="let pageNum of pageNumbers"
+            class="btn btn-page-number"
+            [class.active]="pageNum === currentPage"
+            [class.ellipsis]="pageNum === -1"
+            [disabled]="pageNum === -1"
+            (click)="goToPage(pageNum)">
+            <span *ngIf="pageNum === -1">...</span>
+            <span *ngIf="pageNum !== -1">{{ pageNum + 1 }}</span>
+            <span *ngIf="pageNum === currentPage" class="page-indicator"></span>
+          </button>
+        </div>
+
+        <button
+          class="btn btn-pagination"
+          (click)="nextPage()"
+          [disabled]="isLastPage">
+          Siguiente →
+        </button>
+      </div>
+    </div>
+
     <!-- Modal Form -->
     <div class="modal-overlay" *ngIf="isFormVisible" (click)="closeForm()">
       <div class="modal-content" (click)="$event.stopPropagation()">

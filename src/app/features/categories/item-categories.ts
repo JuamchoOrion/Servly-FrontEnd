@@ -31,6 +31,13 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  // Pagination
+  currentPage = 0;
+  pageSize = 10;
+  totalElements = 0;
+  totalPages = 0;
+  isLastPage = false;
+
   // State
   isLoading = false;
   isFormVisible = false;
@@ -99,19 +106,24 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Cargar todas las categorías
+   * Cargar todas las categorías con paginación
    */
   loadCategories(): void {
     this.isLoading = true;
     this.errorMessage = null;
     this.cdr.markForCheck();
 
-    this.itemCategoryService.getAllCategories()
+    this.itemCategoryService.getCategoriesPaginated(this.currentPage, this.pageSize)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (categories: ItemCategoryResponse[]) => {
+        next: (response: any) => {
           this.ngZone.run(() => {
-            this.categories = [...(categories || [])];
+            this.categories = [...(response.content || [])];
+            this.currentPage = response.pageNumber;
+            this.pageSize = response.pageSize;
+            this.totalElements = response.totalElements;
+            this.totalPages = response.totalPages;
+            this.isLastPage = response.isLast;
             this.isLoading = false;
             this.cdr.markForCheck();
           });
@@ -343,6 +355,74 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
 
   get descriptionControl() {
     return this.categoryForm.get('description');
+  }
+
+  // Métodos de Paginación
+  nextPage(): void {
+    if (!this.isLastPage && this.currentPage < this.totalPages - 1) {
+      this.currentPage++;
+      this.loadCategories();
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 0) {
+      this.currentPage--;
+      this.loadCategories();
+    }
+  }
+
+  goToPage(pageNumber: number): void {
+    if (pageNumber >= 0 && pageNumber < this.totalPages) {
+      this.currentPage = pageNumber;
+      this.loadCategories();
+    }
+  }
+
+  changePageSize(newSize: string | number): void {
+    const size = typeof newSize === 'string' ? parseInt(newSize, 10) : newSize;
+    this.pageSize = size;
+    this.currentPage = 0;
+    this.loadCategories();
+  }
+
+  get pageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisiblePages = 5;
+
+    if (this.totalPages <= maxVisiblePages) {
+      for (let i = 0; i < this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      const halfVisible = Math.floor(maxVisiblePages / 2);
+      let start = this.currentPage - halfVisible;
+      let end = this.currentPage + halfVisible;
+
+      if (start < 0) {
+        start = 0;
+        end = maxVisiblePages - 1;
+      } else if (end >= this.totalPages) {
+        end = this.totalPages - 1;
+        start = end - maxVisiblePages + 1;
+      }
+
+      if (start > 0) {
+        pages.push(0);
+        if (start > 1) pages.push(-1);
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (end < this.totalPages - 1) {
+        if (end < this.totalPages - 2) pages.push(-1);
+        pages.push(this.totalPages - 1);
+      }
+    }
+
+    return pages;
   }
 }
 

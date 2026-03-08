@@ -221,7 +221,7 @@ export class SuppliersComponent implements OnInit {
   }
 
   /**
-   * Maneja la selección de archivo de logo
+   * Maneja la selección de archivo de logo con compresión
    */
   onLogoSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -234,22 +234,124 @@ export class SuppliersComponent implements OnInit {
         return;
       }
 
-      // Validar tamaño (máx 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        this.formError = 'La imagen no debe superar 5MB';
+      // Validar tamaño original (máx 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        this.formError = 'La imagen no debe superar 10MB';
         return;
       }
 
-      this.selectedLogoFile = file;
       this.formError = null;
 
-      // Crear URL de preview
-      if (this.logoPreviewUrl && this.logoPreviewUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(this.logoPreviewUrl);
-      }
-      this.logoPreviewUrl = URL.createObjectURL(file);
-      this.cdr.detectChanges();
+      // Comprimir imagen
+      this.compressImage(file).then((compressedFile) => {
+        this.selectedLogoFile = compressedFile;
+
+        // Crear URL de preview
+        if (this.logoPreviewUrl && this.logoPreviewUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(this.logoPreviewUrl);
+        }
+        this.logoPreviewUrl = URL.createObjectURL(compressedFile);
+        this.cdr.detectChanges();
+      }).catch((error) => {
+        this.formError = 'Error al comprimir la imagen: ' + error.message;
+        console.error('Compression error:', error);
+      });
     }
+  }
+
+  /**
+   * Comprime una imagen usando Canvas API
+   * Reduce tamaño a máximo 800x800px y calidad 80%
+   */
+  private compressImage(file: File): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = (event: ProgressEvent<FileReader>) => {
+        try {
+          const img = new Image();
+
+          img.onload = () => {
+            // Crear canvas
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            if (!ctx) {
+              reject(new Error('No se pudo obtener el contexto del canvas'));
+              return;
+            }
+
+            // Calcular nuevas dimensiones (máximo 800x800px)
+            let width = img.width;
+            let height = img.height;
+            const maxDimension = 800;
+
+            if (width > height) {
+              if (width > maxDimension) {
+                height = Math.round((height * maxDimension) / width);
+                width = maxDimension;
+              }
+            } else {
+              if (height > maxDimension) {
+                width = Math.round((width * maxDimension) / height);
+                height = maxDimension;
+              }
+            }
+
+            // Establecer dimensiones del canvas
+            canvas.width = width;
+            canvas.height = height;
+
+            // Dibujar imagen en canvas
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Convertir a blob con compresión (calidad 80%)
+            canvas.toBlob(
+              (blob) => {
+                if (!blob) {
+                  reject(new Error('No se pudo crear el blob'));
+                  return;
+                }
+
+                // Crear nuevo File a partir del blob
+                const compressedFile = new File(
+                  [blob],
+                  file.name,
+                  { type: 'image/jpeg', lastModified: Date.now() }
+                );
+
+                // Log de compresión
+                const originalSize = (file.size / 1024).toFixed(2);
+                const compressedSize = (compressedFile.size / 1024).toFixed(2);
+                const reduction = (((file.size - compressedFile.size) / file.size) * 100).toFixed(1);
+
+                console.log(
+                  `Imagen comprimida: ${originalSize}KB → ${compressedSize}KB (reducción: ${reduction}%)`
+                );
+
+                resolve(compressedFile);
+              },
+              'image/jpeg',
+              0.8 // Calidad 80%
+            );
+          };
+
+          img.onerror = () => {
+            reject(new Error('No se pudo cargar la imagen'));
+          };
+
+          img.src = event.target?.result as string;
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      reader.onerror = () => {
+        reject(new Error('Error al leer el archivo'));
+      };
+
+      reader.readAsDataURL(file);
+    });
   }
 
   /**

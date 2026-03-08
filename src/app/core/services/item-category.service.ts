@@ -1,8 +1,17 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../enviroments/enviroment';
 import { CreateItemCategoryRequest, UpdateItemCategoryRequest, ItemCategoryResponse } from '../dtos/category.dto';
+
+export interface PaginatedCategoryResponse {
+  content: ItemCategoryResponse[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  isLast: boolean;
+}
 
 /**
  * Servicio para gestionar categorías de items
@@ -35,6 +44,24 @@ export class ItemCategoryService {
     return this.http.get<ItemCategoryResponse[]>(
       this.CATEGORIES_ENDPOINT,
       { withCredentials: true }
+    );
+  }
+
+  /**
+   * Obtener categorías paginadas
+   * GET /api/item-categories/paginated?page=0&size=10
+   */
+  getCategoriesPaginated(
+    page: number = 0,
+    size: number = 10
+  ): Observable<PaginatedCategoryResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.http.get<PaginatedCategoryResponse>(
+      `${this.CATEGORIES_ENDPOINT}/paginated`,
+      { withCredentials: true, params }
     );
   }
 

@@ -82,6 +82,12 @@ export class AccessibilityService {
   private applySettings(settings: AccessibilitySettings): void {
     const root = document.documentElement;
 
+    // Remover todas las clases de font-size anteriores
+    root.classList.remove('font-small', 'font-medium', 'font-large', 'font-extra-large');
+
+    // Aplicar tamaño de fuente con clase CSS
+    root.classList.add(`font-${settings.fontSize}`);
+
     // Aplicar modo oscuro
     if (settings.darkMode) {
       root.classList.add('dark-mode');
@@ -89,14 +95,6 @@ export class AccessibilityService {
       root.classList.remove('dark-mode');
     }
 
-    // Aplicar tamaño de fuente
-    const fontSizeMap = {
-      small: '12px',
-      medium: '14px',
-      large: '16px',
-      'extra-large': '18px'
-    };
-    root.style.setProperty('--base-font-size', fontSizeMap[settings.fontSize]);
 
     // Aplicar alto contraste
     if (settings.highContrast) {

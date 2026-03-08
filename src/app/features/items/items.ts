@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { ItemService, CreateItemRequest, UpdateItemRequest, ItemResponse } from '../../core/services/item.service';
+import { ItemService, CreateItemRequest, UpdateItemRequest, ItemResponse, PaginatedItemResponse } from '../../core/services/item.service';
 import { ItemCategoryService } from '../../core/services/item-category.service';
 import { AuthService } from '../../core/services/auth.service';
 import { I18nService } from '../../core/services/i18n.service';
@@ -32,6 +32,13 @@ export class ItemsComponent implements OnInit, OnDestroy {
   }
 
   categories: ItemCategoryResponse[] = [];
+
+  // Pagination
+  currentPage = 0;
+  pageSize = 10;
+  totalElements = 0;
+  totalPages = 0;
+  isLastPage = false;
 
   // State
   isLoading = false;
@@ -103,13 +110,18 @@ export class ItemsComponent implements OnInit, OnDestroy {
     this.errorMessage = null;
     this.cdr.markForCheck();
 
-    this.itemService.getAllItems()
+    this.itemService.getItemsPaginated(this.currentPage, this.pageSize)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (items: ItemResponse[]) => {
+        next: (response: PaginatedItemResponse) => {
           this.ngZone.run(() => {
-            this.items = [...(items || [])];
-            console.log('Items cargados:', this.items);
+            this.items = [...(response.content || [])];
+            this.currentPage = response.pageNumber;
+            this.pageSize = response.pageSize;
+            this.totalElements = response.totalElements;
+            this.totalPages = response.totalPages;
+            this.isLastPage = response.isLast;
+            console.log('Items paginados cargados:', this.items);
             this.isLoading = false;
             this.cdr.markForCheck();
           });
@@ -314,7 +326,87 @@ export class ItemsComponent implements OnInit, OnDestroy {
 
   // Método para refrescar datos
   refreshData(): void {
+    this.currentPage = 0;
     this.loadCategories();
     this.loadItems();
   }
+
+  // Métodos de Paginación
+  nextPage(): void {
+    if (!this.isLastPage && this.currentPage < this.totalPages - 1) {
+      this.currentPage++;
+      this.loadItems();
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 0) {
+      this.currentPage--;
+      this.loadItems();
+    }
+  }
+
+  goToPage(pageNumber: number): void {
+    if (pageNumber >= 0 && pageNumber < this.totalPages) {
+      this.currentPage = pageNumber;
+      this.loadItems();
+    }
+  }
+
+  changePageSize(newSize: string | number): void {
+    const size = typeof newSize === 'string' ? parseInt(newSize, 10) : newSize;
+    this.pageSize = size;
+    this.currentPage = 0; // Resetear a primera página
+    this.loadItems();
+  }
+
+  get pageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisiblePages = 5; // Mostrar máximo 5 páginas
+
+    if (this.totalPages <= maxVisiblePages) {
+      // Si hay pocas páginas, mostrar todas
+      for (let i = 0; i < this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Si hay muchas páginas, mostrar un rango alrededor de la actual
+      const halfVisible = Math.floor(maxVisiblePages / 2);
+      let start = this.currentPage - halfVisible;
+      let end = this.currentPage + halfVisible;
+
+      // Ajustar los límites
+      if (start < 0) {
+        start = 0;
+        end = maxVisiblePages - 1;
+      } else if (end >= this.totalPages) {
+        end = this.totalPages - 1;
+        start = end - maxVisiblePages + 1;
+      }
+
+      // Agregar primera página si no está visible
+      if (start > 0) {
+        pages.push(0);
+        if (start > 1) {
+          pages.push(-1); // -1 indica "..."
+        }
+      }
+
+      // Agregar páginas del rango
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      // Agregar última página si no está visible
+      if (end < this.totalPages - 1) {
+        if (end < this.totalPages - 2) {
+          pages.push(-1); // -1 indica "..."
+        }
+        pages.push(this.totalPages - 1);
+      }
+    }
+
+    return pages;
+  }
 }
+

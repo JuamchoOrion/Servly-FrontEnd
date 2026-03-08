@@ -6,33 +6,112 @@ import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
 import { DashboardService, DashboardStats, ExpirationAlert } from '../../core/services/dashboard.service';
 import { I18nService } from '../../core/services/i18n.service';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartData, ChartType, Chart, registerables } from 'chart.js';
+
+// Registrar todos los componentes de Chart.js
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, BaseChartDirective],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  // User data
+
+  // ── User data ──────────────────────────────────────────────────────────────
   userName: string = '';
   userRoles: string[] = [];
 
-  // Dashboard data
+  // ── Dashboard data ─────────────────────────────────────────────────────────
   stats: DashboardStats | null = null;
   isLoading = true;
   errorMessage: string | null = null;
 
-  // Chart data for visualization
-  chartData: { label: string; value: number; color: string }[] = [];
-
-  // Permissions
+  // ── Permissions ────────────────────────────────────────────────────────────
   isAdmin = false;
   isStorekeeper = false;
 
-  // Cleanup
+  // ── Bar Chart (Categorías) ─────────────────────────────────────────────────
+  barChartType: ChartType = 'bar';
+
+  barChartData: ChartData<'bar'> = {
+    labels: [],
+    datasets: []
+  };
+
+  barChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => ` ${context.parsed.y} items`
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: {
+          color: '#666666',
+          font: { size: 12, family: 'Inter, Roboto, sans-serif' }
+        }
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: 'rgba(0,0,0,0.05)' },
+        ticks: {
+          color: '#666666',
+          stepSize: 1,
+          font: { size: 12, family: 'Inter, Roboto, sans-serif' }
+        }
+      }
+    }
+  };
+
+  // ── Pie Chart (Estado de expiración) ───────────────────────────────────────
+  pieChartType: ChartType = 'pie';
+
+  pieChartData: ChartData<'pie'> = {
+    labels: [],
+    datasets: []
+  };
+
+  pieChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: '#666666',
+          font: { size: 12, family: 'Inter, Roboto, sans-serif' },
+          padding: 16,
+          usePointStyle: true,
+          pointStyleWidth: 10
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
+            const value = context.parsed as number;
+            const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+            return ` ${context.label}: ${value} (${pct}%)`;
+          }
+        }
+      }
+    }
+  };
+
+  // ── Cleanup ────────────────────────────────────────────────────────────────
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -43,6 +122,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private ngZone: NgZone
   ) {}
 
+  // ── Lifecycle ──────────────────────────────────────────────────────────────
+
   ngOnInit(): void {
     this.initializeUserData();
     this.loadDashboardData();
@@ -52,6 +133,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  // ── Data loading ───────────────────────────────────────────────────────────
 
   private initializeUserData(): void {
     const user = this.authService.getCurrentUser();
@@ -93,22 +176,68 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private prepareChartData(): void {
     if (!this.stats) return;
 
-    const colors = [
-      '#C8A951', // Gold
-      '#2E7D32', // Green
-      '#1976D2', // Blue
-      '#F57C00', // Orange
-      '#7B1FA2', // Purple
-      '#C62828', // Red
-      '#00796B', // Teal
-      '#5D4037'  // Brown
-    ];
+    // ── Bar chart: top categorías ──────────────────────────────────────────
+    this.barChartData = {
+      labels: this.stats.topCategories.map(c => c.name),
+      datasets: [
+        {
+          label: 'Items',
+          data: this.stats.topCategories.map(c => c.count),
+          backgroundColor: [
+            'rgba(200, 169, 81, 0.85)',
+            'rgba(46, 125, 50, 0.85)',
+            'rgba(25, 118, 210, 0.85)',
+            'rgba(245, 124, 0, 0.85)',
+            'rgba(123, 31, 162, 0.85)',
+            'rgba(198, 40, 40, 0.85)',
+            'rgba(0, 121, 107, 0.85)',
+            'rgba(93, 64, 55, 0.85)'
+          ],
+          borderColor: [
+            '#C8A951', '#2E7D32', '#1976D2',
+            '#F57C00', '#7B1FA2', '#C62828',
+            '#00796B', '#5D4037'
+          ],
+          borderWidth: 1,
+          borderRadius: 6,
+          borderSkipped: false
+        }
+      ]
+    };
 
-    this.chartData = this.stats.topCategories.map((category, index) => ({
-      label: category.name,
-      value: category.count,
-      color: colors[index % colors.length]
-    }));
+    // ── Pie chart: estado de expiración ────────────────────────────────────
+    const expiringCount = this.stats.expirationAlerts.filter(a => a.status === 'warning').length;
+    const criticalCount = this.stats.expirationAlerts.filter(a => a.status === 'critical').length;
+    const healthyCount  = Math.max(0, this.stats.totalItems - (expiringCount + criticalCount));
+
+    this.pieChartData = {
+      labels: ['Estado Normal', 'Por Expirar', 'Crítico'],
+      datasets: [
+        {
+          data: [healthyCount, expiringCount, criticalCount],
+          backgroundColor: [
+            'rgba(46, 125, 50, 0.85)',
+            'rgba(245, 124, 0, 0.85)',
+            'rgba(198, 40, 40, 0.85)'
+          ],
+          borderColor: ['#2E7D32', '#F57C00', '#C62828'],
+          borderWidth: 2,
+          hoverOffset: 8
+        }
+      ]
+    };
+
+    this.cdr.markForCheck();
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  /** Filtra items que expiran en menos de 2 semanas (≤14 días, ≥0) */
+  getExpiringItems(): ExpirationAlert[] {
+    if (!this.stats) return [];
+    return this.stats.expirationAlerts.filter(
+      alert => alert.expirationDays <= 14 && alert.expirationDays >= 0
+    );
   }
 
   getGreeting(): string {
@@ -129,33 +258,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return `${alert.expirationDays} días`;
   }
 
-  formatTimeAgo(timestamp: string): string {
-    const now = new Date();
-    const time = new Date(timestamp);
-    const diffMs = now.getTime() - time.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffDays > 0) return `hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
-    if (diffHours > 0) return `hace ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
-    return 'hace unos minutos';
-  }
-
-  getActivityIcon(type: string): string {
-    switch (type) {
-      case 'item_created': return '➕';
-      case 'item_updated': return '✏️';
-      case 'item_deleted': return '🗑️';
-      case 'category_created': return '🏷️';
-      default: return '📝';
-    }
-  }
-
   refreshData(): void {
     this.loadDashboardData();
   }
 
-  // Métodos para accesibilidad
+  // ── Permisos ───────────────────────────────────────────────────────────────
+
   canViewInventory(): boolean {
     return this.isAdmin || this.isStorekeeper;
   }

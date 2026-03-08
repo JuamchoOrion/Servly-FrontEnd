@@ -868,7 +868,7 @@ $white: #FFFFFF;
   }
 
   &:hover {
-    background: darken($error-red, 10%);
+    background: color-mix(in srgb, $error-red 90%, black);
     transform: scale(1.1);
   }
 }
