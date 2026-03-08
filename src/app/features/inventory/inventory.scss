@@ -21,13 +21,15 @@ $white: #FFFFFF;
 ================================ */
 
 .inventory-page {
-  min-height: auto;
   background: $light-bg;
   position: relative;
   font-family: 'Inter', 'Roboto', sans-serif;
   overflow: visible;
   display: flex;
   flex-direction: column;
+  padding: 0;
+  margin: 0;
+  width: 100%;
 }
 
 
@@ -57,6 +59,8 @@ $white: #FFFFFF;
   max-width: 100%;
   margin: 0;
   width: 100%;
+  flex: 1;
+  overflow: visible;
 
   @media (min-width: 768px) {
     padding: 24px 32px;
@@ -76,7 +80,7 @@ $white: #FFFFFF;
 .inventory-header {
   position: relative;
   z-index: 2;
-  background: linear-gradient(135deg, $primary-black 0%, #2A2A2A 100%);
+  background: $white;
   padding: 20px 24px;
   display: flex;
   flex-direction: column;
@@ -86,6 +90,7 @@ $white: #FFFFFF;
   box-shadow: 0 4px 20px rgba(0,0,0,0.15);
   margin-bottom: 20px;
   border-radius: 8px;
+  border: 1px solid $border-light;
 
   @media (min-width: 768px) {
     flex-direction: row;
@@ -104,7 +109,7 @@ $white: #FFFFFF;
     font-size: 24px;
     font-weight: 800;
     letter-spacing: -1px;
-    color: $white;
+    color: $text-dark;
     margin: 0;
 
     @media (min-width: 768px) {
@@ -114,7 +119,7 @@ $white: #FFFFFF;
 
   .inventory-subtitle {
     font-size: 12px;
-    color: rgba(255,255,255,0.7);
+    color: $text-light;
     margin: 0;
     font-weight: 500;
 
@@ -1197,14 +1202,15 @@ select.form-input {
   }
 
   .inventory-header {
-    background: linear-gradient(135deg, $accent-gold 0%, #D4B875 100%);
+    background: #2a2a2a !important;
+    border-color: rgba(200,169,81,0.2);
 
     .inventory-title {
-      color: $primary-black;
+      color: #e0e0e0;
     }
 
     .inventory-subtitle {
-      color: rgba(30,30,30,0.7);
+      color: #999999;
     }
   }
 

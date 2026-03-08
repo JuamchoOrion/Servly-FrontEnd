@@ -40,13 +40,24 @@ $beige: #E8DCC8;
   box-sizing: border-box;
 }
 
-html, body {
+html {
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  background: $light-bg !important;
+}
+
+body {
   font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: $light-bg;
-  color: $text-dark;
+  background: $light-bg !important;
+  color: $text-dark !important;
   font-size: var(--base-font-size);
   transition: background-color 0.3s ease, color 0.3s ease, font-size 0.3s ease;
   line-height: 1.6;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 // ===============================
@@ -55,6 +66,8 @@ html, body {
 ion-app {
   --ion-background-color: #{$light-bg};
   --ion-text-color: #{$text-dark};
+  overflow: visible !important;
+  contain: none !important;
 }
 
 ion-button {
@@ -71,18 +84,13 @@ ion-card {
   border-radius: 16px;
 }
 
+/*
 // ===============================
-// 🌙 DARK MODE - Modo Oscuro
-// Cumple con ISO 25010 - Mejora en ambientes con poca luz
+// 🌙 DARK MODE - DISABLED FOR NOW
 // ===============================
-:root.dark-mode,
-:root.dark-mode html,
-:root.dark-mode body {
+:root.dark-mode {
   --ion-background-color: #1a1a1a;
   --ion-text-color: #f5f5f5;
-}
-
-:root.dark-mode {
   background-color: #1a1a1a;
   color: #f5f5f5;
 
@@ -90,7 +98,9 @@ ion-card {
     background-color: #1a1a1a;
     color: #f5f5f5;
   }
+*/
 
+/*
   ion-card {
     --background: #2a2a2a;
     --color: #f5f5f5;
@@ -106,41 +116,99 @@ ion-card {
     --color: #f5f5f5;
   }
 
-  // Aplicar al login
-  .login-wrapper {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%) !important;
-  }
-
-  .login-container {
-    background: #2a2a2a !important;
+  // GLOBAL - Todos los contenedores principales
+  main {
+    background: #1a1a1a !important;
     color: #f5f5f5 !important;
   }
 
-  .form-input {
-    background: #3a3a3a !important;
+  router-outlet {
+    background: #1a1a1a !important;
+  }
+
+  // LOADING STATE - Contenedor de carga
+  .loading-state,
+  .spinner-container,
+  [class*="loading"],
+  [class*="spinner"] {
+    background: #1a1a1a !important;
     color: #f5f5f5 !important;
-    border-color: #4a4a4a !important;
-  }
 
-  .form-input::placeholder {
-    color: #888 !important;
-  }
+    .spinner {
+      border-color: #4a4a4a !important;
+      border-top-color: $accent-gold !important;
+    }
 
-  .btn-google {
-    background: #3a3a3a !important;
-    color: #f5f5f5 !important;
-    border-color: $accent-gold !important;
-  }
-
-  .login-footer {
-    border-color: #4a4a4a !important;
-    color: #ccc !important;
-
-    a {
-      color: $accent-gold !important;
+    p {
+      color: #ccc !important;
     }
   }
-}
+
+  // TABLAS - Todas las tablas
+  table,
+  .table,
+  [class*="table"] {
+    background: #2a2a2a !important;
+    color: #f5f5f5 !important;
+    border-color: #4a4a4a !important;
+
+    thead {
+      background: #333333 !important;
+      color: #f5f5f5 !important;
+
+      th {
+        color: #f5f5f5 !important;
+        border-color: #4a4a4a !important;
+        background: #333333 !important;
+      }
+    }
+
+    tbody {
+      tr {
+        border-color: #4a4a4a !important;
+
+        td {
+          color: #f5f5f5 !important;
+          border-color: #4a4a4a !important;
+        }
+
+        &:hover {
+          background: #3a3a3a !important;
+        }
+      }
+    }
+  }
+
+  // HEADERS - Todos los headers
+  .header,
+  [class*="header"],
+  [class*="heading"] {
+    background: #2a2a2a !important;
+    color: #f5f5f5 !important;
+    border-color: #4a4a4a !important;
+
+    h1, h2, h3, h4, h5, h6 {
+      color: #f5f5f5 !important;
+    }
+
+    p {
+      color: #ccc !important;
+    }
+  }
+
+  // CARDS Y CONTENEDORES
+  .card,
+  [class*="card"],
+  [class*="container"],
+  [class*="wrapper"] {
+    background: #2a2a2a !important;
+    color: #f5f5f5 !important;
+    border-color: #4a4a4a !important;
+  }
+*/
+
+// RESTO DEL DARK MODE COMENTADO PARA EVITAR FONDO NEGRO
+/* TODO DARK MODE DISABLED */
 
 // ===============================
 // 👁️ ALTO CONTRASTE - High Contrast
@@ -267,9 +335,6 @@ p, span, label, button {
 // 📱 RESPONSIVE
 // ================================
 @media (max-width: 480px) {
-  html, body {
-    font-size: calc(var(--base-font-size) * 0.95);
-  }
 
   h1, h2, h3, h4, h5, h6 {
     font-size: calc(var(--base-font-size) * 1.4);

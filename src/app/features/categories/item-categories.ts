@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Subject, BehaviorSubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ItemCategoryService } from '../../core/services/item-category.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -14,11 +14,22 @@ import { I18nService } from '../../core/services/i18n.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, RouterLinkActive],
   templateUrl: './item-categories.html',
-  styleUrls: ['./item-categories.scss']
+  styleUrls: ['./item-categories.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ItemCategoriesComponent implements OnInit, OnDestroy {
-  // Data
-  categories: ItemCategoryResponse[] = [];
+  // Data - usando BehaviorSubject para mejor reactividad
+  private categoriesSubject = new BehaviorSubject<ItemCategoryResponse[]>([]);
+  categories$ = this.categoriesSubject.asObservable();
+
+  get categories(): ItemCategoryResponse[] {
+    return this.categoriesSubject.value;
+  }
+
+  set categories(value: ItemCategoryResponse[]) {
+    this.categoriesSubject.next(value);
+    this.cdr.markForCheck();
+  }
 
   // State
   isLoading = false;
@@ -42,7 +53,9 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
     private itemCategoryService: ItemCategoryService,
     private authService: AuthService,
     public i18n: I18nService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {
     this.initializeForm();
   }
@@ -50,6 +63,13 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.checkUserPermissions();
     this.loadCategories();
+
+    // Suscribirse a cambios de categorías para actualizar automáticamente
+    this.categories$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.cdr.markForCheck();
+      });
   }
 
   ngOnDestroy(): void {
@@ -81,21 +101,29 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
   /**
    * Cargar todas las categorías
    */
-  private loadCategories(): void {
+  loadCategories(): void {
     this.isLoading = true;
     this.errorMessage = null;
+    this.cdr.markForCheck();
+
     this.itemCategoryService.getAllCategories()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (categories: ItemCategoryResponse[]) => {
-          this.categories = categories || [];
-          this.isLoading = false;
+          this.ngZone.run(() => {
+            this.categories = [...(categories || [])];
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          });
         },
         error: (error: any) => {
-          this.categories = [];
-          this.errorMessage = 'Error al cargar categorías. Por favor, intenta nuevamente.';
-          console.error('Error loading categories:', error);
-          this.isLoading = false;
+          this.ngZone.run(() => {
+            this.categories = [];
+            this.errorMessage = 'Error al cargar categorías. Por favor, intenta nuevamente.';
+            console.error('Error loading categories:', error);
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          });
         }
       });
   }
@@ -109,6 +137,7 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
     this.categoryForm.reset();
     this.isFormVisible = true;
     this.errorMessage = null;
+    this.cdr.markForCheck();
   }
 
   /**
@@ -125,6 +154,7 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
     });
     this.isFormVisible = true;
     this.errorMessage = null;
+    this.cdr.markForCheck();
   }
 
   /**
@@ -135,6 +165,7 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
     this.categoryForm.reset();
     this.selectedCategoryId = null;
     this.isEditMode = false;
+    this.cdr.markForCheck();
   }
 
   /**
@@ -143,6 +174,7 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
   submitForm(): void {
     if (this.categoryForm.invalid) {
       this.errorMessage = 'Por favor completa todos los campos requeridos';
+      this.cdr.markForCheck();
       return;
     }
 
@@ -159,21 +191,31 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
   private createCategory(): void {
     const request: CreateItemCategoryRequest = this.categoryForm.value;
     this.isLoading = true;
+    this.cdr.markForCheck();
 
     this.itemCategoryService.createCategory(request)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (newCategory: ItemCategoryResponse) => {
-          this.categories.push(newCategory);
-          this.successMessage = 'Categoría creada exitosamente';
-          this.closeForm();
-          this.isLoading = false;
-          setTimeout(() => this.successMessage = null, 3000);
+          this.ngZone.run(() => {
+            this.categories = [...this.categories, newCategory];
+            this.successMessage = 'Categoría creada exitosamente';
+            this.closeForm();
+            this.isLoading = false;
+            this.cdr.markForCheck();
+            setTimeout(() => {
+              this.successMessage = null;
+              this.cdr.markForCheck();
+            }, 3000);
+          });
         },
         error: (error: any) => {
-          this.errorMessage = error.error?.message || 'Error al crear categoría';
-          console.error('Error creating category:', error);
-          this.isLoading = false;
+          this.ngZone.run(() => {
+            this.errorMessage = error.error?.message || 'Error al crear categoría';
+            console.error('Error creating category:', error);
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          });
         }
       });
   }
@@ -186,24 +228,31 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
 
     const request: UpdateItemCategoryRequest = this.categoryForm.value;
     this.isLoading = true;
+    this.cdr.markForCheck();
 
     this.itemCategoryService.updateCategory(this.selectedCategoryId, request)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (updatedCategory: ItemCategoryResponse) => {
-          const index = this.categories.findIndex(c => c.id === this.selectedCategoryId);
-          if (index !== -1) {
-            this.categories[index] = updatedCategory;
-          }
-          this.successMessage = 'Categoría actualizada exitosamente';
-          this.closeForm();
-          this.isLoading = false;
-          setTimeout(() => this.successMessage = null, 3000);
+          this.ngZone.run(() => {
+            this.categories = this.categories.map(c => c.id === this.selectedCategoryId ? updatedCategory : c);
+            this.successMessage = 'Categoría actualizada exitosamente';
+            this.closeForm();
+            this.isLoading = false;
+            this.cdr.markForCheck();
+            setTimeout(() => {
+              this.successMessage = null;
+              this.cdr.markForCheck();
+            }, 3000);
+          });
         },
         error: (error: any) => {
-          this.errorMessage = error.error?.message || 'Error al actualizar categoría';
-          console.error('Error updating category:', error);
-          this.isLoading = false;
+          this.ngZone.run(() => {
+            this.errorMessage = error.error?.message || 'Error al actualizar categoría';
+            console.error('Error updating category:', error);
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          });
         }
       });
   }
@@ -218,16 +267,22 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (updatedCategory: ItemCategoryResponse) => {
-          const index = this.categories.findIndex(c => c.id === category.id);
-          if (index !== -1) {
-            this.categories[index] = updatedCategory;
-          }
-          this.successMessage = `Categoría ${updatedCategory.active ? 'activada' : 'desactivada'}`;
-          setTimeout(() => this.successMessage = null, 3000);
+          this.ngZone.run(() => {
+            this.categories = this.categories.map(c => c.id === category.id ? updatedCategory : c);
+            this.successMessage = `Categoría ${updatedCategory.active ? 'activada' : 'desactivada'}`;
+            this.cdr.markForCheck();
+            setTimeout(() => {
+              this.successMessage = null;
+              this.cdr.markForCheck();
+            }, 3000);
+          });
         },
         error: (error: any) => {
-          this.errorMessage = error.error?.message || 'Error al cambiar estado de categoría';
-          console.error('Error toggling category:', error);
+          this.ngZone.run(() => {
+            this.errorMessage = error.error?.message || 'Error al cambiar estado de categoría';
+            console.error('Error toggling category:', error);
+            this.cdr.markForCheck();
+          });
         }
       });
   }
@@ -245,13 +300,22 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.categories = this.categories.filter(c => c.id !== category.id);
-          this.successMessage = 'Categoría eliminada exitosamente';
-          setTimeout(() => this.successMessage = null, 3000);
+          this.ngZone.run(() => {
+            this.categories = this.categories.filter(c => c.id !== category.id);
+            this.successMessage = 'Categoría eliminada exitosamente';
+            this.cdr.markForCheck();
+            setTimeout(() => {
+              this.successMessage = null;
+              this.cdr.markForCheck();
+            }, 3000);
+          });
         },
         error: (error: any) => {
-          this.errorMessage = error.error?.message || 'Error al eliminar categoría';
-          console.error('Error deleting category:', error);
+          this.ngZone.run(() => {
+            this.errorMessage = error.error?.message || 'Error al eliminar categoría';
+            console.error('Error deleting category:', error);
+            this.cdr.markForCheck();
+          });
         }
       });
   }

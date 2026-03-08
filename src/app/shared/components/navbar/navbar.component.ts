@@ -53,6 +53,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
       roles: ['ADMIN', 'STOREKEEPER']
     },
     {
+      label: 'Items',
+      route: '/items',
+      icon: '📋',
+      roles: ['ADMIN', 'STOREKEEPER']
+    },
+    {
       label: 'Proveedores',
       route: '/inventory/providers',
       icon: '🤝',

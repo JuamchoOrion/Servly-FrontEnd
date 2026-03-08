@@ -1,25 +1,752 @@
-.dashboard-container {
-  padding: 2rem;
+/* ===============================
+   🎨 DASHBOARD STYLES
+================================ */
+
+$primary-black: #1E1E1E;
+$accent-gold: #C8A951;
+$light-bg: #F5F5F5;
+$success-green: #2E7D32;
+$warning-orange: #F57C00;
+$error-red: #C62828;
+$info-blue: #1976D2;
+$text-dark: #2C2C2C;
+$text-light: #666666;
+$text-muted: #999999;
+$white: #FFFFFF;
+$border-light: #EFEFEF;
+
+/* ===============================
+   🌍 PAGE LAYOUT
+================================ */
+
+.dashboard-page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: $light-bg;
+  position: relative;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  overflow: visible;
+  padding: 0;
+  margin: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+.dashboard-container {
+  position: relative;
+  z-index: 1;
+  padding: 0 16px 20px 16px;
+  max-width: 100%;
+  margin: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: visible;
+
+  @media (min-width: 768px) {
+    padding: 0 32px 24px 32px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0 12px 12px 12px;
+  }
+}
+
+/* ===============================
+   📋 HEADER
+================================ */
 
 .dashboard-header {
-  margin-bottom: 2rem;
+  position: relative;
+  z-index: 2;
+  background: $white;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  margin: 0 0 24px 0;
+  border-radius: 0 0 16px 16px;
+  border: 1px solid $border-light;
+  border-top: none;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    align-items: center;
+    padding: 24px 32px;
+  }
+
+  .header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: $primary-black;
+      margin: 0;
+
+      @media (min-width: 768px) {
+        font-size: 32px;
+      }
+    }
+
+    p {
+      font-size: 14px;
+      color: $text-light;
+      margin: 0;
+      font-weight: 500;
+
+      @media (min-width: 768px) {
+        font-size: 15px;
+      }
+    }
+  }
+
+  .btn-refresh {
+    background: $accent-gold;
+    color: $primary-black;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, $accent-gold 90%, black);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba($accent-gold, 0.3);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
 }
 
-.dashboard-header h1 {
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 0.5rem;
+/* ===============================
+   ⚠️ ALERTS & LOADING
+================================ */
+
+.alert {
+  padding: 16px 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  font-weight: 500;
+  animation: slideDown 0.3s ease-out;
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  &.alert-error {
+    background: rgba($error-red, 0.1);
+    color: $error-red;
+    border-left: 4px solid $error-red;
+  }
 }
 
-.dashboard-header p {
-  color: #666;
-  font-size: 1rem;
+.loading-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: $text-light;
+  background: $white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid $border-light;
+    border-top: 5px solid $accent-gold;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 24px;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  p {
+    font-size: 18px;
+    margin: 0;
+    color: $text-light;
+  }
 }
 
-.dashboard-content {
-  background: #fff;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* ===============================
+   📊 STATS GRID
+================================ */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.stat-card {
+  background: $white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
+
+  &.stat-primary::before {
+    background: $accent-gold;
+  }
+
+  &.stat-secondary::before {
+    background: $info-blue;
+  }
+
+  &.stat-warning::before {
+    background: $warning-orange;
+  }
+
+  &.stat-success::before {
+    background: $success-green;
+  }
+
+  .stat-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba($accent-gold, 0.1);
+  }
+
+  .stat-content {
+    flex: 1;
+
+    .stat-number {
+      font-size: 32px;
+      font-weight: 800;
+      color: $primary-black;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: $text-light;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .stat-action {
+    .stat-link {
+      color: $accent-gold;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      transition: color 0.3s ease;
+
+      &:hover {
+        color: color-mix(in srgb, $accent-gold 80%, black);
+      }
+    }
+  }
+}
+
+/* ===============================
+   📈 ANALYTICS GRID
+================================ */
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.analytics-card {
+  background: $white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  .card-header {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid $border-light;
+
+    h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: $primary-black;
+      margin: 0 0 4px 0;
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: $text-light;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+/* ===============================
+   📊 CHART STYLES
+================================ */
+
+.chart-container {
+  padding: 24px;
+}
+
+.bar-chart {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  height: 200px;
+  margin-bottom: 20px;
+  padding: 0 8px;
+
+  .bar-item {
+    flex: 1;
+    min-height: 20px;
+    border-radius: 6px 6px 0 0;
+    position: relative;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: center;
+    padding: 8px 4px 0;
+
+    &:hover {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+
+    .bar-value {
+      color: $white;
+      font-weight: 700;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .bar-label {
+      position: absolute;
+      bottom: -24px;
+      font-size: 10px;
+      color: $text-muted;
+      text-align: center;
+      font-weight: 500;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    .legend-text {
+      color: $text-light;
+      font-weight: 500;
+    }
+  }
+}
+
+/* ===============================
+   ⚠️ ALERTS CONTAINER
+================================ */
+
+.alerts-container {
+  padding: 24px;
+  max-height: 300px;
+  overflow-y: auto;
+
+  .alert-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba($accent-gold, 0.05);
+    }
+
+    &.status-warning {
+      background: rgba($warning-orange, 0.1);
+      border-left-color: $warning-orange;
+    }
+
+    &.status-critical {
+      background: rgba($error-red, 0.1);
+      border-left-color: $error-red;
+    }
+
+    .alert-info {
+      flex: 1;
+
+      .alert-name {
+        font-weight: 600;
+        color: $primary-black;
+        font-size: 14px;
+      }
+
+      .alert-category {
+        font-size: 12px;
+        color: $text-light;
+      }
+    }
+
+    .alert-status {
+      font-weight: 700;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+
+      .status-warning & {
+        background: $warning-orange;
+        color: $white;
+      }
+
+      .status-critical & {
+        background: $error-red;
+        color: $white;
+      }
+    }
+  }
+
+  .no-alerts {
+    text-align: center;
+    color: $text-light;
+    font-style: italic;
+    padding: 40px 20px;
+  }
+}
+
+/* ===============================
+   📝 BOTTOM GRID (Activity + Actions)
+================================ */
+
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.activity-card, .quick-actions-card {
+  @extend .analytics-card;
+}
+
+.activity-list {
+  padding: 24px;
+  max-height: 300px;
+  overflow-y: auto;
+
+  .activity-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid $border-light;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .activity-icon {
+      font-size: 20px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba($accent-gold, 0.1);
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .activity-content {
+      flex: 1;
+
+      .activity-description {
+        font-size: 14px;
+        font-weight: 500;
+        color: $primary-black;
+        margin-bottom: 2px;
+      }
+
+      .activity-meta {
+        font-size: 12px;
+        color: $text-muted;
+      }
+    }
+  }
+
+  .no-activity {
+    text-align: center;
+    color: $text-light;
+    font-style: italic;
+    padding: 40px 20px;
+  }
+}
+
+.quick-actions-grid {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px;
+    border-radius: 12px;
+    background: rgba($accent-gold, 0.05);
+    border: 2px solid transparent;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba($accent-gold, 0.1);
+      border-color: $accent-gold;
+      transform: translateY(-2px);
+    }
+
+    .action-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .action-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: $primary-black;
+      text-align: center;
+    }
+  }
+}
+
+/* ===============================
+   📁 EMPTY STATE
+================================ */
+
+.empty-dashboard {
+  text-align: center;
+  padding: 80px 20px;
+  background: $white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+
+  .empty-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+  }
+
+  h3 {
+    font-size: 20px;
+    color: $text-dark;
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    color: $text-light;
+    margin: 0;
+  }
+}
+
+/* ===============================
+   📱 RESPONSIVE
+================================ */
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+    }
+
+    .stat-content .stat-number {
+      font-size: 24px;
+    }
+  }
+
+  .bar-chart {
+    height: 150px;
+  }
+}
+
+/* ===============================
+   🌙 DARK MODE RESPONSIVE
+================================ */
+
+:root.dark-mode {
+  .dashboard-page {
+    background: #1a1a1a;
+    color: #f5f5f5;
+  }
+
+  .dashboard-container {
+    background: #1a1a1a;
+  }
+
+  .dashboard-header,
+  .stat-card,
+  .analytics-card,
+  .activity-card,
+  .quick-actions-card,
+  .empty-dashboard {
+    background: #2a2a2a !important;
+    border-color: #4a4a4a;
+
+    h1, h2, h3, .stat-number, .activity-description {
+      color: #f5f5f5 !important;
+    }
+
+    p, .stat-label, .card-subtitle, .activity-meta, .legend-text {
+      color: #ccc !important;
+    }
+  }
+
+  .loading-state {
+    background: #2a2a2a !important;
+    color: #f5f5f5 !important;
+
+    .spinner {
+      border-color: #4a4a4a;
+      border-top-color: $accent-gold;
+    }
+  }
+
+  .alert-item {
+    &:hover {
+      background: rgba($accent-gold, 0.1) !important;
+    }
+  }
+
+  .quick-action {
+    background: rgba($accent-gold, 0.1) !important;
+
+    &:hover {
+      background: rgba($accent-gold, 0.2) !important;
+      border-color: $accent-gold;
+    }
+
+    .action-text {
+      color: #f5f5f5 !important;
+    }
+  }
+
+  .bar-chart .bar-item .bar-label {
+    color: #999 !important;
+  }
 }
