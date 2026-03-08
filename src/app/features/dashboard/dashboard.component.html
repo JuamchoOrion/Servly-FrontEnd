@@ -1,10 +1,58 @@
 <div class="dashboard-container">
   <header class="dashboard-header">
     <h1>Bienvenido, {{ userName }}</h1>
-    <p>Roles: {{ userRoles.join(', ') }}</p>
+    <p class="user-roles">
+      <span *ngFor="let role of userRoles; let last = last">
+        {{ role }}<span *ngIf="!last">, </span>
+      </span>
+    </p>
   </header>
 
   <main class="dashboard-content">
-    <p>Panel de control</p>
+    <!-- Admin Section -->
+    <div class="admin-section" *ngIf="isAdmin">
+      <h2>🛡️ Panel de Administrador</h2>
+      <p class="section-description">Gestiona usuarios y configura el sistema</p>
+
+      <!-- Gestión de Usuarios -->
+      <h3 class="subsection-title">📋 Gestión de Usuarios</h3>
+      <div class="action-cards">
+        <div class="action-card" (click)="goToCreateUser()">
+          <div class="card-icon">👤</div>
+          <h3>Crear Usuario</h3>
+          <p>Registrar nuevo personal en el sistema</p>
+        </div>
+
+        <div class="action-card" (click)="goToUserList()">
+          <div class="card-icon">👥</div>
+          <h3>Ver Usuarios</h3>
+          <p>Listar y gestionar todos los usuarios</p>
+        </div>
+
+        <div class="action-card" (click)="goToMetrics()">
+          <div class="card-icon">📊</div>
+          <h3>Métricas</h3>
+          <p>Ver estadísticas del sistema</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Section (para todos los usuarios) -->
+    <div class="profile-section">
+      <h3 class="subsection-title">👤 Mi Cuenta</h3>
+      <div class="action-cards">
+        <div class="action-card" (click)="goToProfile()">
+          <div class="card-icon">🆔</div>
+          <h3>Mi Perfil</h3>
+          <p>Ver y gestionar mis datos personales</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- General Section -->
+    <div class="general-section" *ngIf="!isAdmin">
+      <h2>Panel de Control</h2>
+      <p>Bienvenido al sistema de gestión Servly</p>
+    </div>
   </main>
 </div>

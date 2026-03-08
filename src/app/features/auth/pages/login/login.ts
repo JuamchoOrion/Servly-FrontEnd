@@ -222,32 +222,50 @@ export class LoginComponent implements OnInit, OnDestroy {
         return;
       }
 
+      console.log('🔵 Login Component: Llamando a authService.login...');
+
       // Realizar login
       this.authService.login(email, password, this.recaptchaToken).subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          this.loginSuccess = this.i18n.translate('success.login');
+        next: (response: any) => {
+          console.log('🔵 Login Component: Login response:', response);
 
-          // Limpiar intentos fallidos
-          this.rateLimitService.clearFailedAttempts();
+          // Verificar si es respuesta 2FA (mensaje sin tokens)
+          const is2FA = response.message && response.message.includes('2FA');
 
-          // Resetear token reCAPTCHA
-          this.recaptchaToken = null;
-          if (window.grecaptcha) {
-            window.grecaptcha.reset();
-          }
+          if (is2FA) {
+            // Primer login - redirigir a 2FA
+            console.log('🔵 Login Component: 2FA requerido, redirigiendo...');
+            sessionStorage.setItem('pendingEmail', email);
+            this.loginSuccess = this.i18n.translate('success.login');
+            this.isLoading = false;
 
-          // Redirigir según rol
-          setTimeout(() => {
-            const userRole = response.role?.toUpperCase();
-            if (userRole === 'STOREKEEPER') {
-              this.router.navigate(['/inventory']);
-            } else {
-              this.router.navigate(['/dashboard']);
+            setTimeout(() => {
+              this.router.navigate(['/auth/verify-2fa'], {
+                queryParams: { email: email }
+              });
+            }, 1000);
+          } else {
+            // Login normal con tokens
+            console.log('🔵 Login Component: Login exitoso con tokens');
+            this.loginSuccess = this.i18n.translate('success.login');
+
+            // Limpiar intentos fallidos
+            this.rateLimitService.clearFailedAttempts();
+
+            // Resetear token reCAPTCHA
+            this.recaptchaToken = null;
+            if (window.grecaptcha) {
+              window.grecaptcha.reset();
             }
-          }, 1500);
+
+            // Redirigir al PERFIL del usuario
+            console.log('🔵 Login Component: Redirigiendo a /profile...');
+            this.isLoading = false;
+            this.router.navigate(['/profile']);
+          }
         },
         error: (error) => {
+          console.error('❌ Login Component: Error en login:', error);
           this.isLoading = false;
 
           // Registrar intento fallido para rate limiting

@@ -1,0 +1,135 @@
+<div class="user-list-wrapper">
+  <div class="user-list-container">
+
+    <!-- Header -->
+    <div class="user-list-header">
+      <h1>Gestión de Usuarios</h1>
+      <p>Administra los usuarios del sistema</p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-section">
+      <div class="filter-group">
+        <label for="search" class="filter-label">🔍 Buscar</label>
+        <input
+          id="search"
+          type="text"
+          class="filter-input"
+          placeholder="Email, nombre o apellido..."
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange()"
+          #searchInput="ngModel">
+      </div>
+
+      <div class="filter-group">
+        <label for="roleFilter" class="filter-label">📋 Rol</label>
+        <select
+          id="roleFilter"
+          class="filter-select"
+          [(ngModel)]="roleFilter"
+          (ngModelChange)="onFilterChange()">
+          <option value="ALL">Todos los roles</option>
+          <option value="ADMIN">ADMIN</option>
+          <option value="CASHIER">CASHIER</option>
+          <option value="WAITER">WAITER</option>
+          <option value="STOREKEEPER">STOREKEEPER</option>
+          <option value="KITCHEN">KITCHEN</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="statusFilter" class="filter-label">✅ Estado</label>
+        <select
+          id="statusFilter"
+          class="filter-select"
+          [(ngModel)]="statusFilter"
+          (ngModelChange)="onFilterChange()">
+          <option value="ALL">Todos</option>
+          <option value="ACTIVE">Activos</option>
+          <option value="INACTIVE">Inactivos</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Mensajes -->
+    <div class="message error" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" *ngIf="isLoading">
+      <p>Cargando usuarios...</p>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-container" *ngIf="!isLoading && !errorMessage && filteredUsers.length > 0">
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Nombre</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of filteredUsers">
+            <td>{{ user.email }}</td>
+            <td>{{ user.name }} {{ user.lastName || '' }}</td>
+            <td>
+              <span class="badge {{ getRoleBadgeClass(user.role) }}">
+                {{ getRoleLabel(user.role) }}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge" [class.active]="user.enabled" [class.inactive]="!user.enabled">
+                {{ user.enabled ? '✅ Activo' : '❌ Inactivo' }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button
+                  class="btn-icon btn-role"
+                  (click)="changeRole(user.id, user.role)"
+                  title="Cambiar rol (clic para rotar entre roles)">
+                  🔄
+                </button>
+                <button
+                  class="btn-icon btn-view"
+                  (click)="viewUser(user.id)"
+                  title="Ver detalle">
+                  👁️
+                </button>
+                <button
+                  class="btn-icon btn-toggle"
+                  (click)="toggleUserStatus(user.id, user.enabled)"
+                  [title]="user.enabled ? 'Desactivar' : 'Activar'">
+                  {{ user.enabled ? '🔓' : '🔒' }}
+                </button>
+                <button
+                  class="btn-icon btn-delete"
+                  (click)="deleteUser(user.id)"
+                  title="Eliminar">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filteredUsers.length === 0">
+            <td colspan="5" class="no-results">
+              No se encontraron usuarios con los filtros seleccionados
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="user-list-footer">
+      <p>
+        Total: <strong>{{ filteredUsers.length }}</strong> de <strong>{{ users.length }}</strong> usuarios
+      </p>
+    </div>
+  </div>
+</div>

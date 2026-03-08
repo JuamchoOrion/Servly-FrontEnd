@@ -8,6 +8,13 @@ import { LoginResponseDTO, ErrorResponseDTO } from '../dtos/login-response.dto';
 import { throwError } from 'rxjs';
 
 /**
+ * MessageResponse genérico
+ */
+interface MessageResponse {
+  message: string;
+}
+
+/**
  * Modelo de usuario actual
  */
 export interface CurrentUser {
@@ -63,34 +70,62 @@ export class AuthService {
    * - 429: Demasiados intentos (rate limit)
    * - 500: Error del servidor
    */
-  login(email: string, password: string, recaptchaToken: string): Observable<LoginResponseDTO> {
+  login(email: string, password: string, recaptchaToken: string): Observable<LoginResponseDTO | MessageResponse> {
     const request: LoginRequestDTO = {
       email,
       password,
       recaptchaToken
     };
 
-    return this.http.post<LoginResponseDTO>(this.AUTH_ENDPOINT, request, { withCredentials: true }).pipe(
-      tap((response: LoginResponseDTO) => {
-        // Normalizar el token (puede venir como 'token' o 'accessToken')
-        const accessToken = response.token || response.accessToken;
+    console.log('🔵 AuthService login: Iniciando login para', email);
+
+    return this.http.post<LoginResponseDTO | MessageResponse>(this.AUTH_ENDPOINT, request, { withCredentials: true }).pipe(
+      tap((response: any) => {
+        console.log('🔵 AuthService login: Response recibida:', response);
+
+        // Verificar si es respuesta 202 (2FA requerido - primer login)
+        if ((response as MessageResponse).message &&
+            (response as MessageResponse).message.includes('2FA')) {
+          console.log('🔵 AuthService login: 2FA requerido, no guardar tokens');
+          return;  // No guardar nada, el componente manejará la redirección
+        }
+
+        // Login normal - verificar tokens
+        const accessToken = (response as LoginResponseDTO).token ||
+                           (response as LoginResponseDTO).accessToken;
+
         if (!accessToken) {
+          console.error('❌ AuthService login: No access token in response');
           throw new Error('No access token in response');
         }
 
+        console.log('🔵 AuthService login: Guardando tokens...');
         // Guardar tokens en sessionStorage
-        this.setTokens(accessToken, response.refreshToken);
-        // Guardar usuario actual
+        const refreshToken = (response as LoginResponseDTO).refreshToken;
+        this.setTokens(accessToken, refreshToken);
+
+        // Guardar usuario actual - verificar roles
+        const roles: string[] = ((response as LoginResponseDTO).roles ||
+                     ((response as LoginResponseDTO).role ? [(response as LoginResponseDTO).role] : []))
+                     .filter((r: string | undefined) => r !== undefined);
+        console.log('🔵 AuthService login: Roles del usuario:', roles);
+
         this.setCurrentUser({
-          email: response.email,
-          name: response.name,
-          roles: response.roles || (response.role ? [response.role] : []),
-          mustChangePassword: response.mustChangePassword
+          email: (response as LoginResponseDTO).email,
+          name: (response as LoginResponseDTO).name || '',
+          roles: roles,
+          mustChangePassword: (response as LoginResponseDTO).mustChangePassword
         });
+
         // Actualizar estado
         this.isAuthenticatedSubject.next(true);
+        console.log('🔵 AuthService login: Login completado exitosamente');
+        console.log('🔵 AuthService login: currentUser =', this.currentUserSubject.value);
       }),
-      catchError(error => this.handleError(error))
+      catchError(error => {
+        console.error('❌ AuthService login: Error en login:', error);
+        return this.handleError(error);
+      })
     );
   }
 
@@ -148,6 +183,64 @@ export class AuthService {
         this.clearSession();
         return throwError(() => new Error('Logout failed'));
       })
+    );
+  }
+
+  /**
+   * Obtiene el access token desde sessionStorage
+   */
+  getAccessTokenFromStorage(): string | null {
+    return sessionStorage.getItem(this.TOKEN_KEY);
+  }
+
+  /**
+   * Verifica el código 2FA
+   * POST /api/auth/verify-2fa
+   */
+  verify2FA(email: string, code: string): Observable<LoginResponseDTO> {
+    return this.http.post<LoginResponseDTO>(`${this.API_URL}/api/auth/verify-2fa`, { email, code })
+      .pipe(catchError(error => this.handleError(error)));
+  }
+
+  /**
+   * Reenvía código 2FA
+   * POST /api/auth/resend-2fa
+   */
+  resend2FACode(email: string): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}/api/auth/resend-2fa`, { email })
+      .pipe(catchError(error => this.handleError(error)));
+  }
+
+  /**
+   * Cambia contraseña en primer login
+   * POST /api/auth/force-password-change
+   */
+  forcePasswordChange(currentPassword: string, newPassword: string): Observable<LoginResponseDTO> {
+    return this.http.post<LoginResponseDTO>(
+      `${this.API_URL}/api/auth/force-password-change`,
+      { currentPassword, newPassword },
+      {
+        headers: {
+          'Authorization': `Bearer ${this.getAccessTokenFromStorage()}`,
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      }
+    ).pipe(
+      tap((response: any) => {
+        const accessToken = response.accessToken || response.token;
+        const refreshToken = response.refreshToken;
+        if (accessToken && refreshToken) {
+          this.setTokens(accessToken, refreshToken);
+        }
+        this.setCurrentUser({
+          email: response.email,
+          name: response.name || '',
+          roles: response.roles || [],
+          mustChangePassword: false
+        });
+      }),
+      catchError(error => this.handleError(error))
     );
   }
 

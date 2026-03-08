@@ -1,0 +1,128 @@
+<div class="create-user-wrapper">
+  <div class="create-user-container">
+
+    <!-- Header -->
+    <div class="create-user-header">
+      <h1 class="page-title">Crear Nuevo Usuario</h1>
+      <p class="page-subtitle">Complete el formulario para registrar un nuevo usuario en el sistema</p>
+    </div>
+
+    <!-- Formulario -->
+    <form [formGroup]="createUserForm" (ngSubmit)="onSubmit()" class="create-user-form">
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email" class="form-label">
+          Email <span class="required">*</span>
+        </label>
+        <input
+          id="email"
+          type="email"
+          class="form-input"
+          [class.error]="emailControl?.invalid && emailControl?.touched"
+          placeholder="usuario@ejemplo.com"
+          formControlName="email"
+          (blur)="emailControl?.markAsTouched()">
+        <span class="error-text" *ngIf="emailControl?.invalid && emailControl?.touched">
+          {{ getEmailError() }}
+        </span>
+      </div>
+
+      <!-- Nombre -->
+      <div class="form-group">
+        <label for="name" class="form-label">
+          Nombre <span class="required">*</span>
+        </label>
+        <input
+          id="name"
+          type="text"
+          class="form-input"
+          [class.error]="nameControl?.invalid && nameControl?.touched"
+          placeholder="Juan"
+          formControlName="name"
+          (blur)="nameControl?.markAsTouched()"
+          maxlength="100">
+        <span class="error-text" *ngIf="nameControl?.invalid && nameControl?.touched">
+          {{ getNameError() }}
+        </span>
+      </div>
+
+      <!-- Apellido -->
+      <div class="form-group">
+        <label for="lastName" class="form-label">
+          Apellido <span class="required">*</span>
+        </label>
+        <input
+          id="lastName"
+          type="text"
+          class="form-input"
+          [class.error]="lastNameControl?.invalid && lastNameControl?.touched"
+          placeholder="Pérez"
+          formControlName="lastName"
+          (blur)="lastNameControl?.markAsTouched()"
+          maxlength="100">
+        <span class="error-text" *ngIf="lastNameControl?.invalid && lastNameControl?.touched">
+          {{ getLastNameError() }}
+        </span>
+      </div>
+
+      <!-- Rol -->
+      <div class="form-group">
+        <label for="role" class="form-label">
+          Rol <span class="required">*</span>
+        </label>
+        <select
+          id="role"
+          class="form-select"
+          [class.error]="roleControl?.invalid && roleControl?.touched"
+          formControlName="role"
+          (blur)="roleControl?.markAsTouched()">
+          <option value="">Seleccione un rol</option>
+          <option *ngFor="let roleOption of ROLES" [value]="roleOption.value">
+            {{ roleOption.label }}
+          </option>
+        </select>
+        <span class="error-text" *ngIf="roleControl?.invalid && roleControl?.touched">
+          {{ getRoleError() }}
+        </span>
+      </div>
+
+      <!-- Mensajes de éxito/error -->
+      <div class="success-alert" *ngIf="successMessage">
+        <span class="alert-icon">✅</span>
+        {{ successMessage }}
+      </div>
+
+      <div class="error-alert" *ngIf="errorMessage">
+        <span class="alert-icon">❌</span>
+        {{ errorMessage }}
+      </div>
+
+      <!-- Botones -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="onCancel()"
+          [disabled]="isLoading">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isLoading || createUserForm.invalid">
+          <span *ngIf="!isLoading">Crear Usuario</span>
+          <span *ngIf="isLoading">Creando...</span>
+        </button>
+      </div>
+    </form>
+
+    <!-- Footer -->
+    <div class="create-user-footer">
+      <p>
+        <span class="info-icon">ℹ️</span>
+        El sistema generará una contraseña temporal y la enviará al correo del usuario.
+      </p>
+    </div>
+  </div>
+</div>

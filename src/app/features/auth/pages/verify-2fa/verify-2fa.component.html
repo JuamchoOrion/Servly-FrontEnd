@@ -1,0 +1,82 @@
+<div class="verify-2fa-wrapper">
+  <div class="verify-2fa-container">
+
+    <!-- Header -->
+    <div class="verify-header">
+      <div class="verify-icon">🔐</div>
+      <h1>Verificación en 2 Pasos</h1>
+      <p class="verify-subtitle">Primer acceso detectado</p>
+    </div>
+
+    <!-- Info Box -->
+    <div class="info-box">
+      <p>
+        <span class="info-icon">📧</span>
+        Hemos enviado un código de verificación de 6 dígitos a:
+      </p>
+      <p class="email-highlight">{{ email }}</p>
+      <p class="info-text">
+        Ingresa el código para continuar con el proceso de activación de tu cuenta.
+      </p>
+    </div>
+
+    <!-- Formulario -->
+    <form [formGroup]="verifyForm" (ngSubmit)="onSubmit()" class="verify-form">
+
+      <!-- Código de 6 dígitos -->
+      <div class="form-group">
+        <label for="code" class="form-label">Código de Verificación</label>
+        <input
+          id="code"
+          type="text"
+          class="form-input"
+          [class.error]="codeControl?.invalid && codeControl?.touched"
+          placeholder="123456"
+          formControlName="code"
+          maxlength="6"
+          inputmode="numeric"
+          pattern="\d*"
+          (blur)="codeControl?.markAsTouched()">
+        <span class="error-text" *ngIf="codeControl?.invalid && codeControl?.touched">
+          {{ getCodeError() }}
+        </span>
+      </div>
+
+      <!-- Mensaje de Error -->
+      <div class="error-alert" *ngIf="errorMessage">
+        <span class="alert-icon">❌</span>
+        {{ errorMessage }}
+      </div>
+
+      <!-- Botón de Verificar -->
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="isLoading || verifyForm.invalid">
+        <span *ngIf="!isLoading">✅ Verificar Código</span>
+        <span *ngIf="isLoading">Verificando...</span>
+      </button>
+
+      <!-- Reenviar Código -->
+      <div class="resend-section">
+        <p>¿No recibiste el código?</p>
+        <button
+          type="button"
+          class="btn btn-link"
+          (click)="resendCode()"
+          [disabled]="isLoading">
+          📬 Reenviar código
+        </button>
+      </div>
+
+    </form>
+
+    <!-- Footer -->
+    <div class="verify-footer">
+      <p>
+        <span class="info-icon">ℹ️</span>
+        El código expira en 10 minutos. Revisa tu bandeja de entrada y spam.
+      </p>
+    </div>
+  </div>
+</div>

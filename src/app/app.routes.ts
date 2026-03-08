@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role-guard.service';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -30,6 +31,12 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'profile',
+    loadComponent: () =>
+      import('./features/profile/profile.component').then(m => m.ProfileComponent),
+    canActivate: [authGuard]
+  },
+  {
     path: 'inventory',
     loadComponent: () =>
       import('./features/inventory/Inventory').then(m => m.InventoryComponent),
@@ -40,6 +47,26 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/categories/item-categories').then(m => m.ItemCategoriesComponent),
     canActivate: [authGuard, roleGuard(['ADMIN', 'STOREKEEPER'])]
+  },
+
+  // Admin routes
+  {
+    path: 'admin/users/create',
+    loadComponent: () =>
+      import('./features/admin/pages/create-user/create-user.component').then(m => m.CreateUserComponent),
+    canActivate: [authGuard, adminGuard]
+  },
+  {
+    path: 'admin/users',
+    loadComponent: () =>
+      import('./features/admin/pages/user-list/user-list.component').then(m => m.UserListComponent),
+    canActivate: [authGuard, adminGuard]
+  },
+  {
+    path: 'admin/users/:id',
+    loadComponent: () =>
+      import('./features/admin/pages/user-detail/user-detail.component').then(m => m.UserDetailComponent),
+    canActivate: [authGuard, adminGuard]
   },
 
   // Wildcard - must be last
