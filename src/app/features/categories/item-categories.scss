@@ -1,70 +1,116 @@
 /* ===============================
-   🎨 CATEGORÍAS CONTAINER
+   🎨 CATEGORÍAS PAGE STYLES
 ================================ */
 
-$primary-color: #1976D2;
-$success-color: #00C853;
-$error-color: #D50000;
-$warning-color: #FFA000;
-$text-dark: #333;
-$text-light: #666;
-$text-light-secondary: rgba(0, 0, 0, 0.6);
-$border-color: #DDD;
-$bg-light: #F5F5F5;
-$white: #FFFFFF;
 $primary-black: #1E1E1E;
 $accent-gold: #C8A951;
+$light-bg: #F5F5F5;
+$success-green: #2E7D32;
+$error-red: #C62828;
+$text-dark: #2C2C2C;
+$text-light: #666666;
+$text-muted: #999999;
+$white: #FFFFFF;
+$border-light: #EFEFEF;
 
-.categories-container {
+/* ===============================
+   🌍 PAGE LAYOUT
+================================ */
+
+.categories-page {
+  min-height: auto;
+  background: $light-bg;
+  position: relative;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
   padding: 0;
-  background: $bg-light;
-  min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 /* ===============================
-   📱 NAVBAR
+   📋 CONTAINER PRINCIPAL
 ================================ */
 
-.categories-navbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: linear-gradient(135deg, $primary-black 0%, #1a1a1a 100%);
-  padding: 16px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 2px 12px rgba(200,169,81,0.1);
-  gap: 32px;
-  border-bottom: 2px solid rgba($accent-gold, 0.15);
-}
+.categories-container {
+  position: relative;
+  z-index: 1;
+  padding: 20px 16px;
+  max-width: 100%;
+  margin: 0;
+  width: 100%;
 
-.navbar-brand {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  gap: 0;
+  @media (min-width: 768px) {
+    padding: 24px 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
 
-  .brand-text {
-    font-size: 28px;
-    font-weight: 900;
-    background: linear-gradient(135deg, $white 0%, $accent-gold 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -1px;
-    text-transform: uppercase;
-    transition: all 0.3s ease;
-    margin: 0;
+  @media (max-width: 480px) {
+    padding: 12px 12px;
   }
 }
 
-.nav-dropdown-main {
+/* ===============================
+   📋 HEADER
+================================ */
+
+.categories-header {
   position: relative;
-  flex-shrink: 0;
+  z-index: 2;
+  background: linear-gradient(135deg, $primary-black 0%, #2A2A2A 100%);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  margin-bottom: 20px;
+  border-radius: 8px;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    align-items: center;
+    padding: 20px 32px;
+  }
+
+  .header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+
+    h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: $white;
+      margin: 0;
+
+      @media (min-width: 768px) {
+        font-size: 28px;
+      }
+    }
+
+    p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+      margin: 0;
+      font-weight: 500;
+
+      @media (min-width: 768px) {
+        font-size: 13px;
+      }
+    }
+  }
+}
+
+/* =======================================
+   🔘 BUTTONS
+======================================= */
+
+.btn {
   display: flex;
   align-items: center;
 
@@ -261,15 +307,15 @@ $accent-gold: #C8A951;
   }
 
   &.alert-success {
-    background: rgba($success-color, 0.1);
-    color: $success-color;
-    border-left: 4px solid $success-color;
+    background: rgba($success-green, 0.1);
+    color: $success-green;
+    border-left: 4px solid $success-green;
   }
 
   &.alert-error {
-    background: rgba($error-color, 0.1);
-    color: $error-color;
-    border-left: 4px solid $error-color;
+    background: rgba($error-red, 0.1);
+    color: $error-red;
+    border-left: 4px solid $error-red;
   }
 }
 
@@ -285,8 +331,8 @@ $accent-gold: #C8A951;
   .spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid $border-color;
-    border-top-color: $primary-color;
+    border: 4px solid $border-light;
+    border-top: 4px solid $accent-gold;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     margin: 0 auto 20px;
@@ -350,7 +396,7 @@ $accent-gold: #C8A951;
 
   thead tr {
     background: #F8F9FA;
-    border-bottom: 2px solid $border-color;
+    border-bottom: 2px solid $border-light;
   }
 
   th {
@@ -364,7 +410,7 @@ $accent-gold: #C8A951;
   }
 
   tbody tr {
-    border-bottom: 1px solid $border-color;
+    border-bottom: 1px solid $border-light;
     transition: background 0.2s ease;
 
     &:hover {
@@ -384,7 +430,7 @@ $accent-gold: #C8A951;
 
   .id-cell {
     font-weight: 600;
-    color: $primary-color;
+    color: $accent-gold;
     width: 60px;
   }
 
@@ -427,13 +473,13 @@ $accent-gold: #C8A951;
   letter-spacing: 0.5px;
 
   &.active {
-    background: rgba($success-color, 0.2);
-    color: $success-color;
+    background: rgba($success-green, 0.2);
+    color: $success-green;
   }
 
   &.inactive {
-    background: rgba($text-light, 0.2);
-    color: $text-light;
+    background: rgba($error-red, 0.2);
+    color: $error-red;
   }
 }
 
@@ -452,22 +498,22 @@ $accent-gold: #C8A951;
   }
 
   &.btn-primary {
-    background: $primary-color;
+    background: $primary-black;
     color: $white;
 
     &:hover:not(:disabled) {
-      background: color-mix(in srgb, $primary-color 95%, black);
+      background: color-mix(in srgb, $primary-black 95%, black);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba($primary-color, 0.3);
+      box-shadow: 0 4px 12px rgba($primary-black, 0.3);
     }
   }
 
   &.btn-secondary {
-    background: $border-color;
+    background: #EFEFEF;
     color: $text-dark;
 
     &:hover:not(:disabled) {
-      background: color-mix(in srgb, $border-color 90%, black);
+      background: color-mix(in srgb, #EFEFEF 90%, black);
     }
   }
 }
@@ -475,7 +521,7 @@ $accent-gold: #C8A951;
 .btn-icon {
   padding: 8px 12px;
   background: transparent;
-  border: 1px solid $border-color;
+  border: 1px solid #EFEFEF;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -490,7 +536,7 @@ $accent-gold: #C8A951;
 
     &:hover {
       background: rgba(#FFA000, 0.1);
-      border-color: #FFA000;
+      border\-light: #FFA000;
     }
   }
 
@@ -504,11 +550,11 @@ $accent-gold: #C8A951;
   }
 
   &.btn-delete {
-    color: $error-color;
+    color: $error-red;
 
     &:hover {
-      background: rgba($error-color, 0.1);
-      border-color: $error-color;
+      background: rgba($error-red, 0.1);
+      border-color: $error-red;
     }
   }
 }
@@ -563,7 +609,7 @@ $accent-gold: #C8A951;
 
 .modal-header {
   padding: 24px;
-  border-bottom: 1px solid $border-color;
+  border-bottom: 1px solid #EFEFEF;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -591,7 +637,7 @@ $accent-gold: #C8A951;
     transition: all 0.2s ease;
 
     &:hover {
-      background: $bg-light;
+      background: $light-bg;
       color: $text-dark;
     }
   }
@@ -606,7 +652,7 @@ $accent-gold: #C8A951;
   gap: 12px;
   justify-content: flex-end;
   padding-top: 24px;
-  border-top: 1px solid $border-color;
+  border-top: 1px solid #EFEFEF;
   margin-top: 24px;
 
   .btn {
@@ -633,7 +679,7 @@ $accent-gold: #C8A951;
   .form-input {
     width: 100%;
     padding: 12px 16px;
-    border: 2px solid $border-color;
+    border: 2px solid #EFEFEF;
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
@@ -641,15 +687,15 @@ $accent-gold: #C8A951;
 
     &:focus {
       outline: none;
-      border-color: $primary-color;
-      box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+      border-color: $primary-black;
+      box-shadow: 0 0 0 3px rgba($primary-black, 0.1);
     }
 
     &.error {
-      border-color: $error-color;
+      border-color: $error-red;
 
       &:focus {
-        box-shadow: 0 0 0 3px rgba($error-color, 0.1);
+        box-shadow: 0 0 0 3px rgba($error-red, 0.1);
       }
     }
   }
@@ -661,7 +707,7 @@ $accent-gold: #C8A951;
 
   .error-text {
     display: block;
-    color: $error-color;
+    color: $error-red;
     font-size: 12px;
     margin-top: 6px;
     font-weight: 500;

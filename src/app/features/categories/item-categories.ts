@@ -83,15 +83,17 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
    */
   private loadCategories(): void {
     this.isLoading = true;
+    this.errorMessage = null;
     this.itemCategoryService.getAllCategories()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (categories: ItemCategoryResponse[]) => {
-          this.categories = categories;
+          this.categories = categories || [];
           this.isLoading = false;
         },
         error: (error: any) => {
-          this.errorMessage = 'Error al cargar categorías';
+          this.categories = [];
+          this.errorMessage = 'Error al cargar categorías. Por favor, intenta nuevamente.';
           console.error('Error loading categories:', error);
           this.isLoading = false;
         }

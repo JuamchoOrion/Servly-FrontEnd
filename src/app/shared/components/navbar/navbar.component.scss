@@ -323,11 +323,15 @@ $border-color: rgba($accent-gold, 0.2);
 
 @media (max-width: 768px) {
   .main-navbar {
-    padding: 12px;
+    padding: 10px 12px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
 
     .navbar-left {
       flex: 0;
       gap: 12px;
+      order: 1;
     }
 
     .navbar-logo .logo-text {
@@ -339,7 +343,9 @@ $border-color: rgba($accent-gold, 0.2);
     }
 
     .navbar-right {
-      gap: 12px;
+      gap: 8px;
+      order: 2;
+      flex-wrap: nowrap;
 
       .navbar-brand {
         display: none;
@@ -347,12 +353,75 @@ $border-color: rgba($accent-gold, 0.2);
     }
 
     .user-section .user-btn {
-      padding: 8px 12px;
-      font-size: 12px;
+      padding: 8px 10px;
+      font-size: 11px;
 
       .user-email {
         display: none;
       }
+
+      .user-icon {
+        width: 18px;
+        height: 18px;
+      }
+
+      .dropdown-arrow {
+        width: 14px;
+        height: 14px;
+      }
+    }
+
+    .mobile-menu-btn {
+      order: 3;
+      padding: 6px;
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .login-btn {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .main-navbar {
+    padding: 8px;
+    gap: 4px;
+
+    .navbar-left {
+      gap: 8px;
+    }
+
+    .navbar-logo .logo-text {
+      font-size: 16px;
+    }
+
+    .navbar-right {
+      gap: 4px;
+    }
+
+    .user-section .user-btn {
+      padding: 6px 8px;
+      font-size: 10px;
+    }
+
+    .mobile-menu-btn {
+      padding: 4px;
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .login-btn {
+      padding: 6px 10px;
+      font-size: 11px;
     }
   }
 }

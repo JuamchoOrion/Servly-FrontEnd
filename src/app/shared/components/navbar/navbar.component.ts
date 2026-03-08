@@ -37,25 +37,25 @@ export class NavbarComponent implements OnInit, OnDestroy {
     {
       label: 'Dashboard',
       route: '/dashboard',
-      icon: '▬',
+      icon: '📊',
       roles: ['ADMIN', 'STOREKEEPER', 'STAFF']
     },
     {
       label: 'Inventario',
       route: '/inventory',
-      icon: '□',
+      icon: '📦',
       roles: ['ADMIN', 'STOREKEEPER']
     },
     {
       label: 'Categorías',
       route: '/categories',
-      icon: '≡',
+      icon: '🏷️',
       roles: ['ADMIN', 'STOREKEEPER']
     },
     {
       label: 'Proveedores',
       route: '/inventory/providers',
-      icon: '◇',
+      icon: '🤝',
       roles: ['ADMIN', 'STOREKEEPER']
     }
   ];

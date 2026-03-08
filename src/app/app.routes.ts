@@ -36,6 +36,12 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard(['ADMIN', 'STOREKEEPER'])]
   },
   {
+    path: 'inventory/providers',
+    loadComponent: () =>
+      import('./features/suppliers/Suppliers').then(m => m.SuppliersComponent),
+    canActivate: [authGuard, roleGuard(['ADMIN', 'STOREKEEPER'])]
+  },
+  {
     path: 'categories',
     loadComponent: () =>
       import('./features/categories/item-categories').then(m => m.ItemCategoriesComponent),

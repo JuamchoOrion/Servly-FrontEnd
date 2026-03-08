@@ -1,102 +1,103 @@
-<div class="categories-container">
+<div class="categories-page">
+  <div class="categories-container">
 
-  <!-- Header -->
-  <div class="categories-header">
-    <div class="header-content">
-      <h1>Gestión de Categorías</h1>
-      <p>Administra todas las categorías de items del inventario</p>
-    </div>
-    <button
-      class="btn btn-primary"
-      (click)="openCreateForm()"
-      [disabled]="isLoading"
-      *ngIf="canEdit()">
-      + Crear Categoría
-    </button>
-  </div>
-
-  <!-- Success Message -->
-  <div class="alert alert-success" *ngIf="successMessage">
-    <span class="alert-icon">✅</span>
-    {{ successMessage }}
-  </div>
-
-  <!-- Error Message -->
-  <div class="alert alert-error" *ngIf="errorMessage">
-    <span class="alert-icon">⚠️</span>
-    {{ errorMessage }}
-  </div>
-
-  <!-- Loading State -->
-  <div class="loading-state" *ngIf="isLoading && categories.length === 0">
-    <div class="spinner"></div>
-    <p>Cargando categorías...</p>
-  </div>
-
-  <!-- Empty State -->
-  <div class="empty-state" *ngIf="!isLoading && categories.length === 0">
-    <div class="empty-icon">📁</div>
-    <h3>No hay categorías</h3>
-    <p>Crea tu primera categoría para comenzar</p>
-  </div>
-
-  <!-- Categories Table -->
-  <div class="categories-table-wrapper" *ngIf="categories.length > 0">
-    <table class="categories-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Descripción</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let category of categories" [class.inactive]="!category.active">
-          <td class="id-cell">{{ category.id }}</td>
-          <td class="name-cell">{{ category.name }}</td>
-          <td class="description-cell">{{ category.description }}</td>
-          <td class="status-cell">
-            <span class="badge" [class.active]="category.active" [class.inactive]="!category.active">
-              {{ category.active ? 'Activa' : 'Inactiva' }}
-            </span>
-          </td>
-          <td class="actions-cell">
-            <button
-              class="btn-icon btn-toggle"
-              (click)="toggleCategory(category)"
-              [title]="category.active ? 'Desactivar' : 'Activar'"
-              *ngIf="canEdit()">
-              {{ category.active ? '✓' : '○' }}
-            </button>
-            <button
-              class="btn-icon btn-edit"
-              (click)="openEditForm(category)"
-              title="Editar"
-              *ngIf="canEdit()">
-              ✏️
-            </button>
-            <button
-              class="btn-icon btn-delete"
-              (click)="deleteCategory(category)"
-              title="Eliminar"
-              *ngIf="canEdit()">
-              🗑️
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Modal Form -->
-  <div class="modal-overlay" *ngIf="isFormVisible" (click)="closeForm()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>{{ isEditMode ? 'Editar Categoría' : 'Nueva Categoría' }}</h2>
-        <button class="btn-close" (click)="closeForm()">✕</button>
+    <!-- Header -->
+    <div class="categories-header">
+      <div class="header-content">
+        <h1>Gestión de Categorías</h1>
+        <p>Administra todas las categorías de items del inventario</p>
       </div>
+      <button
+        class="btn btn-primary"
+        (click)="openCreateForm()"
+        [disabled]="isLoading"
+        *ngIf="canEdit()">
+        + Crear Categoría
+      </button>
+    </div>
+
+    <!-- Success Message -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <span class="alert-icon">✅</span>
+      {{ successMessage }}
+    </div>
+
+    <!-- Error Message -->
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <span class="alert-icon">⚠️</span>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading && categories.length === 0">
+      <div class="spinner"></div>
+      <p>Cargando categorías...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && categories.length === 0">
+      <div class="empty-icon">📁</div>
+      <h3>No hay categorías</h3>
+      <p>Crea tu primera categoría para comenzar</p>
+    </div>
+
+    <!-- Categories Table -->
+    <div class="categories-table-wrapper" *ngIf="categories.length > 0">
+      <table class="categories-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let category of categories" [class.inactive]="!category.active">
+            <td class="id-cell">{{ category.id }}</td>
+            <td class="name-cell">{{ category.name }}</td>
+            <td class="description-cell">{{ category.description }}</td>
+            <td class="status-cell">
+              <span class="badge" [class.active]="category.active" [class.inactive]="!category.active">
+                {{ category.active ? 'Activa' : 'Inactiva' }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <button
+                class="btn-icon btn-toggle"
+                (click)="toggleCategory(category)"
+                [title]="category.active ? 'Desactivar' : 'Activar'"
+                *ngIf="canEdit()">
+                {{ category.active ? '✓' : '○' }}
+              </button>
+              <button
+                class="btn-icon btn-edit"
+                (click)="openEditForm(category)"
+                title="Editar"
+                *ngIf="canEdit()">
+                ✏️
+              </button>
+              <button
+                class="btn-icon btn-delete"
+                (click)="deleteCategory(category)"
+                title="Eliminar"
+                *ngIf="canEdit()">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal-overlay" *ngIf="isFormVisible" (click)="closeForm()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ isEditMode ? 'Editar Categoría' : 'Nueva Categoría' }}</h2>
+          <button class="btn-close" (click)="closeForm()">✕</button>
+        </div>
 
       <form [formGroup]="categoryForm" (ngSubmit)="submitForm()" class="modal-body">
         <!-- Name Field -->

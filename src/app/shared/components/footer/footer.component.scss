@@ -9,11 +9,17 @@ $text-light: rgba(255, 255, 255, 0.6);
 $text-light-secondary: rgba(255, 255, 255, 0.4);
 
 .main-footer {
-  margin-top: auto;
-  padding: 24px;
+  width: 100%;
+  padding: 20px 16px;
   background: linear-gradient(135deg, $primary-black 0%, #0f0f0f 100%);
   border-top: 2px solid rgba($accent-gold, 0.15);
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+  margin: 0;
+
+  @media (min-width: 768px) {
+    padding: 24px 32px;
+  }
 
   .footer-content {
     max-width: 1400px;
@@ -21,18 +27,25 @@ $text-light-secondary: rgba(255, 255, 255, 0.4);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
+    gap: 16px;
     flex-wrap: wrap;
 
-    /* LEFT SECTION */
+    @media (min-width: 768px) {
+      gap: 24px;
+    }
+
     .footer-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
       flex: 0 1 auto;
 
+      @media (min-width: 768px) {
+        gap: 12px;
+      }
+
       .footer-logo {
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 900;
         background: linear-gradient(135deg, $white 0%, $accent-gold 100%);
         -webkit-background-clip: text;
@@ -40,69 +53,71 @@ $text-light-secondary: rgba(255, 255, 255, 0.4);
         background-clip: text;
         letter-spacing: -0.5px;
         text-transform: uppercase;
+
+        @media (min-width: 768px) {
+          font-size: 18px;
+        }
       }
 
       .footer-year {
-        font-size: 12px;
+        font-size: 11px;
         color: $text-light-secondary;
         font-weight: 500;
+
+        @media (min-width: 768px) {
+          font-size: 12px;
+        }
       }
     }
 
-    /* CENTER SECTION */
     .footer-center {
-      flex: 1;
-      display: flex;
-      justify-content: center;
+      flex: 0 1 auto;
 
       .footer-contact {
-        padding: 10px 20px;
-        background: rgba($accent-gold, 0.1);
-        border: 2px solid rgba($accent-gold, 0.3);
-        border-radius: 10px;
+        padding: 8px 16px;
+        background: transparent;
+        border: 1px solid rgba($accent-gold, 0.5);
         color: $accent-gold;
+        border-radius: 8px;
+        font-size: 12px;
         font-weight: 600;
-        font-size: 14px;
         cursor: pointer;
         transition: all 0.3s ease;
-        white-space: nowrap;
 
-        &:hover {
-          background: rgba($accent-gold, 0.2);
-          border-color: $accent-gold;
-          box-shadow: 0 4px 16px rgba($accent-gold, 0.2);
-          transform: translateY(-2px);
+        @media (min-width: 768px) {
+          padding: 10px 20px;
+          font-size: 13px;
         }
 
-        &:active {
-          transform: translateY(0);
+        &:hover {
+          background: rgba($accent-gold, 0.1);
+          border-color: $accent-gold;
+          box-shadow: 0 4px 12px rgba($accent-gold, 0.2);
         }
 
         span {
-          display: flex;
-          align-items: center;
-          gap: 8px;
+          white-space: nowrap;
         }
       }
     }
 
-    /* RIGHT SECTION */
     .footer-right {
       flex: 0 1 auto;
+      text-align: right;
 
       .footer-text {
-        font-size: 12px;
+        font-size: 11px;
         color: $text-light;
         font-weight: 500;
-        white-space: nowrap;
+        display: block;
+
+        @media (min-width: 768px) {
+          font-size: 12px;
+        }
       }
     }
   }
 }
-
-/* ═══════════════════════════════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
   .main-footer {
@@ -112,26 +127,12 @@ $text-light-secondary: rgba(255, 255, 255, 0.4);
       gap: 12px;
       justify-content: center;
       text-align: center;
+      flex-direction: column;
 
-      .footer-left {
-        flex: 1 1 100%;
-        justify-content: center;
-        order: 1;
-      }
-
-      .footer-center {
-        flex: 1 1 100%;
-        order: 2;
-      }
-
+      .footer-left,
+      .footer-center,
       .footer-right {
-        flex: 1 1 100%;
-        order: 3;
-
-        .footer-text {
-          white-space: normal;
-          font-size: 11px;
-        }
+        width: 100%;
       }
     }
   }
