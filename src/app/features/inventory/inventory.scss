@@ -785,6 +785,52 @@ $white: #FFFFFF;
           border-radius: 6px;
         }
       }
+
+      .batch-actions {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px dashed rgba($error-red, 0.2);
+
+        .btn-delete-batch {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          width: 100%;
+          padding: 10px 16px;
+          background: transparent;
+          border: 2px solid $error-red;
+          border-radius: 8px;
+          color: $error-red;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          .material-icons {
+            font-size: 18px;
+          }
+
+          &:hover:not(:disabled) {
+            background: $error-red;
+            color: $white;
+          }
+
+          &:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+          }
+
+          .spinner-small {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba($error-red, 0.3);
+            border-top-color: $error-red;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+          }
+        }
+      }
     }
   }
 
@@ -3157,6 +3203,26 @@ select.form-input {
       .detail-item { color: #999999; }
       .date-item { color: #888888; }
       .days-expired { background: rgba($error-red, 0.2); }
+
+      .batch-actions {
+        border-top-color: rgba($error-red, 0.2);
+
+        .btn-delete-batch {
+          background: transparent;
+          border-color: #ff6b6b;
+          color: #ff6b6b;
+
+          &:hover:not(:disabled) {
+            background: #ff6b6b;
+            color: #1a1a1a;
+          }
+
+          .spinner-small {
+            border-color: rgba(#ff6b6b, 0.3);
+            border-top-color: #ff6b6b;
+          }
+        }
+      }
     }
 
     .expired-section-footer {

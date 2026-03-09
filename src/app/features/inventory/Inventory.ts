@@ -63,6 +63,7 @@ export class InventoryComponent implements OnInit {
   expiredBatches: StockBatch[] = [];
   showBatchAlerts = true;
   showExpiredSection = false;  // Mostrar/ocultar sección de lotes expirados
+  deletingBatchId: number | null = null;  // ID del lote que se está eliminando
 
   // Modal para crear nuevo lote
   showCreateBatchModal = false;
@@ -310,6 +311,43 @@ export class InventoryComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error al recargar lotes expirados:', error);
+        }
+      });
+  }
+
+  /**
+   * Elimina un lote expirado
+   * DELETE /api/stock-batch/{id}
+   */
+  deleteExpiredBatch(batch: StockBatch): void {
+    if (this.deletingBatchId) return; // Ya hay una eliminación en proceso
+
+    if (!confirm(`¿Estás seguro de eliminar el lote "${batch.batchNumber}"?\n\nEsta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    this.deletingBatchId = batch.id;
+    this.cdr.detectChanges();
+
+    this.stockBatchService.deleteBatch(batch.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          // Eliminar el lote de la lista local
+          this.expiredBatches = this.expiredBatches.filter(b => b.id !== batch.id);
+          this.deletingBatchId = null;
+
+          // Recargar el inventario para actualizar las cantidades
+          this.loadInventory();
+          this.cdr.detectChanges();
+
+          console.log(`Lote ${batch.batchNumber} eliminado exitosamente`);
+        },
+        error: (error) => {
+          console.error('Error al eliminar el lote:', error);
+          this.deletingBatchId = null;
+          this.cdr.detectChanges();
+          alert('Error al eliminar el lote. Por favor, intenta nuevamente.');
         }
       });
   }
