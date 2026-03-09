@@ -6,6 +6,7 @@ import { takeUntil } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { StockBatch, StockBatchStatus, StockBatchService, CreateBatchRequest } from '../../core/services/stock-batch.service';
 import { SupplierService, SupplierDTO } from '../../core/services/supplier.service';
+import { environment } from '../../../enviroments/enviroment';
 
 // DTOs - Coincidiendo con el backend
 interface ItemStockDTO {
@@ -156,7 +157,7 @@ export class InventoryComponent implements OnInit {
       .set('size', this.pageSize.toString())
       .set('sort', 'id,asc');
 
-    this.http.get<PaginatedInventoryResponse>('/api/staff/inventory/paginated', { params })
+    this.http.get<PaginatedInventoryResponse>(`${environment.apiUrl}/api/staff/inventory/paginated`, { params, withCredentials: true })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {

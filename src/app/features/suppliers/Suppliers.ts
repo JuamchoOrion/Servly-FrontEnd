@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SupplierService, SupplierDTO, SupplierCreateRequest, MessageResponse, PaginatedSupplierResponse } from '../../core/services/supplier.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { environment } from '../../../enviroments/enviroment';
 
 @Component({
   selector: 'app-suppliers',
@@ -80,7 +81,7 @@ export class SuppliersComponent implements OnInit {
       .set('size', this.pageSize.toString())
       .set('sort', 'id,asc');
 
-    this.http.get<PaginatedSupplierResponse>('/api/staff/inventory/suppliers/paginated', { params })
+    this.http.get<PaginatedSupplierResponse>(`${environment.apiUrl}/api/staff/inventory/suppliers/paginated`, { params, withCredentials: true })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
