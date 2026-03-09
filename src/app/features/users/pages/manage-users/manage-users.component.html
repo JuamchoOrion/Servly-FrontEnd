@@ -1,0 +1,256 @@
+<div class="manage-users-page">
+  <div class="manage-users-container">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1>
+          <span class="material-icons">people</span>
+          Gestionar Usuarios
+        </h1>
+        <p>Administración de usuarios del sistema</p>
+      </div>
+      <button
+        class="btn btn-primary"
+        (click)="loadUsers()"
+        [disabled]="isLoading"
+        title="Actualizar lista">
+        <span class="material-icons">refresh</span>
+        Actualizar
+      </button>
+    </div>
+
+    <!-- Success Message -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <span class="material-icons alert-icon">check_circle</span>
+      <div class="alert-content">
+        <strong>¡Éxito!</strong>
+        <p>{{ successMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <span class="material-icons alert-icon">error</span>
+      <div class="alert-content">
+        <strong>Error</strong>
+        <p>{{ errorMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Cargando usuarios...</p>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-card" *ngIf="!isLoading && users.length > 0">
+      <div class="table-responsive">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>2FA</th>
+              <th>Cambio Password</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users" class="user-row">
+              <!-- Nombre -->
+              <td class="cell-name">
+                <span class="user-name">{{ user.name }}</span>
+              </td>
+
+              <!-- Email -->
+              <td class="cell-email">
+                {{ user.email }}
+              </td>
+
+              <!-- Rol -->
+              <td class="cell-role">
+                <span class="badge" [class]="getRoleBadgeClass(user.role)">
+                  {{ getRoleLabel(user.role) }}
+                </span>
+              </td>
+
+              <!-- Estado -->
+              <td class="cell-status">
+                <span class="status-indicator" [class.active]="user.enabled">
+                  <span class="material-icons status-icon">
+                    {{ user.enabled ? 'check_circle' : 'cancel' }}
+                  </span>
+                  {{ user.enabled ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+
+              <!-- 2FA -->
+              <td class="cell-2fa">
+                <span class="two-factor" [class.enabled]="user.twoFactorEnabled">
+                  <span class="material-icons">
+                    {{ user.twoFactorEnabled ? 'lock' : 'lock_open' }}
+                  </span>
+                  {{ user.twoFactorEnabled ? 'Sí' : 'No' }}
+                </span>
+              </td>
+
+              <!-- Cambio Password Pendiente -->
+              <td class="cell-password">
+                <span class="password-change" [class.pending]="user.mustChangePassword">
+                  <span class="material-icons">
+                    {{ user.mustChangePassword ? 'warning' : 'check_circle' }}
+                  </span>
+                  {{ user.mustChangePassword ? 'Pendiente' : 'Completado' }}
+                </span>
+              </td>
+
+              <!-- Acciones -->
+              <td class="cell-actions">
+                <div class="action-buttons">
+                  <!-- Cambiar Rol -->
+                  <button
+                    class="btn-icon btn-role"
+                    (click)="openRoleModal(user)"
+                    title="Cambiar rol"
+                    [disabled]="isCurrentUser(user.id)">
+                    <span class="material-icons">badge</span>
+                  </button>
+
+                  <!-- Activar/Desactivar -->
+                  <button
+                    class="btn-icon btn-toggle"
+                    (click)="toggleUserStatus(user)"
+                    [title]="user.enabled ? 'Desactivar' : 'Activar'"
+                    [class.active]="user.enabled">
+                    <span class="material-icons">
+                      {{ user.enabled ? 'visibility_off' : 'visibility' }}
+                    </span>
+                  </button>
+
+                  <!-- Eliminar -->
+                  <button
+                    class="btn-icon btn-delete"
+                    (click)="openDeleteModal(user)"
+                    title="Eliminar usuario"
+                    [disabled]="isCurrentUser(user.id)">
+                    <span class="material-icons">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && users.length === 0">
+      <span class="material-icons empty-icon">people_outline</span>
+      <h3>No hay usuarios registrados</h3>
+      <p>No se encontraron usuarios en el sistema</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal Cambiar Rol -->
+<div class="modal-overlay" *ngIf="showRoleModal" (click)="closeRoleModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>
+        <span class="material-icons">badge</span>
+        Cambiar Rol
+      </h2>
+      <button class="btn-close" (click)="closeRoleModal()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <p class="modal-description">
+        Seleccione el nuevo rol para <strong>{{ selectedUser?.name }}</strong>
+      </p>
+
+      <div class="form-group">
+        <label for="role">Rol</label>
+        <select
+          id="role"
+          [(ngModel)]="selectedRole"
+          class="form-control"
+          [disabled]="isSavingRole">
+          <option *ngFor="let option of roleOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="modal-warning" *ngIf="selectedRole === 'ADMIN'">
+        <span class="material-icons">warning</span>
+        <p>Está asignando rol de administrador. Asegúrese de confiar en este usuario.</p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        class="btn btn-secondary"
+        (click)="closeRoleModal()"
+        [disabled]="isSavingRole">
+        Cancelar
+      </button>
+      <button
+        class="btn btn-primary"
+        (click)="saveRole()"
+        [disabled]="isSavingRole || !selectedRole">
+        <span class="material-icons" *ngIf="isSavingRole">hourglass_empty</span>
+        <span class="material-icons" *ngIf="!isSavingRole">check_circle</span>
+        {{ isSavingRole ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Eliminar -->
+<div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+  <div class="modal modal-delete" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>
+        <span class="material-icons">warning</span>
+        Eliminar Usuario
+      </h2>
+      <button class="btn-close" (click)="closeDeleteModal()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <p class="modal-description">
+        ¿Está seguro que desea eliminar a <strong>{{ userToDelete?.name }}</strong>?
+      </p>
+      <p class="modal-warning-text">
+        <span class="material-icons">error_outline</span>
+        Esta acción no se puede deshacer.
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        class="btn btn-secondary"
+        (click)="closeDeleteModal()"
+        [disabled]="isDeleting">
+        Cancelar
+      </button>
+      <button
+        class="btn btn-danger"
+        (click)="confirmDelete()"
+        [disabled]="isDeleting">
+        <span class="material-icons" *ngIf="isDeleting">hourglass_empty</span>
+        <span class="material-icons" *ngIf="!isDeleting">delete</span>
+        {{ isDeleting ? 'Eliminando...' : 'Eliminar' }}
+      </button>
+    </div>
+  </div>
+</div>

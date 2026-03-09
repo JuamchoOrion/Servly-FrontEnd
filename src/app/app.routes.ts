@@ -59,6 +59,18 @@ export const routes: Routes = [
       import('./features/items/items').then(m => m.ItemsComponent),
     canActivate: [authGuard, roleGuard(['ADMIN', 'STOREKEEPER'])]
   },
+  {
+    path: 'employees/create',
+    loadComponent: () =>
+      import('./features/employees/pages/create-employee/create-employee.component').then(m => m.CreateEmployeeComponent),
+    canActivate: [authGuard, roleGuard(['ADMIN'])]
+  },
+  {
+    path: 'users/manage',
+    loadComponent: () =>
+      import('./features/users/pages/manage-users/manage-users.component').then(m => m.ManageUsersComponent),
+    canActivate: [authGuard, roleGuard(['ADMIN'])]
+  },
 
   // Wildcard - must be last
   { path: '**', redirectTo: 'login' }

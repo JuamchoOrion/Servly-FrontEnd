@@ -190,6 +190,14 @@
           <span class="card-subtitle">Tareas comunes</span>
         </div>
         <div class="quick-actions-grid">
+          <a routerLink="/employees/create" class="quick-action" *ngIf="isAdmin">
+            <span class="material-icons action-icon">person_add</span>
+            <div class="action-text">Crear Empleado</div>
+          </a>
+          <a routerLink="/users/manage" class="quick-action" *ngIf="isAdmin">
+            <span class="material-icons action-icon">people</span>
+            <div class="action-text">Gestionar Usuarios</div>
+          </a>
           <a routerLink="/items" class="quick-action" *ngIf="canViewItems()">
             <span class="material-icons action-icon">add_circle</span>
             <div class="action-text">Crear Item</div>

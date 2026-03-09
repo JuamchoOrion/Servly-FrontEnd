@@ -1,0 +1,161 @@
+<div class="create-employee-page">
+  <div class="create-employee-container">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1>
+          <span class="material-icons">person_add</span>
+          Crear Empleado
+        </h1>
+        <p>Registro de nuevo personal al sistema</p>
+      </div>
+    </div>
+
+    <!-- Success Message -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <span class="material-icons alert-icon">check_circle</span>
+      <div class="alert-content">
+        <strong>¡Éxito!</strong>
+        <p>{{ successMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <span class="material-icons alert-icon">error</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <!-- Form -->
+    <div class="form-card">
+      <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="employee-form">
+
+        <div class="form-grid">
+          <!-- Name -->
+          <div class="form-group">
+            <label for="name">
+              Nombre <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="name"
+              formControlName="name"
+              class="form-control"
+              [class.error]="nameControl?.invalid && nameControl?.touched"
+              placeholder="Ej: Juan"
+              autocomplete="off">
+            <span class="error-message" *ngIf="nameControl?.invalid && nameControl?.touched">
+              {{ getFieldError('name') }}
+            </span>
+          </div>
+
+          <!-- Last Name -->
+          <div class="form-group">
+            <label for="lastName">
+              Apellido <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              formControlName="lastName"
+              class="form-control"
+              [class.error]="lastNameControl?.invalid && lastNameControl?.touched"
+              placeholder="Ej: Pérez"
+              autocomplete="off">
+            <span class="error-message" *ngIf="lastNameControl?.invalid && lastNameControl?.touched">
+              {{ getFieldError('lastName') }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">
+            Email <span class="required">*</span>
+          </label>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            class="form-control"
+            [class.error]="emailControl?.invalid && emailControl?.touched"
+            placeholder="ejemplo@servly.com"
+            autocomplete="off">
+          <span class="error-message" *ngIf="emailControl?.invalid && emailControl?.touched">
+            {{ getFieldError('email') }}
+          </span>
+        </div>
+
+        <!-- Address -->
+        <div class="form-group">
+          <label for="address">
+            Dirección <span class="optional">(Opcional)</span>
+          </label>
+          <input
+            type="text"
+            id="address"
+            formControlName="address"
+            class="form-control"
+            [class.error]="addressControl?.invalid && addressControl?.touched"
+            placeholder="Ej: Calle 123 #45-67"
+            autocomplete="off">
+          <span class="error-message" *ngIf="addressControl?.invalid && addressControl?.touched">
+            {{ getFieldError('address') }}
+          </span>
+        </div>
+
+        <!-- Role -->
+        <div class="form-group">
+          <label for="role">
+            Rol <span class="required">*</span>
+          </label>
+          <select
+            id="role"
+            formControlName="role"
+            class="form-control"
+            [class.error]="roleControl?.invalid && roleControl?.touched">
+            <option value="">Seleccione un rol</option>
+            <option *ngFor="let option of roleOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          <span class="error-message" *ngIf="roleControl?.invalid && roleControl?.touched">
+            {{ getFieldError('role') }}
+          </span>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="onCancel()"
+            [disabled]="isLoading">
+            <span class="material-icons">arrow_back</span>
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isLoading || employeeForm.invalid">
+            <span class="material-icons" *ngIf="isLoading">hourglass_empty</span>
+            <span class="material-icons" *ngIf="!isLoading">check_circle</span>
+            {{ isLoading ? 'Creando...' : 'Crear Empleado' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="material-icons info-icon">info</span>
+      <div class="info-content">
+        <h4>Información importante</h4>
+        <p>El empleado recibirá una contraseña temporal en su email y deberá cambiarla en su primer login.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
