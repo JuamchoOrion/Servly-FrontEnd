@@ -1,11 +1,19 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { BehaviorSubject, Observable, throwError, of } from 'rxjs';
+import { tap, catchError, switchMap } from 'rxjs/operators';
 import { environment } from '../../../enviroments/enviroment';
 import { LoginRequestDTO } from '../dtos/login-request.dto';
 import { LoginResponseDTO, ErrorResponseDTO } from '../dtos/login-response.dto';
-import { throwError } from 'rxjs';
+
+/**
+ * Error especial para 2FA requerido
+ */
+interface TwoFactorRequiredError {
+  status: number;
+  is2faRequired: boolean;
+  message: string;
+}
 
 /**
  * Modelo de usuario actual
@@ -71,26 +79,125 @@ export class AuthService {
     };
 
     return this.http.post<LoginResponseDTO>(this.AUTH_ENDPOINT, request, { withCredentials: true }).pipe(
-      tap((response: LoginResponseDTO) => {
-        // Normalizar el token (puede venir como 'token' o 'accessToken')
-        const accessToken = response.token || response.accessToken;
-        if (!accessToken) {
-          throw new Error('No access token in response');
+      switchMap((response: LoginResponseDTO) => {
+        console.log('🔵 Login response:', response);
+        console.log('🔵 response.message:', response.message);
+        console.log('🔵 response.tempToken:', response.tempToken);
+        console.log('🔵 response.requiresTwoFactor:', response.requiresTwoFactor);
+
+        // CASO 1: El backend indica que requiere 2FA (con tempToken o flag)
+        if (response.tempToken || response.requiresTwoFactor) {
+          console.log('🔵 CASO 1: 2FA con tempToken/flag');
+          // Guardar token temporal
+          if (response.tempToken) {
+            this.setTempToken(response.tempToken);
+          }
+          // Guardar información del usuario si viene
+          if (response.email) {
+            this.setCurrentUser({
+              email: response.email,
+              name: response.name || '',
+              roles: response.roles || (response.role ? [response.role] : []),
+              mustChangePassword: response.mustChangePassword || false
+            });
+          }
+          // Retornar error especial para redirigir a 2FA
+          return throwError(() => ({
+            status: 401,
+            is2faRequired: true,
+            tempToken: response.tempToken,
+            message: response.message || 'Verificación en 2 pasos requerida'
+          }));
         }
 
+        // CASO 2: Mensaje de 2FA sin tempToken (backend alternativo)
+        const msg = response.message || '';
+        console.log('🔵 Verificando si es mensaje de 2FA:', msg);
+        const is2faMessage = msg.includes('2 pasos') || msg.includes('2FA') || msg.includes('código') || msg.includes('Verificación');
+        console.log('🔵 is2faMessage:', is2faMessage);
+
+        if (response.message && is2faMessage) {
+          console.log('🔵 CASO 2: 2FA solo con mensaje');
+          // Guardar email del login para usar en verify-2fa
+          sessionStorage.setItem('temp_login_email', email);
+
+          const user = this.getCurrentUser();
+          console.log('🔵 user antes de actualizar:', user);
+          if (user) {
+            this.setCurrentUser({
+              ...user,
+              mustChangePassword: true
+            });
+          } else {
+            // Si no hay usuario, crear uno temporal con el email del login
+            console.log('🔵 Creando usuario temporal con email del login');
+            this.setCurrentUser({
+              email: email,
+              name: '',
+              roles: [],
+              mustChangePassword: false
+            });
+          }
+          return throwError(() => ({
+            status: 401,
+            is2faRequired: true,
+            message: response.message,
+            email: email // Pasar email del login
+          }));
+        }
+
+        // Normalizar el token (puede venir como 'token' o 'accessToken')
+        let accessToken = response.token || response.accessToken;
+
+        // CASO 3: Usuario debe cambiar contraseña (primer login)
+        if (response.mustChangePassword) {
+          console.log('🔵 CASO 3: mustChangePassword=true');
+          // Guardar token temporal si existe
+          if (accessToken) {
+            this.setTempToken(accessToken);
+          }
+          // Guardar información del usuario
+          this.setCurrentUser({
+            email: response.email || '',
+            name: response.name || '',
+            roles: response.roles || (response.role ? [response.role] : []),
+            mustChangePassword: true
+          });
+          // Retornar respuesta para que el componente decida
+          return of(response);
+        }
+
+        // CASO 4: Login normal - guardar tokens y usuario
+        if (!accessToken) {
+          console.error('❌ CASO 4: No access token in response:', response);
+          return throwError(() => new Error('No access token in response'));
+        }
+
+        console.log('🔵 CASO 5: Login exitoso');
         // Guardar tokens en sessionStorage
-        this.setTokens(accessToken, response.refreshToken);
+        this.setTokens(accessToken, response.refreshToken || '');
         // Guardar usuario actual
         this.setCurrentUser({
-          email: response.email,
-          name: response.name,
+          email: response.email || '',
+          name: response.name || '',
           roles: response.roles || (response.role ? [response.role] : []),
-          mustChangePassword: response.mustChangePassword
+          mustChangePassword: response.mustChangePassword || false
         });
         // Actualizar estado
         this.isAuthenticatedSubject.next(true);
+
+        return of(response);
       }),
-      catchError(error => this.handleError(error))
+      catchError(error => {
+        console.log('🔵 catchError:', error);
+        // Manejar caso especial: 2FA requerido
+        if (error?.is2faRequired) {
+          console.log('🔵 2FA capturado - redirigiendo');
+          // Propagar el error especial
+          return throwError(() => error);
+        }
+        return this.handleError(error);
+      })
     );
   }
 
@@ -119,13 +226,13 @@ export class AuthService {
         }
 
         // Actualizar tokens en sessionStorage
-        this.setTokens(accessToken, response.refreshToken);
+        this.setTokens(accessToken, response.refreshToken || '');
         // Actualizamos el usuario si cambió
         this.setCurrentUser({
-          email: response.email,
-          name: response.name,
+          email: response.email || '',
+          name: response.name || '',
           roles: response.roles || (response.role ? [response.role] : []),
-          mustChangePassword: response.mustChangePassword
+          mustChangePassword: response.mustChangePassword || false
         });
       }),
       catchError(error => {
@@ -142,10 +249,10 @@ export class AuthService {
    */
   logout(): Observable<void> {
     return this.http.post<void>(this.LOGOUT_ENDPOINT, {}, { withCredentials: true }).pipe(
-      tap(() => this.clearSession()),
+      tap(() => this.clearSessionInternal()),
       catchError(() => {
         // Si el servidor falla, limpiar sesión localmente de todas formas
-        this.clearSession();
+        this.clearSessionInternal();
         return throwError(() => new Error('Logout failed'));
       })
     );
@@ -238,12 +345,27 @@ export class AuthService {
   }
 
   /**
-   * Limpia toda la sesión del usuario
+   * Limpia toda la sesión del usuario (público para usar en logout forzado)
    */
-  private clearSession(): void {
+  clearSession(): void {
     sessionStorage.removeItem(this.TOKEN_KEY);
     sessionStorage.removeItem(this.REFRESH_TOKEN_KEY);
     sessionStorage.removeItem(this.USER_KEY);
+    sessionStorage.removeItem('temp_login_email');
+    sessionStorage.removeItem('temp_login_token');
+    this.currentUserSubject.next(null);
+    this.isAuthenticatedSubject.next(false);
+  }
+
+  /**
+   * Limpia toda la sesión del usuario
+   */
+  private clearSessionInternal(): void {
+    sessionStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem(this.REFRESH_TOKEN_KEY);
+    sessionStorage.removeItem(this.USER_KEY);
+    sessionStorage.removeItem('temp_login_email');
+    sessionStorage.removeItem('temp_login_token');
     this.currentUserSubject.next(null);
     this.isAuthenticatedSubject.next(false);
   }
@@ -325,5 +447,173 @@ export class AuthService {
     console.log('🔵 Iniciando login con Google...');
     console.log('🔵 URL:', `${this.API_URL}/oauth2/authorize/google`);
     window.location.href = url;
+  }
+
+  /**
+   * Paso 2: Verifica el código 2FA
+   *
+   * @param code Código de 6 dígitos
+   * @param email Email del usuario (opcional, se usa si no hay tempToken)
+   * @returns Observable<LoginResponseDTO> con tokens actualizados
+   *
+   * Posibles errores:
+   * - 401: Código inválido
+   * - 403: Token expirado
+   * - 500: Error del servidor
+   */
+  verify2fa(code: string, email?: string): Observable<LoginResponseDTO> {
+    // Usar tempToken preferiblemente
+    const tempToken = this.getTempToken();
+
+    const headers: any = {
+      'Content-Type': 'application/json'
+    };
+
+    const body: any = { code };
+
+    // Si hay tempToken, usarlo para autenticación
+    if (tempToken) {
+      headers['Authorization'] = `Bearer ${tempToken}`;
+      console.log('🔵 verify2fa: usando tempToken');
+    } else if (email) {
+      // Si no hay tempToken, enviar email (flujo alternativo)
+      body.email = email;
+      console.log('🔵 verify2fa: usando email');
+    } else {
+      console.error('❌ verify2fa: no hay tempToken ni email');
+      return throwError(() => new Error('No tempToken or email available'));
+    }
+
+    return this.http.post<LoginResponseDTO>(
+      `${this.API_URL}/api/auth/verify-2fa`,
+      body,
+      {
+        headers,
+        withCredentials: true
+      }
+    ).pipe(
+      tap((response: LoginResponseDTO) => {
+        console.log('🔵 verify2fa response:', response);
+        console.log('🔵 mustChangePassword:', response.mustChangePassword);
+
+        const accessToken = response.token || response.accessToken;
+
+        // Si debe cambiar contraseña, guardar token temporal para usar en force-password-change
+        if (response.mustChangePassword && accessToken) {
+          console.log('🔵 mustChangePassword=true, guardando accessToken como tempToken');
+          this.setTempToken(accessToken);
+        } else if (accessToken) {
+          // Login normal - guardar tokens
+          this.setTokens(accessToken, response.refreshToken || '');
+          this.clearTempToken();
+        }
+
+        this.setCurrentUser({
+          email: response.email || '',
+          name: response.name || '',
+          roles: response.roles || (response.role ? [response.role] : []),
+          mustChangePassword: response.mustChangePassword || false
+        });
+        this.isAuthenticatedSubject.next(true);
+      }),
+      catchError(error => this.handleError(error))
+    );
+  }
+
+  /**
+   * Paso 3: Cambio forzado de contraseña (primer login)
+   *
+   * @param temporaryPassword Contraseña temporal recibida por email
+   * @param newPassword Nueva contraseña del usuario
+   * @param email Email del usuario (opcional, se usa si no hay token)
+   * @returns Observable<LoginResponseDTO> con tokens actualizados
+   *
+   * Posibles errores:
+   * - 400: Contraseña débil o inválida
+   * - 401: Contraseña temporal incorrecta
+   * - 403: Token expirado
+   * - 409: Misma contraseña
+   * - 500: Error del servidor
+   */
+  forcePasswordChange(temporaryPassword: string, newPassword: string, email?: string): Observable<LoginResponseDTO> {
+    // Usar tempToken preferiblemente (flujo después de 2FA)
+    const tempToken = this.getTempToken();
+    const accessToken = this.getAccessToken();
+
+    const headers: any = {
+      'Content-Type': 'application/json'
+    };
+
+    const body: any = {
+      currentPassword: temporaryPassword,  // El backend espera 'currentPassword'
+      newPassword
+    };
+
+    // Si hay tempToken, usarlo (flujo normal después de 2FA)
+    if (tempToken) {
+      headers['Authorization'] = `Bearer ${tempToken}`;
+      console.log('🔵 forcePasswordChange: usando tempToken');
+    } else if (accessToken) {
+      // Si no, usar accessToken (flujo alternativo)
+      headers['Authorization'] = `Bearer ${accessToken}`;
+      console.log('🔵 forcePasswordChange: usando accessToken');
+    } else {
+      console.error('❌ forcePasswordChange: no hay token disponible');
+    }
+
+    // Si hay email, enviarlo (para cuando no hay token)
+    if (email) {
+      body.email = email;
+    }
+
+    return this.http.post<LoginResponseDTO>(
+      `${this.API_URL}/api/auth/force-password-change`,
+      body,
+      {
+        headers,
+        withCredentials: true
+      }
+    ).pipe(
+      tap((response: LoginResponseDTO) => {
+        console.log('🔵 forcePasswordChange response:', response);
+        // Actualizar usuario - ya no debe cambiar contraseña
+        this.setCurrentUser({
+          email: response.email || '',
+          name: response.name || '',
+          roles: response.roles || (response.role ? [response.role] : []),
+          mustChangePassword: false
+        });
+      }),
+      catchError(error => {
+        console.log('🔵 forcePasswordChange error:', error);
+        console.log('🔵 error.status:', error.status);
+        console.log('🔵 error.error:', error.error);
+        console.log('🔵 error.error.message:', error.error?.message);
+        console.log('🔵 error.error.errors:', error.error?.errors);
+        return this.handleError(error);
+      })
+    );
+  }
+
+  /**
+   * Guarda el token temporal para el flujo de primer login
+   * Se usa entre el paso 1 y 2
+   */
+  setTempToken(token: string): void {
+    sessionStorage.setItem('temp_login_token', token);
+  }
+
+  /**
+   * Obtiene el token temporal
+   */
+  getTempToken(): string | null {
+    return sessionStorage.getItem('temp_login_token');
+  }
+
+  /**
+   * Limpia el token temporal
+   */
+  clearTempToken(): void {
+    sessionStorage.removeItem('temp_login_token');
   }
 }

@@ -7,7 +7,7 @@ export interface LoginResponseDTO {
   /**
    * Token JWT de acceso válido por 24 horas
    * Usar en header: Authorization: Bearer {token}
-   * (Puede venir como 'token' o 'accessToken' según el backend)
+   * (Puede venir como 'token' o 'accessToken')
    */
   token?: string;
   accessToken?: string;
@@ -16,17 +16,27 @@ export interface LoginResponseDTO {
    * Token JWT de refresco válido por 7 días
    * Usar para renovar el access token cuando expire
    */
-  refreshToken: string;
+  refreshToken?: string;
+
+  /**
+   * Token temporal para verificación 2FA (cuando se requiere 2FA)
+   */
+  tempToken?: string;
+
+  /**
+   * Flag indicando si se requiere verificación 2FA
+   */
+  requiresTwoFactor?: boolean;
 
   /**
    * Email del usuario autenticado
    */
-  email: string;
+  email?: string;
 
   /**
    * Nombre completo del usuario
    */
-  name: string;
+  name?: string;
 
   /**
    * Lista de roles del usuario
@@ -49,12 +59,17 @@ export interface LoginResponseDTO {
    * Flag indicando si el usuario debe cambiar la contraseña
    * Si es true, mostrar pantalla de cambio de contraseña obligatorio
    */
-  mustChangePassword: boolean;
+  mustChangePassword?: boolean;
 
   /**
    * Flag indicando si el usuario completó el primer login
    */
   firstLoginCompleted?: boolean;
+
+  /**
+   * Mensaje del backend (para casos especiales como 2FA requerido)
+   */
+  message?: string;
 }
 
 /**

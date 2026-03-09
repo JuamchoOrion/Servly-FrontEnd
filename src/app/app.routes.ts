@@ -27,6 +27,16 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/auth/pages/login/oauth2-callback/oauth2-callback.component').then(m => m.OAuth2CallbackComponent)
   },
+  {
+    path: 'auth/verify-2fa',
+    loadComponent: () =>
+      import('./features/auth/pages/verify-2fa/verify-2fa.component').then(m => m.Verify2faComponent)
+  },
+  {
+    path: 'auth/force-password-change',
+    loadComponent: () =>
+      import('./features/auth/pages/force-password-change/force-password-change.component').then(m => m.ForcePasswordChangeComponent)
+  },
 
   // Protected routes with lazy loading
   {

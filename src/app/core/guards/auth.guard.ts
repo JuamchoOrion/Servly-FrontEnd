@@ -6,9 +6,19 @@ export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // ✅ Usar getCurrentUser() NO getCurrentUserSync()
   const user = authService.getCurrentUser();
   if (user) {
+    // Si debe cambiar contraseña, redirigir a force-password-change
+    // Excepto si ya está en esa ruta
+    if (user.mustChangePassword) {
+      const currentRoute = router.url;
+      if (!currentRoute.includes('/auth/force-password-change')) {
+        console.log('🔵 Usuario con mustChangePassword=true intentando acceder a:', currentRoute);
+        console.log('🔵 Redirigiendo a /auth/force-password-change');
+        router.navigate(['/auth/force-password-change']);
+        return false;
+      }
+    }
     return true;
   }
 

@@ -1,0 +1,97 @@
+<div class="verify-2fa-page">
+  <div class="verify-2fa-container">
+
+    <!-- Card -->
+    <div class="verify-card">
+      <!-- Header -->
+      <div class="card-header">
+        <div class="icon-wrapper">
+          <span class="material-icons">security</span>
+        </div>
+        <h1>Verificación de Dos Factores</h1>
+        <p>Ingrese el código de 6 dígitos enviado a su correo</p>
+      </div>
+
+      <!-- Email Display -->
+      <div class="email-display" *ngIf="userEmail">
+        <span class="material-icons">email</span>
+        <span>Código enviado a: <strong>{{ userEmail }}</strong></span>
+      </div>
+
+      <!-- Error Message -->
+      <div class="alert alert-error" *ngIf="errorMessage">
+        <span class="material-icons alert-icon">error</span>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="verifyForm" (ngSubmit)="onSubmit()" class="verify-form">
+        <div class="form-group">
+          <label for="code">Código de verificación</label>
+          <input
+            type="text"
+            id="code"
+            formControlName="code"
+            class="form-control code-input"
+            [class.error]="codeControl?.invalid && codeControl?.touched"
+            placeholder="000000"
+            maxlength="6"
+            autocomplete="off"
+            (input)="onCodeInput($event)"
+            #codeInput>
+          <span class="error-message" *ngIf="codeControl?.invalid && codeControl?.touched">
+            {{ getCodeError() }}
+          </span>
+        </div>
+
+        <!-- Timer & Resend -->
+        <div class="timer-container">
+          <div class="timer-display" [class.expiring]="timeRemaining < 60">
+            <span class="material-icons">schedule</span>
+            <span>El código expira en: {{ formatTime(timeRemaining) }}</span>
+          </div>
+          <button
+            type="button"
+            class="btn-resend"
+            (click)="resendCode()"
+            [disabled]="!canResend || isLoading">
+            <span class="material-icons">refresh</span>
+            {{ canResend ? 'Reenviar código' : 'Reenviar disponible' }}
+          </button>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isLoading || verifyForm.invalid">
+          <span class="material-icons" *ngIf="isLoading">hourglass_empty</span>
+          <span class="material-icons" *ngIf="!isLoading">check_circle</span>
+          {{ isLoading ? 'Verificando...' : 'Verificar' }}
+        </button>
+      </form>
+
+      <!-- Back to Login -->
+      <div class="back-to-login">
+        <a routerLink="/login">
+          <span class="material-icons">arrow_back</span>
+          Volver al login
+        </a>
+      </div>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <span class="material-icons info-icon">info</span>
+      <div class="info-content">
+        <h4>¿No recibe el código?</h4>
+        <ul>
+          <li>Verifique su carpeta de spam o correo no deseado</li>
+          <li>Asegúrese de usar el correo registrado</li>
+          <li>Espere el tiempo indicado para reenviar</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>

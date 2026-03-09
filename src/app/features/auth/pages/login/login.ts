@@ -237,8 +237,16 @@ export class LoginComponent implements OnInit, OnDestroy {
             window.grecaptcha.reset();
           }
 
-          // Redirigir según rol
+          // Redirigir según el flujo
           setTimeout(() => {
+            // Verificar si debe cambiar contraseña (primer login)
+            if (response.mustChangePassword) {
+              // El token temporal ya se guardó en el servicio
+              this.router.navigate(['/auth/force-password-change']);
+              return;
+            }
+
+            // Login normal - redirigir según rol
             const userRole = response.role?.toUpperCase();
             if (userRole === 'STOREKEEPER') {
               this.router.navigate(['/inventory']);
@@ -248,6 +256,26 @@ export class LoginComponent implements OnInit, OnDestroy {
           }, 1500);
         },
         error: (error) => {
+          console.log('🔵 Login error handler:', error);
+          console.log('🔵 error.is2faRequired:', error?.is2faRequired);
+
+          // Caso especial: 2FA requerido - redirigir inmediatamente
+          if (error?.is2faRequired) {
+            console.log('🔵 2FA detectado, preparando redirección...');
+            this.isLoading = false;
+            console.log('🔵 isLoading establecido a false');
+            console.log('🔵 Navegando a /auth/verify-2fa');
+            // Pequeño delay para asegurar que el UI se actualice
+            setTimeout(() => {
+              console.log('🔵 Ejecutando router.navigate...');
+              this.router.navigate(['/auth/verify-2fa']).then(
+                (success) => console.log('🔵 Navegación exitosa:', success),
+                (err) => console.error('🔵 Error en navegación:', err)
+              );
+            }, 100);
+            return;
+          }
+
           this.isLoading = false;
 
           // Registrar intento fallido para rate limiting
