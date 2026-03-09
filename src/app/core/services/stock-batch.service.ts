@@ -117,6 +117,17 @@ export class StockBatchService {
   }
 
   /**
+   * Elimina un lote de stock
+   * DELETE /api/stock-batch/{id}
+   */
+  deleteBatch(batchId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.API_URL}/${batchId}`,
+      { withCredentials: true }
+    );
+  }
+
+  /**
    * Helpers para clasificar estados
    */
   isExpired(batch: StockBatch): boolean {

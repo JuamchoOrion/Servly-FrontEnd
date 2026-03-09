@@ -77,6 +77,17 @@
                 {{ batch.daysUntilExpiry * -1 }} días vencido
               </span>
             </div>
+            <div class="batch-actions">
+              <button
+                class="btn-delete-batch"
+                (click)="deleteExpiredBatch(batch)"
+                [disabled]="deletingBatchId === batch.id"
+                title="Eliminar lote expirado">
+                <span class="material-icons" *ngIf="deletingBatchId !== batch.id">delete</span>
+                <span class="spinner-small" *ngIf="deletingBatchId === batch.id"></span>
+                <span>{{ deletingBatchId === batch.id ? 'Eliminando...' : 'Eliminar' }}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
