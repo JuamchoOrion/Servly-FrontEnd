@@ -142,6 +142,138 @@ label {
 /* DARK MODE COMPLETAMENTE DESHABILITADO */
 
 // ===============================
+// 🌙 MODO OSCURO - Dark Mode
+// Cumple con ISO 25010 - Preferencias visuales
+// ===============================
+:root.dark-mode {
+  --ion-background-color: #1a1a1a;
+  --ion-text-color: #f5f5f5;
+
+  html, body {
+    background-color: #1a1a1a !important;
+    color: #f5f5f5 !important;
+  }
+
+  ion-app {
+    --ion-background-color: #1a1a1a !important;
+    --ion-text-color: #f5f5f5 !important;
+  }
+
+  // Fondos de contenedores principales
+  main, .app-main, .app-content, router-outlet {
+    background: #1a1a1a !important;
+    color: #f5f5f5 !important;
+  }
+
+  // Todas las páginas
+  .dashboard-page, .inventory-page, .items-page, .suppliers-page,
+  .login-page, .categories-page, .table-orders-page {
+    background: #1a1a1a !important;
+    color: #f5f5f5 !important;
+  }
+
+  // Contenedores y tarjetas
+  .dashboard-container, .dashboard-header, .stat-card, .analytics-card,
+  .activity-card, .quick-actions-card, .empty-dashboard, .loading-state,
+  .inventory-container, .item-card, .items-table-wrapper, .suppliers-container,
+  .categories-container, .category-card, .login-container, .login-card,
+  .table-orders-container {
+    background: #2a2a2a !important;
+    color: #f5f5f5 !important;
+    border-color: #3a3a3a !important;
+  }
+
+  // Textos
+  h1, h2, h3, h4, h5, h6, .stat-number, .item-name, .supplier-name,
+  .category-name, .action-text {
+    color: #f5f5f5 !important;
+  }
+
+  p, span, .stat-label, .card-subtitle, .item-description, .supplier-info,
+  .category-description, .alert-count {
+    color: #cccccc !important;
+  }
+
+  .alert-category, .no-alerts, .text-muted {
+    color: #999999 !important;
+  }
+
+  // Inputs y formularios
+  input, textarea, select, ion-input, ion-select, .form-input {
+    background: #333333 !important;
+    color: #f5f5f5 !important;
+    border-color: #444444 !important;
+  }
+
+  // Botones
+  .btn-refresh, button, .btn-primary {
+    background: #333333 !important;
+    color: #f5f5f5 !important;
+    border-color: #444444 !important;
+  }
+
+  .btn-secondary {
+    background: #2a2a2a !important;
+    color: #f5f5f5 !important;
+  }
+
+  // Tablas
+  table, th, td, .items-table, .suppliers-table {
+    background: #2a2a2a !important;
+    color: #f5f5f5 !important;
+    border-color: #3a3a3a !important;
+  }
+
+  thead {
+    background: #333333 !important;
+  }
+
+  tbody tr:nth-child(even) {
+    background: #2a2a2a !important;
+  }
+
+  tbody tr:hover {
+    background: #333333 !important;
+  }
+
+  // Iconos y botones de acción
+  .btn-icon {
+    background: #333333 !important;
+
+    svg {
+      fill: #cccccc !important;
+    }
+
+    &:hover {
+      background: #444444 !important;
+    }
+  }
+
+  // Labels de formularios
+  .form-label, label {
+    color: #f5f5f5 !important;
+  }
+
+  // Mensajes de error
+  .error-text {
+    color: #ef5350 !important;
+  }
+
+  // Scrollbars
+  ::-webkit-scrollbar-track {
+    background: #1a1a1a !important;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(200, 169, 81, 0.4) !important;
+
+    &:hover {
+      background-color: rgba(200, 169, 81, 0.7) !important;
+    }
+  }
+}
+
+// ===============================
 // 👁️ ALTO CONTRASTE - High Contrast
 // Cumple con ISO 25010 - Mayor contraste visual
 // ===============================
@@ -331,6 +463,48 @@ p, span, label, button {
   &:focus {
     top: 0;
   }
+}
+
+// ===============================
+// ♿ ACCESIBILIDAD - BOTÓN FLOTANTE
+// ================================
+// Asegurar que el botón de accesibilidad siempre esté visible
+.accessibility-container {
+  position: fixed !important;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99999 !important;
+  pointer-events: none;
+
+  // El botón debe recibir eventos de pointer
+  .accessibility-toggle {
+    pointer-events: auto !important;
+  }
+
+  // El menú también debe recibir eventos
+  .accessibility-menu {
+    pointer-events: auto !important;
+  }
+}
+
+// Asegurar que el contenedor del app no interfiera con el fixed
+ion-app.app-wrapper {
+  position: relative !important;
+  overflow: visible !important;
+  contain: none !important;
+}
+
+.app-wrapper {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.app-main {
+  overflow: visible !important;
+}
+
+.app-content {
+  overflow: visible !important;
 }
 
 

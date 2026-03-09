@@ -57,6 +57,8 @@ ion-app.app-wrapper {
   background: #f5f5f5 !important;
   overflow: visible !important;
   contain: none !important;
+  position: relative !important;
+  transform: none !important;
 
   app-navbar {
     flex-shrink: 0;
@@ -71,12 +73,16 @@ ion-app.app-wrapper {
     width: 100%;
     overflow: visible;
     background: #f5f5f5 !important;
+    position: static !important;
+    transform: none !important;
 
     .app-content {
       flex: 1;
       width: 100%;
       overflow: visible;
       background: #f5f5f5 !important;
+      position: static !important;
+      transform: none !important;
     }
 
     app-footer {
@@ -86,14 +92,29 @@ ion-app.app-wrapper {
     }
   }
 
+  /* Accesibilidad - Botón flotante SIEMPRE visible */
   app-accessibility-menu {
-    position: fixed;
-    z-index: 9999;
-    bottom: 24px;
-    right: 24px;
-    width: auto;
-    height: auto;
-    pointer-events: all;
+    position: fixed !important;
+    z-index: 999999 !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    width: auto !important;
+    height: auto !important;
+    pointer-events: none !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    /* El contenedor interno del componente */
+    .accessibility-container {
+      position: fixed !important;
+      bottom: 24px !important;
+      right: 24px !important;
+      z-index: 999999 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      transform: none !important;
+    }
   }
 }
 

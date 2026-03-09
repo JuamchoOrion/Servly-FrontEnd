@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, Router } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../directives/click-outside.directive';
 import { Subject } from 'rxjs';
@@ -22,7 +22,7 @@ interface CurrentUser {
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink, ClickOutsideDirective],
+  imports: [CommonModule, RouterLink, RouterLinkActive, ClickOutsideDirective],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
@@ -37,31 +37,31 @@ export class NavbarComponent implements OnInit, OnDestroy {
     {
       label: 'Dashboard',
       route: '/dashboard',
-      icon: '📊',
+      icon: 'dashboard',
       roles: ['ADMIN', 'STOREKEEPER', 'STAFF']
     },
     {
       label: 'Inventario',
       route: '/inventory',
-      icon: '📦',
+      icon: 'inventory_2',
       roles: ['ADMIN', 'STOREKEEPER']
     },
     {
       label: 'Categorías',
       route: '/categories',
-      icon: '🏷️',
+      icon: 'label',
       roles: ['ADMIN', 'STOREKEEPER']
     },
     {
       label: 'Items',
       route: '/items',
-      icon: '📋',
+      icon: 'format_list_bulleted',
       roles: ['ADMIN', 'STOREKEEPER']
     },
     {
       label: 'Proveedores',
       route: '/inventory/providers',
-      icon: '🤝',
+      icon: 'handshake',
       roles: ['ADMIN', 'STOREKEEPER']
     }
   ];

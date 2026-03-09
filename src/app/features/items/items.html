@@ -13,27 +13,29 @@
           (click)="refreshData()"
           [disabled]="isLoading"
           title="Refrescar datos">
-          🔄 Refrescar
+          <span class="material-icons">refresh</span>
+          Refrescar
         </button>
         <button
           class="btn btn-primary"
           (click)="openCreateForm()"
           [disabled]="isLoading"
           *ngIf="canEdit()">
-          + Crear Item
+          <span class="material-icons">add_circle</span>
+          Crear Item
         </button>
       </div>
     </div>
 
     <!-- Success Message -->
     <div class="alert alert-success" *ngIf="successMessage">
-      <div class="alert-icon">✅</div>
+      <span class="material-icons alert-icon">check_circle</span>
       <span>{{ successMessage }}</span>
     </div>
 
     <!-- Error Message -->
     <div class="alert alert-error" *ngIf="errorMessage">
-      <div class="alert-icon">❌</div>
+      <span class="material-icons alert-icon">error</span>
       <span>{{ errorMessage }}</span>
     </div>
 
@@ -45,7 +47,7 @@
 
     <!-- Empty State -->
     <div class="empty-state" *ngIf="!isLoading && items.length === 0">
-      <div class="empty-icon">📦</div>
+      <span class="material-icons empty-icon">inventory_2</span>
       <h3>No hay items</h3>
       <p>Crea tu primer item para comenzar</p>
     </div>
@@ -82,14 +84,14 @@
                 (click)="openEditForm(item)"
                 title="Editar"
                 *ngIf="canEdit()">
-                ✏️
+                <span class="material-icons">edit</span>
               </button>
               <button
                 class="btn-icon btn-delete"
                 (click)="deleteItem(item)"
                 title="Eliminar"
                 *ngIf="canEdit()">
-                🗑️
+                <span class="material-icons">delete</span>
               </button>
             </td>
           </tr>
@@ -155,7 +157,9 @@
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h2>{{ isEditMode ? 'Editar Item' : 'Nuevo Item' }}</h2>
-          <button class="btn-close" (click)="closeForm()">✕</button>
+          <button class="btn-close" (click)="closeForm()">
+            <span class="material-icons">close</span>
+          </button>
         </div>
 
         <form [formGroup]="itemForm" (ngSubmit)="submitForm()" class="modal-body">

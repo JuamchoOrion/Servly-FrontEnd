@@ -160,3 +160,47 @@ $text-light: #666666;
   }
 }
 
+
+/* ===============================
+   🌙 MODO OSCURO - Dark Mode
+================================ */
+
+:host-context(.dark-mode) {
+  .main-footer {
+    background: #2a2a2a !important;
+    border-top-color: #3a3a3a !important;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3) !important;
+
+    .footer-content {
+      .footer-left {
+        .footer-logo {
+          color: $accent-gold !important;
+        }
+
+        .footer-year {
+          color: #999999 !important;
+        }
+      }
+
+      .footer-center {
+        .footer-contact {
+          border-color: $accent-gold !important;
+          color: $accent-gold !important;
+
+          &:hover {
+            background: rgba($accent-gold, 0.15) !important;
+            border-color: $accent-gold !important;
+            box-shadow: 0 2px 8px rgba($accent-gold, 0.3) !important;
+          }
+        }
+      }
+
+      .footer-right {
+        .footer-text {
+          color: #999999 !important;
+        }
+      }
+    }
+  }
+}
+

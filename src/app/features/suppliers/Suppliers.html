@@ -5,15 +5,13 @@
   <!-- Header -->
   <header class="suppliers-header">
     <div class="header-content">
-      <h1 class="suppliers-title" id="page-title">Proveedores</h1>
-      <p class="suppliers-subtitle">Gestión de proveedores y contactos</p>
+      <h1>Gestión de Proveedores</h1>
+      <p>Administra los proveedores y contactos del sistema</p>
     </div>
     <div class="header-actions">
       <button class="btn btn-add" (click)="openCreateModal()" [disabled]="isLoading" aria-label="Crear nuevo proveedor">
-        <svg class="icon-plus" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-        </svg>
-        <span aria-hidden="true">Nuevo Proveedor</span>
+        <span class="material-icons">add_circle</span>
+        <span>Nuevo Proveedor</span>
       </button>
     </div>
   </header>
@@ -103,6 +101,58 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div class="pagination-controls" *ngIf="suppliers.length > 0">
+        <div class="pagination-info">
+          <span class="page-info">
+            Página {{ currentPage + 1 }} de {{ totalPages }}
+            ({{ totalElements }} proveedores totales)
+          </span>
+          <div class="page-size-selector">
+            <label for="pageSize">Mostrar:</label>
+            <select
+              id="pageSize"
+              [value]="pageSize"
+              (change)="changePageSize($any($event.target).value)"
+              class="page-size-select">
+              <option value="5">5 por página</option>
+              <option value="10">10 por página</option>
+              <option value="20">20 por página</option>
+              <option value="50">50 por página</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pagination-buttons">
+          <button
+            class="btn btn-pagination"
+            (click)="previousPage()"
+            [disabled]="currentPage === 0">
+            ← Anterior
+          </button>
+
+          <div class="page-numbers">
+            <button
+              *ngFor="let pageNum of pageNumbers"
+              class="btn btn-page-number"
+              [class.active]="pageNum === currentPage"
+              [class.ellipsis]="pageNum === -1"
+              [disabled]="pageNum === -1"
+              (click)="goToPage(pageNum)">
+              <span *ngIf="pageNum === -1">...</span>
+              <span *ngIf="pageNum !== -1">{{ pageNum + 1 }}</span>
+            </button>
+          </div>
+
+          <button
+            class="btn btn-pagination"
+            (click)="nextPage()"
+            [disabled]="isLastPage">
+            Siguiente →
+          </button>
         </div>
       </div>
     </div>

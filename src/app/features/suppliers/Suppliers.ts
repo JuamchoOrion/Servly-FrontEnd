@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { SupplierService, SupplierDTO, SupplierCreateRequest, MessageResponse } from '../../core/services/supplier.service';
+import { SupplierService, SupplierDTO, SupplierCreateRequest, MessageResponse, PaginatedSupplierResponse } from '../../core/services/supplier.service';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 @Component({
   selector: 'app-suppliers',
@@ -23,6 +24,13 @@ export class SuppliersComponent implements OnInit {
   selectedLogoFile: File | null = null;
   logoPreviewUrl: string | null = null;
 
+  // Paginación
+  currentPage = 0;
+  pageSize = 10;
+  totalElements = 0;
+  totalPages = 0;
+  isLastPage = false;
+
   supplierForm!: FormGroup;
 
   private destroy$ = new Subject<void>();
@@ -30,7 +38,8 @@ export class SuppliersComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
-    private supplierService: SupplierService
+    private supplierService: SupplierService,
+    private http: HttpClient
   ) {
     this.initializeForm();
   }
@@ -61,21 +70,32 @@ export class SuppliersComponent implements OnInit {
   }
 
   /**
-   * Carga los proveedores desde el backend
+   * Carga los proveedores desde el backend con paginación
    */
   private loadSuppliers(): void {
     this.isLoading = true;
 
-    this.supplierService.getAll()
+    const params = new HttpParams()
+      .set('page', this.currentPage.toString())
+      .set('size', this.pageSize.toString())
+      .set('sort', 'id,asc');
+
+    this.http.get<PaginatedSupplierResponse>('/api/staff/inventory/suppliers/paginated', { params })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) => {
-          this.suppliers = data;
+        next: (response) => {
+          this.suppliers = response.content || [];
+          this.currentPage = response.pageNumber;
+          this.pageSize = response.pageSize;
+          this.totalElements = response.totalElements;
+          this.totalPages = response.totalPages;
+          this.isLastPage = response.last;
           this.isLoading = false;
           this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('Error al cargar proveedores:', error);
+          this.suppliers = [];
           this.isLoading = false;
           this.cdr.detectChanges();
         }
@@ -433,5 +453,77 @@ export class SuppliersComponent implements OnInit {
       this.formError = error.message || 'Error al procesar la solicitud';
       console.error('Error:', error);
     }
+  }
+
+  // Métodos de Paginación
+  nextPage(): void {
+    if (!this.isLastPage) {
+      this.currentPage++;
+      this.loadSuppliers();
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 0) {
+      this.currentPage--;
+      this.loadSuppliers();
+    }
+  }
+
+  goToPage(pageNumber: number): void {
+    if (pageNumber >= 0 && pageNumber < this.totalPages) {
+      this.currentPage = pageNumber;
+      this.loadSuppliers();
+    }
+  }
+
+  changePageSize(newSize: string | number): void {
+    const size = typeof newSize === 'string' ? parseInt(newSize, 10) : newSize;
+    this.pageSize = size;
+    this.currentPage = 0;
+    this.loadSuppliers();
+  }
+
+  get pageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisiblePages = 5;
+
+    if (this.totalPages <= maxVisiblePages) {
+      for (let i = 0; i < this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      const halfVisible = Math.floor(maxVisiblePages / 2);
+      let start = this.currentPage - halfVisible;
+      let end = this.currentPage + halfVisible;
+
+      if (start < 0) {
+        start = 0;
+        end = maxVisiblePages - 1;
+      } else if (end >= this.totalPages) {
+        end = this.totalPages - 1;
+        start = end - maxVisiblePages + 1;
+      }
+
+      if (start > 0) {
+        pages.push(0);
+        if (start > 1) {
+          pages.push(-1);
+        }
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (end < this.totalPages - 1) {
+        if (end < this.totalPages - 2) {
+          pages.push(-1);
+        }
+        pages.push(this.totalPages - 1);
+      }
+    }
+
+    return pages;
   }
 }

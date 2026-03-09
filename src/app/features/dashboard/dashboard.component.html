@@ -12,7 +12,8 @@
         (click)="refreshData()"
         [disabled]="isLoading"
         title="Actualizar datos">
-        🔄 Actualizar
+        <span class="material-icons">refresh</span>
+        Actualizar
       </button>
     </div>
 
@@ -24,7 +25,7 @@
 
     <!-- ══ Error Message ════════════════════════════════════════════════════ -->
     <div class="alert alert-error" *ngIf="errorMessage">
-      <div class="alert-icon">❌</div>
+      <span class="material-icons alert-icon">error</span>
       <span>{{ errorMessage }}</span>
     </div>
 
@@ -35,7 +36,7 @@
       <div class="stats-grid">
 
         <div class="stat-card stat-primary">
-          <div class="stat-icon">📦</div>
+          <span class="material-icons stat-icon">inventory_2</span>
           <div class="stat-content">
             <div class="stat-number">{{ stats.totalItems }}</div>
             <div class="stat-label">Items Totales</div>
@@ -46,7 +47,7 @@
         </div>
 
         <div class="stat-card stat-secondary">
-          <div class="stat-icon">🏷️</div>
+          <span class="material-icons stat-icon">label</span>
           <div class="stat-content">
             <div class="stat-number">{{ stats.totalCategories }}</div>
             <div class="stat-label">Categorías</div>
@@ -57,7 +58,7 @@
         </div>
 
         <div class="stat-card stat-warning">
-          <div class="stat-icon">⚠️</div>
+          <span class="material-icons stat-icon">warning</span>
           <div class="stat-content">
             <div class="stat-number">{{ stats.lowStockItems }}</div>
             <div class="stat-label">Stock Bajo</div>
@@ -68,7 +69,7 @@
         </div>
 
         <div class="stat-card stat-success">
-          <div class="stat-icon">🤝</div>
+          <span class="material-icons stat-icon">handshake</span>
           <div class="stat-content">
             <div class="stat-number">{{ stats.totalSuppliers }}</div>
             <div class="stat-label">Proveedores</div>
@@ -86,7 +87,7 @@
         <!-- Bar Chart: Distribución por Categorías -->
         <div class="analytics-card">
           <div class="card-header">
-            <h3>📊 Distribución por Categorías</h3>
+            <h3><span class="material-icons">bar_chart</span> Distribución por Categorías</h3>
             <span class="card-subtitle">Items por categoría</span>
           </div>
           <div class="chart-container">
@@ -101,7 +102,7 @@
         <!-- Pie Chart: Estado de Expiración -->
         <div class="analytics-card">
           <div class="card-header">
-            <h3>🥧 Estado de Expiración</h3>
+            <h3><span class="material-icons">pie_chart</span> Estado de Expiración</h3>
             <span class="card-subtitle">Distribución de items</span>
           </div>
           <div class="chart-container">
@@ -118,7 +119,7 @@
       <!-- ── Expiration Alerts ───────────────────────────────────────────── -->
       <div class="alerts-section">
         <div class="section-header">
-          <h3>⏰ Próximos a Expirar (menos de 2 semanas)</h3>
+          <h3><span class="material-icons">schedule</span> Productos de Rápida Expiración</h3>
           <span class="alert-count">{{ getExpiringItems().length }} items</span>
         </div>
         <div class="alerts-container">
@@ -135,7 +136,7 @@
             </div>
           </div>
           <div *ngIf="getExpiringItems().length === 0" class="no-alerts">
-            ✅ No hay items próximos a expirar en las próximas 2 semanas
+            <span class="material-icons">check_circle</span> No hay items próximos a expirar en las próximas 2 semanas
           </div>
         </div>
       </div>
@@ -143,24 +144,24 @@
       <!-- ── Quick Actions ──────────────────────────────────────────────── -->
       <div class="quick-actions-card">
         <div class="card-header">
-          <h3>⚡ Acciones Rápidas</h3>
+          <h3><span class="material-icons">bolt</span> Acciones Rápidas</h3>
           <span class="card-subtitle">Tareas comunes</span>
         </div>
         <div class="quick-actions-grid">
           <a routerLink="/items" class="quick-action" *ngIf="canViewItems()">
-            <div class="action-icon">➕</div>
+            <span class="material-icons action-icon">add_circle</span>
             <div class="action-text">Crear Item</div>
           </a>
           <a routerLink="/categories" class="quick-action" *ngIf="canManageCategories()">
-            <div class="action-icon">🏷️</div>
+            <span class="material-icons action-icon">label</span>
             <div class="action-text">Nueva Categoría</div>
           </a>
           <a routerLink="/inventory" class="quick-action" *ngIf="canViewInventory()">
-            <div class="action-icon">📋</div>
+            <span class="material-icons action-icon">inventory_2</span>
             <div class="action-text">Revisar Inventario</div>
           </a>
           <a routerLink="/inventory/providers" class="quick-action" *ngIf="canViewInventory()">
-            <div class="action-icon">🤝</div>
+            <span class="material-icons action-icon">handshake</span>
             <div class="action-text">Gestionar Proveedores</div>
           </a>
         </div>
@@ -170,7 +171,7 @@
 
     <!-- ══ Empty State ══════════════════════════════════════════════════════ -->
     <div class="empty-dashboard" *ngIf="!isLoading && !stats && !errorMessage">
-      <div class="empty-icon">📊</div>
+      <span class="material-icons empty-icon">insights</span>
       <h3>Dashboard no disponible</h3>
       <p>No se pudieron cargar las estadísticas</p>
     </div>

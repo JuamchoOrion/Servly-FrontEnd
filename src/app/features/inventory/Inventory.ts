@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 // DTOs - Coincidiendo con el backend
 interface ItemStockDTO {
@@ -15,7 +15,16 @@ interface ItemStockDTO {
   unitOfMeasurement: string;
   supplierName: string;
   expirationDays: number | null;
-  stockPercent: number;
+  idealStock: number;
+}
+
+interface PaginatedInventoryResponse {
+  content: ItemStockDTO[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
 }
 
 @Component({
@@ -30,6 +39,13 @@ export class InventoryComponent implements OnInit {
   inventoryItems: ItemStockDTO[] = [];
   isLoading = false;
   isSubmitting = false;
+
+  // Paginación
+  currentPage = 0;
+  pageSize = 10;
+  totalElements = 0;
+  totalPages = 0;
+  isLastPage = false;
 
   // Filtro de bajo stock
   showLowStockOnly = false;
@@ -70,22 +86,33 @@ export class InventoryComponent implements OnInit {
   }
 
   /**
-   * Carga el inventario desde el backend
+   * Carga el inventario desde el backend con paginación
    */
   private loadInventory(): void {
     this.isLoading = true;
 
-    this.http.get<ItemStockDTO[]>('/api/staff/inventory')
+    const params = new HttpParams()
+      .set('page', this.currentPage.toString())
+      .set('size', this.pageSize.toString())
+      .set('sort', 'id,asc');
+
+    this.http.get<PaginatedInventoryResponse>('/api/staff/inventory/paginated', { params })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (items) => {
-          this.inventoryItems = items;
+        next: (response) => {
+          this.inventoryItems = response.content || [];
+          this.currentPage = response.pageNumber;
+          this.pageSize = response.pageSize;
+          this.totalElements = response.totalElements;
+          this.totalPages = response.totalPages;
+          this.isLastPage = response.last;
           this.calculateLowStockCount();
           this.isLoading = false;
           this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('Error al cargar inventario:', error);
+          this.inventoryItems = [];
           this.isLoading = false;
           this.cdr.detectChanges();
         }
@@ -126,11 +153,11 @@ export class InventoryComponent implements OnInit {
   }
 
   /**
-   * Obtiene los items con stock bajo (<= 5)
+   * Obtiene los items con stock bajo (<= 60% del stock ideal)
    */
   get lowStockItems(): ItemStockDTO[] {
     if (!this.inventoryItems) return [];
-    return this.inventoryItems.filter(item => item.quantity <= 5);
+    return this.inventoryItems.filter(item => this.getStockLevel(item.quantity, item.idealStock) === 'low');
   }
 
   /**
@@ -141,7 +168,7 @@ export class InventoryComponent implements OnInit {
       this.lowStockCount = 0;
       return;
     }
-    this.lowStockCount = this.inventoryItems.filter(item => item.quantity <= 5).length;
+    this.lowStockCount = this.inventoryItems.filter(item => this.getStockLevel(item.quantity, item.idealStock) === 'low').length;
   }
 
   /**
@@ -160,20 +187,38 @@ export class InventoryComponent implements OnInit {
   }
 
   /**
-   * Obtiene el porcentaje de stock para la barra visual
+   * Obtiene el nivel de stock basado en el stock ideal
+   * - Bajo: <= 60% del stock ideal
+   * - Suficiente: > 60% y <= 120% del stock ideal
+   * - Óptimo: > 120% del stock ideal
    */
-  getStockPercentage(quantity: number): number {
-    const maxStock = 100;
-    return Math.min((quantity / maxStock) * 100, 100);
+  getStockLevel(quantity: number, idealStock: number): 'low' | 'medium' | 'high' {
+    if (!idealStock || idealStock <= 0) return 'low';
+
+    const percentage = (quantity / idealStock) * 100;
+
+    if (percentage <= 60) return 'low';
+    if (percentage <= 120) return 'medium';
+    return 'high';
   }
 
   /**
    * Obtiene el texto del nivel de stock
    */
-  getStockLevelText(quantity: number): string {
-    if (quantity <= 5) return 'Stock Bajo';
-    if (quantity <= 15) return 'Stock Medio';
+  getStockLevelText(quantity: number, idealStock: number): string {
+    const level = this.getStockLevel(quantity, idealStock);
+
+    if (level === 'low') return 'Stock Bajo';
+    if (level === 'medium') return 'Stock Suficiente';
     return 'Stock Óptimo';
+  }
+
+  /**
+   * Obtiene el porcentaje de stock para la barra visual (relativo al stock ideal)
+   */
+  getStockPercentage(quantity: number, idealStock: number): number {
+    if (!idealStock || idealStock <= 0) return 0;
+    return Math.min((quantity / idealStock) * 100, 100);
   }
 
   /**
@@ -267,5 +312,77 @@ export class InventoryComponent implements OnInit {
       this.isSubmitting = false;
       console.error('Error al ajustar stock:', error);
     }
+  }
+
+  // Métodos de Paginación
+  nextPage(): void {
+    if (!this.isLastPage) {
+      this.currentPage++;
+      this.loadInventory();
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 0) {
+      this.currentPage--;
+      this.loadInventory();
+    }
+  }
+
+  goToPage(pageNumber: number): void {
+    if (pageNumber >= 0 && pageNumber < this.totalPages) {
+      this.currentPage = pageNumber;
+      this.loadInventory();
+    }
+  }
+
+  changePageSize(newSize: string | number): void {
+    const size = typeof newSize === 'string' ? parseInt(newSize, 10) : newSize;
+    this.pageSize = size;
+    this.currentPage = 0;
+    this.loadInventory();
+  }
+
+  get pageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisiblePages = 5;
+
+    if (this.totalPages <= maxVisiblePages) {
+      for (let i = 0; i < this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      const halfVisible = Math.floor(maxVisiblePages / 2);
+      let start = this.currentPage - halfVisible;
+      let end = this.currentPage + halfVisible;
+
+      if (start < 0) {
+        start = 0;
+        end = maxVisiblePages - 1;
+      } else if (end >= this.totalPages) {
+        end = this.totalPages - 1;
+        start = end - maxVisiblePages + 1;
+      }
+
+      if (start > 0) {
+        pages.push(0);
+        if (start > 1) {
+          pages.push(-1);
+        }
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (end < this.totalPages - 1) {
+        if (end < this.totalPages - 2) {
+          pages.push(-1);
+        }
+        pages.push(this.totalPages - 1);
+      }
+    }
+
+    return pages;
   }
 }

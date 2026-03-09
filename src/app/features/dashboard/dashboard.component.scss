@@ -75,22 +75,22 @@ $border-light:    #EFEFEF;
     flex: 1;
 
     h1 {
-      font-size: 28px;
+      font-size: calc(var(--base-font-size) * 2);
       font-weight: 800;
       letter-spacing: -1px;
       color: $primary-black;
       margin: 0;
 
-      @media (min-width: 768px) { font-size: 32px; }
+      @media (min-width: 768px) { font-size: calc(var(--base-font-size) * 2.3); }
     }
 
     p {
-      font-size: 14px;
+      font-size: calc(var(--base-font-size) * 1);
       color: $text-light;
       margin: 0;
       font-weight: 500;
 
-      @media (min-width: 768px) { font-size: 15px; }
+      @media (min-width: 768px) { font-size: calc(var(--base-font-size) * 1.07); }
     }
   }
 
@@ -103,7 +103,14 @@ $border-light:    #EFEFEF;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 14px;
+    font-size: calc(var(--base-font-size) * 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .material-icons {
+      font-size: calc(var(--base-font-size) * 1.4);
+    }
 
     &:hover:not(:disabled) {
       background: color-mix(in srgb, $accent-gold 90%, black);
@@ -135,6 +142,11 @@ $border-light:    #EFEFEF;
     background: rgba($error-red, 0.1);
     color: $error-red;
     border-left: 4px solid $error-red;
+  }
+
+  .alert-icon {
+    font-size: 24px;
+    color: $error-red;
   }
 }
 
@@ -211,13 +223,13 @@ $border-light:    #EFEFEF;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   }
 
-  &.stat-primary::before  { background: $accent-gold; }
-  &.stat-secondary::before { background: $info-blue; }
-  &.stat-warning::before  { background: $warning-orange; }
-  &.stat-success::before  { background: $success-green; }
+  &.stat-primary::before  { background: #F5E6C8; }
+  &.stat-secondary::before { background: #F5E6C8; }
+  &.stat-warning::before  { background: #F5E6C8; }
+  &.stat-success::before  { background: #F5E6C8; }
 
   .stat-icon {
-    font-size: 32px;
+    font-size: calc(var(--base-font-size) * 2.3);
     flex-shrink: 0;
     width: 60px;
     height: 60px;
@@ -226,13 +238,14 @@ $border-light:    #EFEFEF;
     justify-content: center;
     border-radius: 12px;
     background: rgba($accent-gold, 0.1);
+    color: $accent-gold;
   }
 
   .stat-content {
     flex: 1;
 
     .stat-number {
-      font-size: 32px;
+      font-size: calc(var(--base-font-size) * 2.3);
       font-weight: 800;
       color: $primary-black;
       line-height: 1;
@@ -240,7 +253,7 @@ $border-light:    #EFEFEF;
     }
 
     .stat-label {
-      font-size: 14px;
+      font-size: calc(var(--base-font-size) * 1);
       color: $text-light;
       font-weight: 600;
       text-transform: uppercase;
@@ -252,7 +265,7 @@ $border-light:    #EFEFEF;
     color: $accent-gold;
     text-decoration: none;
     font-weight: 600;
-    font-size: 14px;
+    font-size: calc(var(--base-font-size) * 1);
     transition: color 0.3s ease;
 
     &:hover { color: color-mix(in srgb, $accent-gold 80%, black); }
@@ -264,8 +277,8 @@ $border-light:    #EFEFEF;
     text-align: center;
     gap: 16px;
 
-    .stat-icon { width: 50px; height: 50px; font-size: 24px; }
-    .stat-content .stat-number { font-size: 24px; }
+    .stat-icon { width: 50px; height: 50px; font-size: calc(var(--base-font-size) * 1.7); }
+    .stat-content .stat-number { font-size: calc(var(--base-font-size) * 1.7); }
   }
 }
 
@@ -298,14 +311,22 @@ $border-light:    #EFEFEF;
     border-bottom: 1px solid $border-light;
 
     h3 {
-      font-size: 18px;
+      font-size: calc(var(--base-font-size) * 1.3);
       font-weight: 700;
       color: $primary-black;
       margin: 0 0 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .material-icons {
+        font-size: calc(var(--base-font-size) * 1.7);
+        color: $accent-gold;
+      }
     }
 
     .card-subtitle {
-      font-size: 12px;
+      font-size: calc(var(--base-font-size) * 0.85);
       color: $text-light;
       font-weight: 500;
       text-transform: uppercase;
@@ -351,7 +372,7 @@ $border-light:    #EFEFEF;
     border-bottom: 1px solid $border-light;
 
     h3 {
-      font-size: 18px;
+      font-size: calc(var(--base-font-size) * 1.3);
       font-weight: 700;
       color: $primary-black;
       margin: 0;
@@ -362,7 +383,7 @@ $border-light:    #EFEFEF;
       color: $white;
       padding: 4px 12px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: calc(var(--base-font-size) * 0.85);
       font-weight: 600;
     }
   }
@@ -415,18 +436,18 @@ $border-light:    #EFEFEF;
       .alert-name {
         font-weight: 600;
         color: $primary-black;
-        font-size: 14px;
+        font-size: calc(var(--base-font-size) * 1);
       }
 
       .alert-category {
-        font-size: 12px;
+        font-size: calc(var(--base-font-size) * 0.85);
         color: $text-light;
       }
     }
 
     .alert-status {
       font-weight: 700;
-      font-size: 12px;
+      font-size: calc(var(--base-font-size) * 0.85);
       padding: 4px 8px;
       border-radius: 4px;
       text-transform: uppercase;
@@ -438,6 +459,15 @@ $border-light:    #EFEFEF;
     color: $text-light;
     font-style: italic;
     padding: 30px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    .material-icons {
+      font-size: calc(var(--base-font-size) * 1.7);
+      color: $success-green;
+    }
   }
 }
 
@@ -471,12 +501,16 @@ $border-light:    #EFEFEF;
     }
 
     .action-icon {
-      font-size: 24px;
+      font-size: calc(var(--base-font-size) * 2.3);
       margin-bottom: 8px;
+      color: $accent-gold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .action-text {
-      font-size: 14px;
+      font-size: calc(var(--base-font-size) * 1);
       font-weight: 600;
       color: $primary-black;
       text-align: center;
@@ -495,13 +529,17 @@ $border-light:    #EFEFEF;
   border: 1px solid $border-light;
 
   .empty-icon {
-    font-size: 64px;
+    font-size: calc(var(--base-font-size) * 4.5);
     margin-bottom: 20px;
     opacity: 0.5;
+    color: $accent-gold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   h3 {
-    font-size: 20px;
+    font-size: calc(var(--base-font-size) * 1.4);
     color: $text-dark;
     margin: 0 0 8px 0;
   }
@@ -509,12 +547,13 @@ $border-light:    #EFEFEF;
   p {
     color: $text-light;
     margin: 0;
+    font-size: calc(var(--base-font-size) * 1);
   }
 }
 
 // ── Dark Mode ──────────────────────────────────────────────────────────────
 
-:root.dark-mode {
+:host-context(.dark-mode) {
   .dashboard-page { background: #1a1a1a; }
 
   .dashboard-header,
@@ -558,4 +597,68 @@ $border-light:    #EFEFEF;
   }
 
   .section-header { border-bottom-color: #3a3a3a !important; }
+
+  // Alerts Section Dark Mode
+  .alerts-section {
+    .section-header {
+      h3 {
+        color: #f5f5f5 !important;
+
+        .material-icons {
+          color: $accent-gold !important;
+        }
+      }
+
+      .alert-count {
+        background: $accent-gold !important;
+        color: #1a1a1a !important;
+      }
+    }
+
+    .alerts-container {
+      .alert-item {
+        &:hover {
+          background: rgba($accent-gold, 0.1) !important;
+        }
+
+        &.status-warning {
+          background: rgba(245, 124, 0, 0.2) !important;
+          border-left-color: $warning-orange !important;
+
+          .alert-status {
+            background: $warning-orange !important;
+            color: #1a1a1a !important;
+          }
+
+          .alert-name,
+          .alert-category {
+            color: #f5f5f5 !important;
+          }
+        }
+
+        &.status-critical {
+          background: rgba(198, 40, 40, 0.2) !important;
+          border-left-color: $error-red !important;
+
+          .alert-status {
+            background: $error-red !important;
+            color: #f5f5f5 !important;
+          }
+
+          .alert-name,
+          .alert-category {
+            color: #f5f5f5 !important;
+          }
+        }
+      }
+
+      .no-alerts {
+        color: #999999 !important;
+
+        .material-icons {
+          color: $success-green !important;
+        }
+      }
+    }
+  }
 }

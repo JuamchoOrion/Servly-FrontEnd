@@ -2,29 +2,29 @@
   <!-- Background -->
   <div class="inventory-background"></div>
 
-
-
   <!-- Main Content -->
   <main class="inventory-container">
+    <!-- Header -->
+    <header class="inventory-header">
+      <div class="header-content">
+        <h1>Gestión de Inventario</h1>
+        <p>Administra el stock de todos los items del sistema</p>
+      </div>
+    </header>
+
     <!-- Low Stock Alert Banner -->
     <div class="low-stock-alert" *ngIf="showLowStockOnly && lowStockItems.length > 0">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
-      </svg>
+      <span class="material-icons">warning</span>
       <span><strong>{{ lowStockItems.length }}</strong> producto(s) con stock bajo</span>
       <button class="btn-close-alert" (click)="toggleLowStockFilter()">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-        </svg>
+        <span class="material-icons">close</span>
       </button>
     </div>
 
     <!-- Low Stock Filter Button (Moved to white area) -->
     <div class="filter-bar" *ngIf="!showLowStockOnly">
       <button class="btn-filter-stock-inline" (click)="toggleLowStockFilter()" [class.active]="showLowStockOnly" title="Filtrar por stock bajo">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-        </svg>
+        <span class="material-icons">filter_list</span>
         <span class="filter-text">Filtrar por Stock Bajo</span>
         <span class="badge" *ngIf="lowStockCount > 0">{{ lowStockCount }}</span>
       </button>
@@ -38,14 +38,14 @@
 
     <!-- Empty State -->
     <div class="empty-state" *ngIf="!isLoading && (!inventoryItems || inventoryItems.length === 0)">
-      <div class="empty-icon">📦</div>
+      <span class="material-icons empty-icon">inventory_2</span>
       <h3>Inventario vacío</h3>
       <p>No hay productos registrados en el inventario</p>
     </div>
 
     <!-- Low Stock Filter Empty -->
     <div class="empty-state" *ngIf="!isLoading && showLowStockOnly && lowStockItems.length === 0">
-      <div class="empty-icon">Todo en orden</div>
+      <span class="material-icons empty-icon">check_circle</span>
       <h3>¡Todo en orden!</h3>
       <p>No hay productos con stock bajo en este momento</p>
       <button class="btn btn-secondary" (click)="toggleLowStockFilter()">
@@ -66,14 +66,10 @@
             </div>
             <div class="item-actions">
               <button class="btn-icon btn-increase" (click)="openIncreaseStockModal(itemStock)" title="Aumentar stock">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-                </svg>
+                <span class="material-icons">add_circle</span>
               </button>
               <button class="btn-icon btn-decrease" (click)="openDecreaseStockModal(itemStock)" title="Disminuir stock">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M19 13H5v-2h14v2z"/>
-                </svg>
+                <span class="material-icons">remove_circle</span>
               </button>
             </div>
           </div>
@@ -82,13 +78,13 @@
             <div class="stock-info">
               <div class="stock-row">
                 <span class="stock-label">Cantidad:</span>
-                <span class="stock-value" [class.low-stock]="itemStock.quantity <= 5">
+                <span class="stock-value" [class.low-stock]="getStockLevel(itemStock.quantity, itemStock.idealStock) === 'low'">
                   {{ itemStock.quantity }} {{ itemStock.unitOfMeasurement }}
                 </span>
               </div>
               <div class="stock-row">
-                <span class="stock-label">Proveedor:</span>
-                <span class="stock-value supplier">{{ itemStock.supplierName }}</span>
+                <span class="stock-label">Stock Ideal:</span>
+                <span class="stock-value">{{ itemStock.idealStock }} {{ itemStock.unitOfMeasurement }}</span>
               </div>
               <div class="stock-row" *ngIf="itemStock.expirationDays">
                 <span class="stock-label">Días expiración:</span>
@@ -98,13 +94,65 @@
 
             <!-- Stock Level Indicator -->
             <div class="stock-level">
-              <div class="stock-level-bar" [class.low]="itemStock.quantity <= 5" [class.medium]="itemStock.quantity > 5 && itemStock.quantity <= 15" [class.high]="itemStock.quantity > 15">
-                <div class="stock-level-fill" [style.width.%]="getStockPercentage(itemStock.quantity)"></div>
+              <div class="stock-level-bar" [class.low]="getStockLevel(itemStock.quantity, itemStock.idealStock) === 'low'" [class.medium]="getStockLevel(itemStock.quantity, itemStock.idealStock) === 'medium'" [class.high]="getStockLevel(itemStock.quantity, itemStock.idealStock) === 'high'">
+                <div class="stock-level-fill" [style.width.%]="getStockPercentage(itemStock.quantity, itemStock.idealStock)"></div>
               </div>
-              <span class="stock-level-text">{{ getStockLevelText(itemStock.quantity) }}</span>
+              <span class="stock-level-text">{{ getStockLevelText(itemStock.quantity, itemStock.idealStock) }}</span>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-controls" *ngIf="inventoryItems.length > 0">
+      <div class="pagination-info">
+        <span class="page-info">
+          Página {{ currentPage + 1 }} de {{ totalPages }}
+          ({{ totalElements }} items totales)
+        </span>
+        <div class="page-size-selector">
+          <label for="pageSize">Mostrar:</label>
+          <select
+            id="pageSize"
+            [value]="pageSize"
+            (change)="changePageSize($any($event.target).value)"
+            class="page-size-select">
+            <option value="5">5 por página</option>
+            <option value="10">10 por página</option>
+            <option value="20">20 por página</option>
+            <option value="50">50 por página</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="pagination-buttons">
+        <button
+          class="btn btn-pagination"
+          (click)="previousPage()"
+          [disabled]="currentPage === 0">
+          ← Anterior
+        </button>
+
+        <div class="page-numbers">
+          <button
+            *ngFor="let pageNum of pageNumbers"
+            class="btn btn-page-number"
+            [class.active]="pageNum === currentPage"
+            [class.ellipsis]="pageNum === -1"
+            [disabled]="pageNum === -1"
+            (click)="goToPage(pageNum)">
+            <span *ngIf="pageNum === -1">...</span>
+            <span *ngIf="pageNum !== -1">{{ pageNum + 1 }}</span>
+          </button>
+        </div>
+
+        <button
+          class="btn btn-pagination"
+          (click)="nextPage()"
+          [disabled]="isLastPage">
+          Siguiente →
+        </button>
       </div>
     </div>
   </main>
@@ -115,9 +163,7 @@
       <div class="modal-header">
         <h2>{{ stockAction === 'increase' ? 'Aumentar Stock' : 'Disminuir Stock' }}</h2>
         <button class="btn-close" (click)="closeStockModal()" aria-label="Cerrar modal">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-          </svg>
+          <span class="material-icons">close</span>
         </button>
       </div>
 

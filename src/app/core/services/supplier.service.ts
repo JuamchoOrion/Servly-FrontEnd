@@ -24,6 +24,15 @@ export interface MessageResponse {
   message: string;
 }
 
+export interface PaginatedSupplierResponse {
+  content: SupplierDTO[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
