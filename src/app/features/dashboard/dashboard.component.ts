@@ -4,7 +4,8 @@ import { RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
-import { DashboardService, DashboardStats, ExpirationAlert } from '../../core/services/dashboard.service';
+import { DashboardService, DashboardStats } from '../../core/services/dashboard.service';
+import { StockBatch, StockBatchStatus } from '../../core/services/stock-batch.service';
 import { I18nService } from '../../core/services/i18n.service';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType, Chart, registerables } from 'chart.js';
@@ -76,7 +77,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   };
 
-  // ── Pie Chart (Estado de expiración) ───────────────────────────────────────
+  // ── Pie Chart (Estado de lotes) ────────────────────────────────────────────
   pieChartType: ChartType = 'pie';
 
   pieChartData: ChartData<'pie'> = {
@@ -205,20 +206,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
       ]
     };
 
-    // ── Pie chart: estado de expiración ────────────────────────────────────
-    const expiringCount = this.stats.expirationAlerts.filter(a => a.status === 'warning').length;
-    const criticalCount = this.stats.expirationAlerts.filter(a => a.status === 'critical').length;
-    const healthyCount  = Math.max(0, this.stats.totalItems - (expiringCount + criticalCount));
+    // ── Pie chart: estado de lotes (StockBatch) ────────────────────────────
+    const healthyCount = this.stats.batchesHealthy;
+    const closeToExpireCount = this.stats.batchesCloseToExpire;
+    const expiredCount = this.stats.batchesExpired;
 
     this.pieChartData = {
-      labels: ['Estado Normal', 'Por Expirar', 'Crítico'],
+      labels: ['Vigentes', 'Próximos a Expirar', 'Expirados'],
       datasets: [
         {
-          data: [healthyCount, expiringCount, criticalCount],
+          data: [healthyCount, closeToExpireCount, expiredCount],
           backgroundColor: [
-            'rgba(46, 125, 50, 0.85)',
-            'rgba(245, 124, 0, 0.85)',
-            'rgba(198, 40, 40, 0.85)'
+            'rgba(46, 125, 50, 0.85)',   // Verde - Vigentes
+            'rgba(245, 124, 0, 0.85)',   // Naranja - Próximos a expirar
+            'rgba(198, 40, 40, 0.85)'    // Rojo - Expirados
           ],
           borderColor: ['#2E7D32', '#F57C00', '#C62828'],
           borderWidth: 2,
@@ -230,14 +231,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
+  // ── Helpers para StockBatch ────────────────────────────────────────────────
 
-  /** Filtra items que expiran en menos de 2 semanas (≤14 días, ≥0) */
-  getExpiringItems(): ExpirationAlert[] {
+  /** Obtiene los lotes próximos a expirar (menos de 7 días) */
+  getCloseToExpireBatches(): StockBatch[] {
     if (!this.stats) return [];
-    return this.stats.expirationAlerts.filter(
-      alert => alert.expirationDays <= 14 && alert.expirationDays >= 0
-    );
+    return this.stats.closeToExpireBatches || [];
+  }
+
+  /** Obtiene los lotes expirados */
+  getExpiredBatches(): StockBatch[] {
+    if (!this.stats) return [];
+    return this.stats.expiredBatches || [];
+  }
+
+  /** Obtiene todos los lotes con alertas (próximos a expirar + expirados) */
+  getAllAlertBatches(): StockBatch[] {
+    return [...this.getCloseToExpireBatches(), ...this.getExpiredBatches()];
   }
 
   getGreeting(): string {
@@ -247,15 +257,39 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return 'Buenas noches';
   }
 
-  getExpirationStatusClass(alert: ExpirationAlert): string {
-    return alert.status === 'critical' ? 'status-critical' : 'status-warning';
+  /** Obtiene la clase CSS según el estado del lote */
+  getBatchStatusClass(batch: StockBatch): string {
+    switch (batch.status) {
+      case 'EXPIRADO': return 'status-critical';
+      case 'PROXIMO_A_EXPIRAR': return 'status-warning';
+      case 'AGOTADO': return 'status-depleted';
+      default: return 'status-healthy';
+    }
   }
 
-  getExpirationStatusText(alert: ExpirationAlert): string {
-    if (alert.status === 'critical') {
-      return alert.expirationDays <= 0 ? 'VENCIDO' : `${alert.expirationDays} días`;
+  /** Obtiene el texto del estado del lote */
+  getBatchStatusText(batch: StockBatch): string {
+    if (batch.status === 'EXPIRADO') {
+      return 'EXPIRADO';
     }
-    return `${alert.expirationDays} días`;
+    if (batch.status === 'PROXIMO_A_EXPIRAR') {
+      return `${batch.daysUntilExpiry} días`;
+    }
+    if (batch.status === 'AGOTADO') {
+      return 'AGOTADO';
+    }
+    return 'Vigente';
+  }
+
+  /** Formatea la fecha de expiración */
+  formatExpiryDate(dateString: string): string {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
   }
 
   refreshData(): void {

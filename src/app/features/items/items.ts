@@ -33,6 +33,9 @@ export class ItemsComponent implements OnInit, OnDestroy {
 
   categories: ItemCategoryResponse[] = [];
 
+  // Filtro por categoría
+  selectedCategoryId: number | null = null;
+
   // Pagination
   currentPage = 0;
   pageSize = 10;
@@ -111,7 +114,12 @@ export class ItemsComponent implements OnInit, OnDestroy {
     this.errorMessage = null;
     this.cdr.markForCheck();
 
-    this.itemService.getItemsPaginated(this.currentPage, this.pageSize)
+    // Usar el servicio adecuado según si hay filtro de categoría
+    const request$ = this.selectedCategoryId
+      ? this.itemService.getItemsByCategoryPaginated(this.selectedCategoryId, this.currentPage, this.pageSize)
+      : this.itemService.getItemsPaginated(this.currentPage, this.pageSize);
+
+    request$
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: PaginatedItemResponse) => {
@@ -409,6 +417,37 @@ export class ItemsComponent implements OnInit, OnDestroy {
     }
 
     return pages;
+  }
+
+  /**
+   * Filtra los items por categoría
+   */
+  filterByCategory(categoryId: string | number | null): void {
+    if (categoryId === '' || categoryId === null || categoryId === 'all') {
+      this.selectedCategoryId = null;
+    } else {
+      this.selectedCategoryId = typeof categoryId === 'string' ? parseInt(categoryId, 10) : categoryId;
+    }
+    this.currentPage = 0; // Resetear a primera página
+    this.loadItems();
+  }
+
+  /**
+   * Limpia el filtro de categoría
+   */
+  clearCategoryFilter(): void {
+    this.selectedCategoryId = null;
+    this.currentPage = 0;
+    this.loadItems();
+  }
+
+  /**
+   * Obtiene el nombre de la categoría seleccionada
+   */
+  getSelectedCategoryName(): string {
+    if (!this.selectedCategoryId) return 'Todas las categorías';
+    const category = this.categories.find(c => c.id === this.selectedCategoryId);
+    return category ? category.name : 'Categoría no encontrada';
   }
 }
 

@@ -12,6 +12,124 @@
       </div>
     </header>
 
+    <!-- Batch Alerts Banner -->
+    <div class="batch-alerts-banner" *ngIf="showBatchAlerts && totalBatchAlerts > 0">
+      <div class="batch-alert-content">
+        <div class="alert-icon-wrapper" [class.has-expired]="expiredBatches.length > 0">
+          <span class="material-icons">{{ expiredBatches.length > 0 ? 'error' : 'schedule' }}</span>
+        </div>
+        <div class="alert-text">
+          <strong *ngIf="expiredBatches.length > 0">{{ expiredBatches.length }} lote(s) expirado(s)</strong>
+          <strong *ngIf="expiredBatches.length === 0 && closeToExpireBatches.length > 0">{{ closeToExpireBatches.length }} lote(s) próximo(s) a expirar</strong>
+          <span class="alert-detail" *ngIf="closeToExpireBatches.length > 0 && expiredBatches.length > 0">
+            + {{ closeToExpireBatches.length }} próximos a expirar
+          </span>
+        </div>
+        <button class="btn-view-expired" *ngIf="expiredBatches.length > 0" (click)="toggleExpiredSection()" title="Ver lotes expirados">
+          <span class="material-icons">{{ showExpiredSection ? 'expand_less' : 'visibility' }}</span>
+          <span>{{ showExpiredSection ? 'Ocultar' : 'Ver' }}</span>
+        </button>
+        <button class="btn-dismiss-alert" (click)="closeBatchAlerts()" title="Cerrar alerta">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Expired Batches Section -->
+    <div class="expired-batches-section" *ngIf="showExpiredSection && expiredBatches.length > 0">
+      <div class="expired-section-header">
+        <div class="expired-title">
+          <span class="material-icons">error_outline</span>
+          <h3>Lotes Expirados</h3>
+          <span class="expired-count">{{ expiredBatches.length }} lote(s)</span>
+        </div>
+        <button class="btn-refresh" (click)="refreshExpiredBatches()" title="Actualizar">
+          <span class="material-icons">refresh</span>
+        </button>
+      </div>
+
+      <div class="expired-batches-list">
+        <div class="expired-batch-card" *ngFor="let batch of expiredBatches">
+          <div class="expired-batch-info">
+            <div class="batch-header">
+              <span class="batch-number">{{ batch.batchNumber }}</span>
+              <span class="expired-badge">
+                <span class="material-icons">warning</span>
+                Expirado
+              </span>
+            </div>
+            <div class="batch-details-row">
+              <span class="detail-item">
+                <span class="material-icons">inventory_2</span>
+                {{ batch.quantity }} unidades
+              </span>
+              <span class="detail-item" *ngIf="batch.supplierName">
+                <span class="material-icons">local_shipping</span>
+                {{ batch.supplierName }}
+              </span>
+            </div>
+            <div class="batch-dates-row">
+              <span class="date-item expiry">
+                <span class="material-icons">event_busy</span>
+                Venció: {{ formatDate(batch.expiryDate) }}
+              </span>
+              <span class="days-expired">
+                {{ batch.daysUntilExpiry * -1 }} días vencido
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="expired-section-footer">
+        <p class="expired-warning">
+          <span class="material-icons">info</span>
+          Los lotes expirados deben ser revisados y dados de baja del inventario.
+        </p>
+      </div>
+    </div>
+
+    <!-- Close to Expire Section -->
+    <div class="close-to-expire-section" *ngIf="showExpiredSection && closeToExpireBatches.length > 0">
+      <div class="expire-section-header">
+        <div class="expire-title">
+          <span class="material-icons">schedule</span>
+          <h3>Próximos a Expirar</h3>
+          <span class="expire-count">{{ closeToExpireBatches.length }} lote(s)</span>
+        </div>
+      </div>
+
+      <div class="close-to-expire-list">
+        <div class="expire-batch-card" *ngFor="let batch of closeToExpireBatches">
+          <div class="expire-batch-info">
+            <div class="batch-header">
+              <span class="batch-number">{{ batch.batchNumber }}</span>
+              <span class="warning-badge">
+                <span class="material-icons">schedule</span>
+                {{ batch.daysUntilExpiry }} días
+              </span>
+            </div>
+            <div class="batch-details-row">
+              <span class="detail-item">
+                <span class="material-icons">inventory_2</span>
+                {{ batch.quantity }} unidades
+              </span>
+              <span class="detail-item" *ngIf="batch.supplierName">
+                <span class="material-icons">local_shipping</span>
+                {{ batch.supplierName }}
+              </span>
+            </div>
+            <div class="batch-dates-row">
+              <span class="date-item warning">
+                <span class="material-icons">event</span>
+                Vence: {{ formatDate(batch.expiryDate) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Low Stock Alert Banner -->
     <div class="low-stock-alert" *ngIf="showLowStockOnly && lowStockItems.length > 0">
       <span class="material-icons">warning</span>
@@ -57,27 +175,19 @@
     <div class="inventory-list" *ngIf="!isLoading && inventoryItems && inventoryItems.length > 0">
       <!-- Cards de items -->
       <div class="inventory-grid">
-        <div class="item-card" *ngFor="let itemStock of displayItems">
+        <div class="item-card" *ngFor="let itemStock of displayItems" [class.expanded]="isExpanded(itemStock.itemStockId)">
           <div class="item-card-header">
             <div class="item-info">
               <h3 class="item-name">{{ itemStock.name }}</h3>
               <p class="item-description">{{ itemStock.description }}</p>
               <span class="item-category" *ngIf="itemStock.category">{{ itemStock.category }}</span>
             </div>
-            <div class="item-actions">
-              <button class="btn-icon btn-increase" (click)="openIncreaseStockModal(itemStock)" title="Aumentar stock">
-                <span class="material-icons">add_circle</span>
-              </button>
-              <button class="btn-icon btn-decrease" (click)="openDecreaseStockModal(itemStock)" title="Disminuir stock">
-                <span class="material-icons">remove_circle</span>
-              </button>
-            </div>
           </div>
 
           <div class="item-card-body">
             <div class="stock-info">
               <div class="stock-row">
-                <span class="stock-label">Cantidad:</span>
+                <span class="stock-label">Cantidad Total:</span>
                 <span class="stock-value" [class.low-stock]="getStockLevel(itemStock.quantity, itemStock.idealStock) === 'low'">
                   {{ itemStock.quantity }} {{ itemStock.unitOfMeasurement }}
                 </span>
@@ -86,9 +196,9 @@
                 <span class="stock-label">Stock Ideal:</span>
                 <span class="stock-value">{{ itemStock.idealStock }} {{ itemStock.unitOfMeasurement }}</span>
               </div>
-              <div class="stock-row" *ngIf="itemStock.expirationDays">
-                <span class="stock-label">Días expiración:</span>
-                <span class="stock-value">{{ itemStock.expirationDays }} días</span>
+              <div class="stock-row" *ngIf="itemStock.supplierName">
+                <span class="stock-label">Proveedor:</span>
+                <span class="stock-value">{{ itemStock.supplierName }}</span>
               </div>
             </div>
 
@@ -98,6 +208,70 @@
                 <div class="stock-level-fill" [style.width.%]="getStockPercentage(itemStock.quantity, itemStock.idealStock)"></div>
               </div>
               <span class="stock-level-text">{{ getStockLevelText(itemStock.quantity, itemStock.idealStock) }}</span>
+            </div>
+
+            <!-- Toggle Batches Button -->
+            <button class="btn-view-batches" (click)="toggleItemBatches(itemStock.itemStockId)">
+              <span class="material-icons">{{ isExpanded(itemStock.itemStockId) ? 'expand_less' : 'expand_more' }}</span>
+              <span>{{ isExpanded(itemStock.itemStockId) ? 'Ocultar Lotes' : 'Ver Lotes' }}</span>
+            </button>
+          </div>
+
+          <!-- Batches Section (Expandible) -->
+          <div class="batches-section" *ngIf="isExpanded(itemStock.itemStockId)">
+            <div class="batches-header">
+              <h4><span class="material-icons">layers</span> Lotes del Item</h4>
+              <div class="batches-header-actions">
+                <span class="batch-count">{{ getBatches(itemStock.itemStockId).length }} lote(s)</span>
+                <button class="btn-add-batch" (click)="openCreateBatchModal(itemStock)" title="Agregar nuevo lote">
+                  <span class="material-icons">add</span>
+                  <span>Nuevo Lote</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Loading batches -->
+            <div class="batches-loading" *ngIf="isBatchesLoading(itemStock.itemStockId)">
+              <div class="mini-spinner"></div>
+              <span>Cargando lotes...</span>
+            </div>
+
+            <!-- No batches -->
+            <div class="no-batches" *ngIf="!isBatchesLoading(itemStock.itemStockId) && getBatches(itemStock.itemStockId).length === 0">
+              <span class="material-icons">inbox</span>
+              <span>No hay lotes registrados</span>
+              <button class="btn-add-batch-empty" (click)="openCreateBatchModal(itemStock)">
+                <span class="material-icons">add_circle</span>
+                <span>Agregar primer lote</span>
+              </button>
+            </div>
+
+            <!-- Batches List -->
+            <div class="batches-list" *ngIf="!isBatchesLoading(itemStock.itemStockId) && getBatches(itemStock.itemStockId).length > 0">
+              <div class="batch-item" *ngFor="let batch of getBatches(itemStock.itemStockId)" [class]="getBatchStatusClass(batch.status)">
+                <div class="batch-info">
+                  <div class="batch-number">{{ batch.batchNumber }}</div>
+                  <div class="batch-details">
+                    <span class="batch-quantity">{{ batch.quantity }} unidades</span>
+                    <span class="batch-supplier" *ngIf="batch.supplierName">• {{ batch.supplierName }}</span>
+                  </div>
+                  <div class="batch-dates">
+                    <span>Ingreso: {{ formatDate(batch.createdDate) }}</span>
+                    <span>Vence: {{ formatDate(batch.expiryDate) }}</span>
+                  </div>
+                </div>
+                <div class="batch-status">
+                  <span class="status-badge" [class]="getBatchStatusClass(batch.status)">
+                    {{ getBatchStatusText(batch) }}
+                  </span>
+                  <span class="days-until" *ngIf="batch.daysUntilExpiry > 0 && batch.status !== 'EXPIRADO'">
+                    {{ batch.daysUntilExpiry }} días
+                  </span>
+                  <span class="days-until expired" *ngIf="batch.status === 'EXPIRADO'">
+                    Vencido
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -157,56 +331,111 @@
     </div>
   </main>
 
-  <!-- Modal de Ajuste de Stock -->
-  <div class="modal-overlay" *ngIf="showStockModal" (click)="closeStockModal()">
-    <div class="modal-container" (click)="$event.stopPropagation()">
+
+  <!-- Modal de Crear Nuevo Lote -->
+  <div class="modal-overlay" *ngIf="showCreateBatchModal" (click)="closeCreateBatchModal()">
+    <div class="modal-container modal-batch" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{ stockAction === 'increase' ? 'Aumentar Stock' : 'Disminuir Stock' }}</h2>
-        <button class="btn-close" (click)="closeStockModal()" aria-label="Cerrar modal">
+        <h2><span class="material-icons">add_box</span> Nuevo Lote</h2>
+        <button class="btn-close" (click)="closeCreateBatchModal()" aria-label="Cerrar modal">
           <span class="material-icons">close</span>
         </button>
       </div>
 
-      <form [formGroup]="stockForm" (ngSubmit)="onAdjustStockSubmit()" class="modal-body">
+      <form [formGroup]="batchForm" (ngSubmit)="onCreateBatchSubmit()" class="modal-body">
         <!-- Información del item -->
         <div class="stock-item-info">
-          <strong>Item:</strong> {{ getAdjustingItemStock()?.name }}
-          <br>
-          <strong>Stock actual:</strong> {{ getAdjustingItemStock()?.quantity }} {{ getAdjustingItemStock()?.unitOfMeasurement }}
+          <div class="info-row">
+            <span class="info-label">Item:</span>
+            <span class="info-value">{{ getCreatingBatchItemStock()?.name }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Stock actual:</span>
+            <span class="info-value">{{ getCreatingBatchItemStock()?.quantity }} {{ getCreatingBatchItemStock()?.unitOfMeasurement }}</span>
+          </div>
+        </div>
+
+        <!-- Número de Lote -->
+        <div class="form-group">
+          <label for="batch-number" class="form-label">Número de Lote *</label>
+          <input
+            id="batch-number"
+            type="text"
+            class="form-input"
+            [class.error]="batchNumberControl.invalid && batchNumberControl.touched"
+            placeholder="Ej: LOTE-ARR-20260308-001"
+            formControlName="batchNumber"
+            (blur)="batchNumberControl.markAsTouched()">
+          <span class="error-text" *ngIf="batchNumberControl.invalid && batchNumberControl.touched">
+            {{ getBatchNumberError() }}
+          </span>
         </div>
 
         <!-- Cantidad -->
         <div class="form-group">
-          <label for="stock-quantity" class="form-label">Cantidad a {{ stockAction === 'increase' ? 'agregar' : 'retirar' }} *</label>
+          <label for="batch-quantity" class="form-label">Cantidad *</label>
           <input
-            id="stock-quantity"
+            id="batch-quantity"
             type="number"
             class="form-input"
-            [class.error]="stockQuantityControl.invalid && stockQuantityControl.touched"
-            placeholder="Ej: 10"
+            [class.error]="batchQuantityControl.invalid && batchQuantityControl.touched"
+            placeholder="Ej: 100"
             min="1"
             formControlName="quantity"
-            (blur)="stockQuantityControl.markAsTouched()">
-          <span class="error-text" *ngIf="stockQuantityControl.invalid && stockQuantityControl.touched">
-            {{ getStockQuantityError() }}
+            (blur)="batchQuantityControl.markAsTouched()">
+          <span class="error-text" *ngIf="batchQuantityControl.invalid && batchQuantityControl.touched">
+            {{ getBatchQuantityError() }}
+          </span>
+        </div>
+
+        <!-- Proveedor -->
+        <div class="form-group">
+          <label for="batch-supplier" class="form-label">Proveedor *</label>
+          <select
+            id="batch-supplier"
+            class="form-input"
+            [class.error]="batchSupplierControl.invalid && batchSupplierControl.touched"
+            formControlName="supplierId"
+            (blur)="batchSupplierControl.markAsTouched()">
+            <option [ngValue]="null" disabled>Seleccionar proveedor...</option>
+            <option *ngFor="let supplier of suppliers" [ngValue]="supplier.id">
+              {{ supplier.name }}
+            </option>
+          </select>
+          <span class="error-text" *ngIf="batchSupplierControl.invalid && batchSupplierControl.touched">
+            {{ getBatchSupplierError() }}
+          </span>
+        </div>
+
+        <!-- Fecha de Vencimiento (Opcional) -->
+        <div class="form-group">
+          <label for="batch-expiry" class="form-label">
+            Fecha de Vencimiento
+            <span class="optional-badge">Opcional</span>
+          </label>
+          <input
+            id="batch-expiry"
+            type="date"
+            class="form-input"
+            [min]="getMinExpiryDate()"
+            formControlName="expiryDate">
+          <span class="form-hint">
+            Si no la proporcionas, se calculará automáticamente según los días de expiración del item.
           </span>
         </div>
 
         <!-- Botones -->
         <div class="modal-buttons">
-          <button type="button" class="btn btn-secondary" (click)="closeStockModal()" [disabled]="isSubmitting">
+          <button type="button" class="btn btn-secondary" (click)="closeCreateBatchModal()" [disabled]="isSubmitting">
             Cancelar
           </button>
           <button
             type="submit"
-            class="btn"
-            [class.btn-primary]="stockAction === 'increase'"
-            [class.btn-danger]="stockAction === 'decrease'"
-            [disabled]="isSubmitting || stockForm.invalid">
-            <span *ngIf="!isSubmitting">
-              {{ stockAction === 'increase' ? 'Aumentar' : 'Disminuir' }}
-            </span>
-            <span *ngIf="isSubmitting">Guardando...</span>
+            class="btn btn-primary"
+            [disabled]="isSubmitting || batchForm.invalid">
+            <span class="material-icons" *ngIf="!isSubmitting">add_circle</span>
+            <span *ngIf="!isSubmitting">Crear Lote</span>
+            <span *ngIf="isSubmitting">Creando...</span>
           </button>
         </div>
       </form>

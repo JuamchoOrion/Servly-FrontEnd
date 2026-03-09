@@ -493,6 +493,839 @@ $white: #FFFFFF;
 
 
 /* ===============================
+   🚨 BATCH ALERTS BANNER
+================================ */
+
+.batch-alerts-banner {
+  background: linear-gradient(135deg, rgba($warning-orange, 0.1) 0%, rgba($error-red, 0.05) 100%);
+  border: 1px solid rgba($warning-orange, 0.3);
+  border-left: 4px solid $warning-orange;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  animation: slideInDown 0.3s ease;
+
+  .batch-alert-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .alert-icon-wrapper {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba($warning-orange, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      .material-icons {
+        font-size: 22px;
+        color: $warning-orange;
+      }
+
+      &.has-expired {
+        background: rgba($error-red, 0.15);
+
+        .material-icons {
+          color: $error-red;
+        }
+      }
+    }
+
+    .alert-text {
+      flex: 1;
+
+      strong {
+        font-size: 14px;
+        color: $text-dark;
+        font-weight: 700;
+      }
+
+      .alert-detail {
+        display: block;
+        font-size: 12px;
+        color: $text-light;
+        margin-top: 2px;
+      }
+    }
+
+    .btn-dismiss-alert {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+
+      .material-icons {
+        font-size: 20px;
+        color: $text-light;
+      }
+
+      &:hover {
+        background: rgba(0,0,0,0.05);
+
+        .material-icons {
+          color: $error-red;
+        }
+      }
+    }
+
+    .btn-view-expired {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border: none;
+      background: rgba($error-red, 0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: $error-red;
+      font-size: 13px;
+      font-weight: 600;
+
+      .material-icons {
+        font-size: 18px;
+      }
+
+      &:hover {
+        background: $error-red;
+        color: $white;
+      }
+    }
+  }
+}
+
+
+/* ===============================
+   🚨 EXPIRED BATCHES SECTION
+================================ */
+
+.expired-batches-section {
+  background: $white;
+  border: 1px solid rgba($error-red, 0.3);
+  border-left: 4px solid $error-red;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  animation: slideInDown 0.3s ease;
+
+  .expired-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: rgba($error-red, 0.05);
+    border-bottom: 1px solid rgba($error-red, 0.15);
+
+    .expired-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .material-icons {
+        font-size: 24px;
+        color: $error-red;
+      }
+
+      h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: $text-dark;
+        margin: 0;
+      }
+
+      .expired-count {
+        font-size: 12px;
+        font-weight: 600;
+        background: $error-red;
+        color: $white;
+        padding: 4px 10px;
+        border-radius: 20px;
+      }
+    }
+
+    .btn-refresh {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: rgba($error-red, 0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+
+      .material-icons {
+        font-size: 20px;
+        color: $error-red;
+      }
+
+      &:hover {
+        background: $error-red;
+
+        .material-icons {
+          color: $white;
+        }
+      }
+    }
+  }
+
+  .expired-batches-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .expired-batch-card {
+    background: rgba($error-red, 0.03);
+    border: 1px solid rgba($error-red, 0.2);
+    border-radius: 10px;
+    padding: 16px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: $error-red;
+      box-shadow: 0 4px 12px rgba($error-red, 0.15);
+    }
+
+    .expired-batch-info {
+      .batch-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+
+        .batch-number {
+          font-size: 15px;
+          font-weight: 700;
+          color: $text-dark;
+        }
+
+        .expired-badge {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          padding: 4px 10px;
+          background: $error-red;
+          color: $white;
+          border-radius: 6px;
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+
+          .material-icons {
+            font-size: 14px;
+          }
+        }
+      }
+
+      .batch-details-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 10px;
+
+        .detail-item {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 13px;
+          color: $text-light;
+
+          .material-icons {
+            font-size: 16px;
+            color: $text-muted;
+          }
+        }
+      }
+
+      .batch-dates-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 10px;
+        border-top: 1px dashed rgba($error-red, 0.2);
+
+        .date-item {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12px;
+
+          .material-icons {
+            font-size: 16px;
+          }
+
+          &.expiry {
+            color: $error-red;
+            font-weight: 600;
+
+            .material-icons {
+              color: $error-red;
+            }
+          }
+        }
+
+        .days-expired {
+          font-size: 12px;
+          font-weight: 700;
+          color: $error-red;
+          background: rgba($error-red, 0.1);
+          padding: 4px 10px;
+          border-radius: 6px;
+        }
+      }
+    }
+  }
+
+  .expired-section-footer {
+    padding: 14px 20px;
+    background: rgba($error-red, 0.05);
+    border-top: 1px solid rgba($error-red, 0.15);
+
+    .expired-warning {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: $text-light;
+      margin: 0;
+
+      .material-icons {
+        font-size: 18px;
+        color: $error-red;
+      }
+    }
+  }
+}
+
+
+/* ===============================
+   ⏰ CLOSE TO EXPIRE SECTION
+================================ */
+
+.close-to-expire-section {
+  background: $white;
+  border: 1px solid rgba($warning-orange, 0.3);
+  border-left: 4px solid $warning-orange;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  animation: slideInDown 0.3s ease;
+
+  .expire-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: rgba($warning-orange, 0.05);
+    border-bottom: 1px solid rgba($warning-orange, 0.15);
+
+    .expire-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .material-icons {
+        font-size: 24px;
+        color: $warning-orange;
+      }
+
+      h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: $text-dark;
+        margin: 0;
+      }
+
+      .expire-count {
+        font-size: 12px;
+        font-weight: 600;
+        background: $warning-orange;
+        color: $white;
+        padding: 4px 10px;
+        border-radius: 20px;
+      }
+    }
+  }
+
+  .close-to-expire-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .expire-batch-card {
+    background: rgba($warning-orange, 0.03);
+    border: 1px solid rgba($warning-orange, 0.2);
+    border-radius: 10px;
+    padding: 16px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: $warning-orange;
+      box-shadow: 0 4px 12px rgba($warning-orange, 0.15);
+    }
+
+    .expire-batch-info {
+      .batch-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+
+        .batch-number {
+          font-size: 15px;
+          font-weight: 700;
+          color: $text-dark;
+        }
+
+        .warning-badge {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          padding: 4px 10px;
+          background: $warning-orange;
+          color: $white;
+          border-radius: 6px;
+          font-size: 11px;
+          font-weight: 700;
+
+          .material-icons {
+            font-size: 14px;
+          }
+        }
+      }
+
+      .batch-details-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 10px;
+
+        .detail-item {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 13px;
+          color: $text-light;
+
+          .material-icons {
+            font-size: 16px;
+            color: $text-muted;
+          }
+        }
+      }
+
+      .batch-dates-row {
+        padding-top: 10px;
+        border-top: 1px dashed rgba($warning-orange, 0.2);
+
+        .date-item {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12px;
+
+          .material-icons {
+            font-size: 16px;
+          }
+
+          &.warning {
+            color: $warning-orange;
+            font-weight: 600;
+
+            .material-icons {
+              color: $warning-orange;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+/* ===============================
+   📦 BATCHES SECTION
+================================ */
+
+.btn-view-batches {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  margin-top: 16px;
+  background: rgba($accent-gold, 0.08);
+  border: 1px solid rgba($accent-gold, 0.3);
+  border-radius: 8px;
+  color: $accent-gold;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  .material-icons {
+    font-size: 20px;
+  }
+
+  &:hover {
+    background: rgba($accent-gold, 0.15);
+    border-color: $accent-gold;
+  }
+}
+
+.item-card.expanded {
+  border-color: $accent-gold;
+  box-shadow: 0 4px 20px rgba($accent-gold, 0.15);
+}
+
+.batches-section {
+  border-top: 1px solid $border-light;
+  padding: 16px;
+  background: rgba($light-bg, 0.5);
+  animation: slideDown 0.3s ease;
+
+  .batches-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+
+    h4 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: $text-dark;
+      margin: 0;
+
+      .material-icons {
+        font-size: 18px;
+        color: $accent-gold;
+      }
+    }
+
+    .batches-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .batch-count {
+      font-size: 12px;
+      color: $text-light;
+      background: $border-light;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+  }
+
+  .batches-loading,
+  .no-batches {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    color: $text-light;
+    font-size: 13px;
+
+    .material-icons {
+      font-size: 24px;
+      opacity: 0.5;
+    }
+
+    .mini-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba($accent-gold, 0.2);
+      border-top-color: $accent-gold;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+  }
+}
+
+// Botón para agregar lote
+.btn-add-batch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba($success-green, 0.1);
+  border: 1px solid rgba($success-green, 0.3);
+  border-radius: 6px;
+  color: $success-green;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  .material-icons {
+    font-size: 16px;
+  }
+
+  &:hover {
+    background: $success-green;
+    color: $white;
+    border-color: $success-green;
+  }
+}
+
+.btn-add-batch-empty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  margin-top: 8px;
+  background: rgba($accent-gold, 0.1);
+  border: 1px dashed $accent-gold;
+  border-radius: 8px;
+  color: $accent-gold;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  .material-icons {
+    font-size: 20px;
+  }
+
+  &:hover {
+    background: rgba($accent-gold, 0.2);
+    border-style: solid;
+  }
+}
+
+// Modal de crear lote
+.modal-batch {
+  max-width: 480px;
+
+  .modal-header {
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .material-icons {
+        font-size: 24px;
+        color: $accent-gold;
+      }
+    }
+  }
+
+  .stock-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 16px;
+    background: rgba($accent-gold, 0.08);
+    border: 1px solid rgba($accent-gold, 0.2);
+    border-radius: 10px;
+    margin-bottom: 20px;
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .info-label {
+        font-size: 13px;
+        color: $text-light;
+        font-weight: 500;
+      }
+
+      .info-value {
+        font-size: 14px;
+        color: $text-dark;
+        font-weight: 700;
+      }
+    }
+  }
+
+  .form-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .optional-badge {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: $text-muted;
+      background: rgba($text-muted, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+  }
+
+  .form-hint {
+    font-size: 11px;
+    color: $text-muted;
+    font-style: italic;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+}
+
+.batches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.batch-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: $white;
+  border-radius: 10px;
+  border: 1px solid $border-light;
+  border-left: 4px solid $success-green;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  // Estados
+  &.batch-healthy {
+    border-left-color: $success-green;
+  }
+
+  &.batch-warning {
+    border-left-color: $warning-orange;
+    background: rgba($warning-orange, 0.03);
+  }
+
+  &.batch-expired {
+    border-left-color: $error-red;
+    background: rgba($error-red, 0.03);
+  }
+
+  &.batch-depleted {
+    border-left-color: $text-muted;
+    background: rgba($text-muted, 0.05);
+    opacity: 0.7;
+  }
+
+  .batch-info {
+    flex: 1;
+
+    .batch-number {
+      font-size: 14px;
+      font-weight: 700;
+      color: $text-dark;
+      margin-bottom: 4px;
+    }
+
+    .batch-details {
+      font-size: 13px;
+      color: $text-light;
+      margin-bottom: 4px;
+
+      .batch-quantity {
+        font-weight: 600;
+        color: $accent-gold;
+      }
+
+      .batch-supplier {
+        color: $text-muted;
+      }
+    }
+
+    .batch-dates {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 11px;
+      color: $text-muted;
+
+      span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+    }
+  }
+
+  .batch-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+
+      &.batch-healthy {
+        background: rgba($success-green, 0.1);
+        color: $success-green;
+      }
+
+      &.batch-warning {
+        background: rgba($warning-orange, 0.15);
+        color: $warning-orange;
+      }
+
+      &.batch-expired {
+        background: rgba($error-red, 0.15);
+        color: $error-red;
+      }
+
+      &.batch-depleted {
+        background: rgba($text-muted, 0.15);
+        color: $text-muted;
+      }
+    }
+
+    .days-until {
+      font-size: 12px;
+      font-weight: 600;
+      color: $text-light;
+
+      &.expired {
+        color: $error-red;
+      }
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+  }
+}
+
+/* ===============================
    ⏳ LOADING STATE
 ================================ */
 
@@ -1235,6 +2068,33 @@ select.form-input {
   }
 
   .item-description {
+    font-size: 12px;
+  }
+
+  .batch-item {
+    flex-direction: column;
+    gap: 12px;
+
+    .batch-status {
+      flex-direction: row;
+      align-items: center;
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  .batches-section {
+    padding: 12px;
+
+    .batches-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+  }
+
+  .btn-view-batches {
+    padding: 12px;
     font-size: 12px;
   }
 }
@@ -2036,3 +2896,444 @@ select.form-input {
     }
   }
 }
+
+/* ===============================
+   🔤 ACCESIBILIDAD - FUENTES VARIABLES
+================================ */
+
+// Fuente pequeña
+:root.font-small .inventory-page,
+:host-context(.font-small) .inventory-page {
+  .inventory-header {
+    h1 { font-size: 20px; }
+    p { font-size: 11px; }
+  }
+
+  .item-name { font-size: 14px; }
+  .item-description { font-size: 11px; }
+  .stock-label { font-size: 11px; }
+  .stock-value { font-size: 13px; }
+  .batch-number { font-size: 12px; }
+  .batch-details { font-size: 11px; }
+  .batch-dates { font-size: 10px; }
+  .status-badge { font-size: 9px; }
+  .form-label { font-size: 11px; }
+  .form-input { font-size: 13px; padding: 10px 14px; }
+  .btn { font-size: 13px; height: 42px; }
+}
+
+// Fuente mediana (default)
+:root.font-medium .inventory-page,
+:host-context(.font-medium) .inventory-page {
+  .inventory-header {
+    h1 { font-size: 24px; }
+    p { font-size: 13px; }
+  }
+}
+
+// Fuente grande
+:root.font-large .inventory-page,
+:host-context(.font-large) .inventory-page {
+  .inventory-header {
+    h1 { font-size: 28px; }
+    p { font-size: 15px; }
+  }
+
+  .item-name { font-size: 20px; }
+  .item-description { font-size: 15px; }
+  .stock-label { font-size: 14px; }
+  .stock-value { font-size: 17px; }
+  .batch-number { font-size: 16px; }
+  .batch-details { font-size: 14px; }
+  .batch-dates { font-size: 12px; }
+  .status-badge { font-size: 12px; padding: 5px 12px; }
+  .form-label { font-size: 14px; }
+  .form-input { font-size: 16px; padding: 16px 20px; }
+  .btn { font-size: 16px; height: 52px; }
+  .btn-view-batches { font-size: 14px; padding: 12px 18px; }
+  .btn-add-batch { font-size: 13px; padding: 8px 14px; }
+}
+
+// Fuente extra grande
+:root.font-extra-large .inventory-page,
+:host-context(.font-extra-large) .inventory-page {
+  .inventory-header {
+    h1 { font-size: 32px; }
+    p { font-size: 17px; }
+  }
+
+  .item-name { font-size: 24px; }
+  .item-description { font-size: 17px; }
+  .stock-label { font-size: 16px; }
+  .stock-value { font-size: 19px; }
+  .batch-number { font-size: 18px; }
+  .batch-details { font-size: 16px; }
+  .batch-dates { font-size: 14px; }
+  .status-badge { font-size: 13px; padding: 6px 14px; }
+  .form-label { font-size: 16px; }
+  .form-input { font-size: 18px; padding: 18px 22px; }
+  .btn { font-size: 18px; height: 56px; }
+  .btn-view-batches { font-size: 16px; padding: 14px 20px; }
+  .btn-add-batch { font-size: 15px; padding: 10px 16px; }
+
+  .batches-section {
+    padding: 20px;
+
+    .batches-header h4 { font-size: 16px; }
+    .batch-count { font-size: 14px; }
+  }
+
+  .modal-batch {
+    max-width: 560px;
+
+    .modal-header h2 { font-size: 24px; }
+    .info-label { font-size: 15px; }
+    .info-value { font-size: 16px; }
+    .form-hint { font-size: 13px; }
+    .optional-badge { font-size: 11px; }
+  }
+}
+
+
+/* ===============================
+   🌓 MODO OSCURO - LOTES Y MODAL
+================================ */
+
+:host-context(.dark-mode) {
+  // Sección de lotes
+  .batches-section {
+    background: rgba(#333333, 0.5);
+    border-top-color: rgba(200,169,81,0.2);
+
+    .batches-header h4 {
+      color: #e0e0e0;
+    }
+
+    .batch-count {
+      background: #444444;
+      color: #999999;
+    }
+  }
+
+  .batches-loading,
+  .no-batches {
+    color: #888888;
+  }
+
+  .batch-item {
+    background: #333333;
+    border-color: #444444;
+
+    .batch-number { color: #e0e0e0; }
+    .batch-details { color: #999999; }
+    .batch-dates { color: #777777; }
+
+    &.batch-healthy { border-left-color: $success-green; }
+    &.batch-warning {
+      border-left-color: $warning-orange;
+      background: rgba($warning-orange, 0.08);
+    }
+    &.batch-expired {
+      border-left-color: $error-red;
+      background: rgba($error-red, 0.08);
+    }
+    &.batch-depleted {
+      border-left-color: #666666;
+      background: rgba(#666666, 0.1);
+    }
+  }
+
+  .status-badge {
+    &.batch-healthy { background: rgba($success-green, 0.2); }
+    &.batch-warning { background: rgba($warning-orange, 0.2); }
+    &.batch-expired { background: rgba($error-red, 0.2); }
+    &.batch-depleted { background: rgba(#666666, 0.2); }
+  }
+
+  .days-until { color: #888888; }
+
+  // Botones de lotes
+  .btn-view-batches {
+    background: rgba(200,169,81,0.15);
+    border-color: rgba(200,169,81,0.3);
+    color: $accent-gold;
+
+    &:hover {
+      background: rgba(200,169,81,0.25);
+    }
+  }
+
+  .btn-add-batch {
+    background: rgba($success-green, 0.15);
+    border-color: rgba($success-green, 0.4);
+    color: #66bb6a;
+
+    &:hover {
+      background: $success-green;
+      color: #1a1a1a;
+    }
+  }
+
+  .btn-add-batch-empty {
+    background: rgba(200,169,81,0.1);
+    border-color: rgba(200,169,81,0.4);
+    color: $accent-gold;
+
+    &:hover {
+      background: rgba(200,169,81,0.2);
+    }
+  }
+
+  // Modal de crear lote
+  .modal-batch {
+    .stock-item-info {
+      background: rgba(200,169,81,0.1);
+      border-color: rgba(200,169,81,0.3);
+
+      .info-label { color: #888888; }
+      .info-value { color: #e0e0e0; }
+    }
+
+    .optional-badge {
+      background: rgba(#888888, 0.2);
+      color: #888888;
+    }
+
+    .form-hint {
+      color: #777777;
+    }
+  }
+
+  // Alertas de lotes
+  .batch-alerts-banner {
+    background: linear-gradient(135deg, rgba($warning-orange, 0.15) 0%, rgba($error-red, 0.1) 100%);
+    border-color: rgba($warning-orange, 0.4);
+
+    .alert-text strong { color: #e0e0e0; }
+    .alert-detail { color: #888888; }
+
+    .btn-view-expired {
+      background: rgba($error-red, 0.2);
+      color: #ff6b6b;
+
+      &:hover {
+        background: $error-red;
+        color: #ffffff;
+      }
+    }
+  }
+
+  // Sección de lotes expirados
+  .expired-batches-section {
+    background: #2a2a2a;
+    border-color: rgba($error-red, 0.4);
+
+    .expired-section-header {
+      background: rgba($error-red, 0.1);
+      border-bottom-color: rgba($error-red, 0.2);
+
+      .expired-title {
+        h3 { color: #e0e0e0; }
+        .expired-count {
+          background: $error-red;
+          color: #ffffff;
+        }
+      }
+
+      .btn-refresh {
+        background: rgba($error-red, 0.15);
+
+        &:hover {
+          background: $error-red;
+        }
+      }
+    }
+
+    .expired-batch-card {
+      background: rgba($error-red, 0.08);
+      border-color: rgba($error-red, 0.3);
+
+      .batch-number { color: #e0e0e0; }
+      .detail-item { color: #999999; }
+      .date-item { color: #888888; }
+      .days-expired { background: rgba($error-red, 0.2); }
+    }
+
+    .expired-section-footer {
+      background: rgba($error-red, 0.08);
+      border-top-color: rgba($error-red, 0.2);
+
+      .expired-warning { color: #888888; }
+    }
+  }
+
+  // Sección de próximos a expirar
+  .close-to-expire-section {
+    background: #2a2a2a;
+    border-color: rgba($warning-orange, 0.4);
+
+    .expire-section-header {
+      background: rgba($warning-orange, 0.1);
+      border-bottom-color: rgba($warning-orange, 0.2);
+
+      .expire-title {
+        h3 { color: #e0e0e0; }
+        .expire-count {
+          background: $warning-orange;
+          color: #ffffff;
+        }
+      }
+    }
+
+    .expire-batch-card {
+      background: rgba($warning-orange, 0.08);
+      border-color: rgba($warning-orange, 0.3);
+
+      .batch-number { color: #e0e0e0; }
+      .detail-item { color: #999999; }
+      .date-item { color: #888888; }
+    }
+  }
+
+  // Filter bar
+  .filter-bar {
+    background: #2a2a2a;
+  }
+
+  .btn-filter-stock-inline {
+    background: #333333;
+    color: #999999;
+
+    &:hover {
+      background: rgba(200,169,81,0.15);
+      color: $accent-gold;
+    }
+
+    &.active {
+      background: rgba(200,169,81,0.2);
+      color: $accent-gold;
+      border-color: $accent-gold;
+    }
+  }
+
+  // Header content
+  .header-content {
+    h1 { color: #e0e0e0; }
+    p { color: #888888; }
+  }
+}
+
+
+/* ===============================
+   🔆 ALTO CONTRASTE - LOTES
+================================ */
+
+:root.high-contrast .batches-section,
+:host-context(.high-contrast) .batches-section {
+  background: #ffffff !important;
+  border-top: 3px solid #000000 !important;
+}
+
+:root.high-contrast .batches-header h4,
+:host-context(.high-contrast) .batches-header h4 {
+  color: #000000 !important;
+  font-weight: 900 !important;
+}
+
+:root.high-contrast .batch-count,
+:host-context(.high-contrast) .batch-count {
+  background: #000000 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+:root.high-contrast .batch-item,
+:host-context(.high-contrast) .batch-item {
+  background: #ffffff !important;
+  border: 3px solid #000000 !important;
+  border-left-width: 6px !important;
+}
+
+:root.high-contrast .batch-number,
+:host-context(.high-contrast) .batch-number {
+  color: #000000 !important;
+  font-weight: 900 !important;
+}
+
+:root.high-contrast .batch-details,
+:host-context(.high-contrast) .batch-details {
+  color: #000000 !important;
+  font-weight: 600 !important;
+}
+
+:root.high-contrast .batch-dates,
+:host-context(.high-contrast) .batch-dates {
+  color: #000000 !important;
+  font-weight: 600 !important;
+}
+
+:root.high-contrast .status-badge,
+:host-context(.high-contrast) .status-badge {
+  border: 2px solid currentColor !important;
+  font-weight: 900 !important;
+}
+
+:root.high-contrast .btn-view-batches,
+:host-context(.high-contrast) .btn-view-batches {
+  background: #ffffff !important;
+  border: 3px solid #000000 !important;
+  color: #000000 !important;
+  font-weight: 900 !important;
+}
+
+:root.high-contrast .btn-view-batches:hover,
+:host-context(.high-contrast) .btn-view-batches:hover {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .btn-add-batch,
+:host-context(.high-contrast) .btn-add-batch {
+  background: #ffffff !important;
+  border: 3px solid #2E7D32 !important;
+  color: #2E7D32 !important;
+  font-weight: 900 !important;
+}
+
+:root.high-contrast .btn-add-batch:hover,
+:host-context(.high-contrast) .btn-add-batch:hover {
+  background: #2E7D32 !important;
+  color: #ffffff !important;
+}
+
+:root.high-contrast .modal-batch .stock-item-info,
+:host-context(.high-contrast) .modal-batch .stock-item-info {
+  background: #f0f0f0 !important;
+  border: 3px solid #000000 !important;
+}
+
+:root.high-contrast .modal-batch .info-label,
+:host-context(.high-contrast) .modal-batch .info-label {
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+
+:root.high-contrast .modal-batch .info-value,
+:host-context(.high-contrast) .modal-batch .info-value {
+  color: #000000 !important;
+  font-weight: 900 !important;
+}
+
+:root.high-contrast .optional-badge,
+:host-context(.high-contrast) .optional-badge {
+  background: #000000 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+:root.high-contrast .form-hint,
+:host-context(.high-contrast) .form-hint {
+  color: #000000 !important;
+  font-weight: 600 !important;
+}
+

@@ -58,13 +58,24 @@
         </div>
 
         <div class="stat-card stat-warning">
-          <span class="material-icons stat-icon">warning</span>
+          <span class="material-icons stat-icon">schedule</span>
           <div class="stat-content">
-            <div class="stat-number">{{ stats.lowStockItems }}</div>
-            <div class="stat-label">Stock Bajo</div>
+            <div class="stat-number">{{ stats.batchesCloseToExpire }}</div>
+            <div class="stat-label">Lotes por Expirar</div>
           </div>
           <div class="stat-action" *ngIf="canViewInventory()">
             <a routerLink="/inventory" class="stat-link">Revisar →</a>
+          </div>
+        </div>
+
+        <div class="stat-card stat-danger">
+          <span class="material-icons stat-icon">error</span>
+          <div class="stat-content">
+            <div class="stat-number">{{ stats.batchesExpired }}</div>
+            <div class="stat-label">Lotes Expirados</div>
+          </div>
+          <div class="stat-action" *ngIf="canViewInventory()">
+            <a routerLink="/inventory" class="stat-link">Ver →</a>
           </div>
         </div>
 
@@ -99,11 +110,11 @@
           </div>
         </div>
 
-        <!-- Pie Chart: Estado de Expiración -->
+        <!-- Pie Chart: Estado de Lotes -->
         <div class="analytics-card">
           <div class="card-header">
-            <h3><span class="material-icons">pie_chart</span> Estado de Expiración</h3>
-            <span class="card-subtitle">Distribución de items</span>
+            <h3><span class="material-icons">pie_chart</span> Estado de Lotes</h3>
+            <span class="card-subtitle">Distribución por estado de expiración</span>
           </div>
           <div class="chart-container">
             <canvas baseChart
@@ -116,27 +127,58 @@
 
       </div>
 
-      <!-- ── Expiration Alerts ───────────────────────────────────────────── -->
+      <!-- ── Batch Expiration Alerts ─────────────────────────────────────── -->
       <div class="alerts-section">
         <div class="section-header">
-          <h3><span class="material-icons">schedule</span> Productos de Rápida Expiración</h3>
-          <span class="alert-count">{{ getExpiringItems().length }} items</span>
+          <h3><span class="material-icons">schedule</span> Lotes Próximos a Expirar</h3>
+          <span class="alert-count">{{ getCloseToExpireBatches().length }} lotes</span>
         </div>
         <div class="alerts-container">
           <div
-            *ngFor="let alert of getExpiringItems()"
+            *ngFor="let batch of getCloseToExpireBatches()"
             class="alert-item"
-            [class]="getExpirationStatusClass(alert)">
+            [class]="getBatchStatusClass(batch)">
             <div class="alert-info">
-              <div class="alert-name">{{ alert.name }}</div>
-              <div class="alert-category">{{ alert.category }}</div>
+              <div class="alert-name">{{ batch.batchNumber }}</div>
+              <div class="alert-category">
+                {{ batch.supplierName }} • {{ batch.quantity }} unidades
+              </div>
+              <div class="alert-expiry">
+                Vence: {{ formatExpiryDate(batch.expiryDate) }}
+              </div>
             </div>
             <div class="alert-status">
-              {{ getExpirationStatusText(alert) }}
+              {{ getBatchStatusText(batch) }}
             </div>
           </div>
-          <div *ngIf="getExpiringItems().length === 0" class="no-alerts">
-            <span class="material-icons">check_circle</span> No hay items próximos a expirar en las próximas 2 semanas
+          <div *ngIf="getCloseToExpireBatches().length === 0" class="no-alerts">
+            <span class="material-icons">check_circle</span> No hay lotes próximos a expirar
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Expired Batches Section ─────────────────────────────────────── -->
+      <div class="alerts-section expired-section" *ngIf="getExpiredBatches().length > 0">
+        <div class="section-header">
+          <h3><span class="material-icons">error</span> Lotes Expirados</h3>
+          <span class="alert-count alert-critical">{{ getExpiredBatches().length }} lotes</span>
+        </div>
+        <div class="alerts-container">
+          <div
+            *ngFor="let batch of getExpiredBatches()"
+            class="alert-item status-critical">
+            <div class="alert-info">
+              <div class="alert-name">{{ batch.batchNumber }}</div>
+              <div class="alert-category">
+                {{ batch.supplierName }} • {{ batch.quantity }} unidades
+              </div>
+              <div class="alert-expiry">
+                Expiró: {{ formatExpiryDate(batch.expiryDate) }}
+              </div>
+            </div>
+            <div class="alert-status">
+              EXPIRADO
+            </div>
           </div>
         </div>
       </div>

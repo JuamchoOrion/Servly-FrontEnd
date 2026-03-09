@@ -242,21 +242,43 @@ $text-light: #666666;
       top: 100%;
       right: 0;
       margin-top: 8px;
-      width: 200px;
+      width: 220px;
       background: $white;
       border: 1px solid $border-light;
       border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-10px);
-      transition: all 0.3s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
       z-index: 1001;
+      overflow: hidden;
+      animation: dropdownFadeIn 0.2s ease-out;
 
-      &.active {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
+      @keyframes dropdownFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .dropdown-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid $border-light;
+        background: $light-bg;
+
+        .role-badge {
+          display: inline-block;
+          padding: 6px 12px;
+          background: rgba($accent-gold, 0.15);
+          border: 1px solid $accent-gold;
+          border-radius: 8px;
+          color: darken($accent-gold, 10%);
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
       }
 
       .dropdown-item {
@@ -268,18 +290,27 @@ $text-light: #666666;
         gap: 12px;
         font-size: 14px;
         font-weight: 500;
-        border-bottom: 1px solid $border-light;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        background: none;
         border: none;
+        border-bottom: 1px solid $border-light;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        background: $white;
         text-align: left;
         width: 100%;
+
+        .material-icons {
+          font-size: 20px;
+          color: $text-light;
+        }
 
         &:hover {
           background: $light-bg;
           color: $accent-gold;
           padding-left: 20px;
+
+          .material-icons {
+            color: $accent-gold;
+          }
         }
 
         &:last-child {
@@ -287,31 +318,21 @@ $text-light: #666666;
         }
 
         &.logout-btn {
-          color: #ff6b6b;
+          color: #d32f2f;
+          border-top: 1px solid $border-light;
+
+          .material-icons {
+            color: #d32f2f;
+          }
 
           &:hover {
-            background: rgba(#ff6b6b, 0.1);
-            color: #ff6b6b;
+            background: rgba(#d32f2f, 0.08);
+            color: #b71c1c;
+
+            .material-icons {
+              color: #b71c1c;
+            }
           }
-        }
-      }
-
-      .dropdown-header {
-        padding: 12px 16px;
-        border-bottom: 1px solid $border-light;
-        margin-bottom: 8px;
-
-        .role-badge {
-          display: inline-block;
-          padding: 6px 12px;
-          background: rgba($accent-gold, 0.1);
-          border: 1px solid $accent-gold;
-          border-radius: 8px;
-          color: $accent-gold;
-          font-size: 11px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
         }
       }
     }
@@ -455,6 +476,315 @@ $text-light: #666666;
     .login-btn {
       padding: 6px 10px;
       font-size: 11px;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
+   🌙 MODO OSCURO
+   ═══════════════════════════════════════════════════════════════════════════════════ */
+
+:host-context(:root.dark-mode) {
+  .main-navbar {
+    background: #1a1a1a;
+    border-bottom-color: rgba($accent-gold, 0.3);
+
+    .navbar-logo .logo-text {
+      color: $accent-gold;
+    }
+
+    .nav-items .nav-item {
+      color: rgba(255, 255, 255, 0.7);
+
+      &:hover {
+        background: rgba($accent-gold, 0.2);
+        color: $accent-gold;
+      }
+
+      &.active {
+        background: rgba($accent-gold, 0.2);
+        color: $accent-gold;
+        border-color: $accent-gold;
+      }
+    }
+
+    .navbar-brand .brand-text {
+      color: $accent-gold;
+    }
+
+    .user-section {
+      .user-btn {
+        background: rgba($accent-gold, 0.15);
+        border-color: rgba($accent-gold, 0.4);
+        color: #f5f5f5;
+
+        &:hover {
+          background: rgba($accent-gold, 0.25);
+          border-color: $accent-gold;
+        }
+      }
+
+      .user-dropdown {
+        background: #2a2a2a;
+        border-color: #444;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+        .dropdown-header {
+          background: #333;
+          border-bottom-color: #444;
+
+          .role-badge {
+            background: rgba($accent-gold, 0.2);
+            border-color: $accent-gold;
+            color: $accent-gold;
+          }
+        }
+
+        .dropdown-item {
+          background: #2a2a2a;
+          color: #f5f5f5;
+          border-bottom-color: #444;
+
+          .material-icons {
+            color: #aaa;
+          }
+
+          &:hover {
+            background: #383838;
+            color: $accent-gold;
+
+            .material-icons {
+              color: $accent-gold;
+            }
+          }
+
+          &.logout-btn {
+            color: #ff6b6b;
+            border-top-color: #444;
+
+            .material-icons {
+              color: #ff6b6b;
+            }
+
+            &:hover {
+              background: rgba(#ff6b6b, 0.15);
+              color: #ff8a8a;
+
+              .material-icons {
+                color: #ff8a8a;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .mobile-menu-btn .material-icons {
+      color: #f5f5f5;
+    }
+
+    .login-btn {
+      background: $accent-gold;
+      color: #1a1a1a;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
+   👁️ ALTO CONTRASTE
+   ═══════════════════════════════════════════════════════════════════════════════════ */
+
+:host-context(:root.high-contrast) {
+  .main-navbar {
+    background: #000;
+    border-bottom: 3px solid #FFD700;
+
+    .navbar-logo .logo-text {
+      color: #FFD700;
+      font-weight: 900;
+    }
+
+    .nav-items .nav-item {
+      color: #fff;
+      border: 2px solid transparent;
+
+      &:hover,
+      &.active {
+        background: #FFD700;
+        color: #000;
+        border-color: #fff;
+      }
+    }
+
+    .navbar-brand .brand-text {
+      color: #FFD700;
+    }
+
+    .user-section {
+      .user-btn {
+        background: #000;
+        border: 3px solid #FFD700;
+        color: #fff;
+
+        .user-icon,
+        .dropdown-arrow {
+          color: #FFD700;
+        }
+
+        &:hover {
+          background: #FFD700;
+          color: #000;
+
+          .user-icon,
+          .dropdown-arrow {
+            color: #000;
+          }
+        }
+      }
+
+      .user-dropdown {
+        background: #000;
+        border: 3px solid #FFD700;
+
+        .dropdown-header {
+          background: #111;
+          border-bottom: 2px solid #FFD700;
+
+          .role-badge {
+            background: #FFD700;
+            color: #000;
+            border-color: #fff;
+            font-weight: 900;
+          }
+        }
+
+        .dropdown-item {
+          background: #000;
+          color: #fff;
+          border-bottom: 2px solid #333;
+
+          .material-icons {
+            color: #FFD700;
+          }
+
+          &:hover {
+            background: #FFD700;
+            color: #000;
+
+            .material-icons {
+              color: #000;
+            }
+          }
+
+          &.logout-btn {
+            color: #ff4444;
+            border-top: 2px solid #333;
+
+            &:hover {
+              background: #ff4444;
+              color: #fff;
+
+              .material-icons {
+                color: #fff;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .login-btn {
+      background: #FFD700;
+      color: #000;
+      border: 3px solid #fff;
+      font-weight: 900;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
+   📝 TAMAÑOS DE FUENTE - ACCESIBILIDAD
+   ═══════════════════════════════════════════════════════════════════════════════════ */
+
+:host-context(:root.font-small) {
+  .main-navbar {
+    .navbar-logo .logo-text { font-size: 20px; }
+    .nav-items .nav-item { font-size: 12px; padding: 8px 12px; }
+    .navbar-brand .brand-text { font-size: 12px; }
+    .user-section .user-btn { font-size: 11px; padding: 8px 12px; }
+    .user-dropdown {
+      width: 180px;
+      .dropdown-header .role-badge { font-size: 9px; }
+      .dropdown-item { font-size: 12px; padding: 10px 14px; }
+    }
+  }
+}
+
+:host-context(:root.font-medium) {
+  .main-navbar {
+    .navbar-logo .logo-text { font-size: 24px; }
+    .nav-items .nav-item { font-size: 14px; }
+    .navbar-brand .brand-text { font-size: 16px; }
+    .user-section .user-btn { font-size: 13px; }
+    .user-dropdown {
+      width: 220px;
+      .dropdown-header .role-badge { font-size: 11px; }
+      .dropdown-item { font-size: 14px; }
+    }
+  }
+}
+
+:host-context(:root.font-large) {
+  .main-navbar {
+    padding: 14px 28px;
+    .navbar-logo .logo-text { font-size: 28px; }
+    .nav-items .nav-item { font-size: 16px; padding: 12px 18px; }
+    .navbar-brand .brand-text { font-size: 18px; }
+    .user-section .user-btn { font-size: 15px; padding: 12px 18px; }
+    .user-dropdown {
+      width: 260px;
+      .dropdown-header .role-badge { font-size: 12px; padding: 8px 14px; }
+      .dropdown-item { font-size: 16px; padding: 14px 18px; }
+    }
+  }
+}
+
+:host-context(:root.font-extra-large) {
+  .main-navbar {
+    padding: 16px 32px;
+    .navbar-logo .logo-text { font-size: 32px; }
+    .nav-items .nav-item { font-size: 18px; padding: 14px 20px; }
+    .navbar-brand .brand-text { font-size: 20px; }
+    .user-section .user-btn { font-size: 17px; padding: 14px 20px; }
+    .user-dropdown {
+      width: 300px;
+      .dropdown-header .role-badge { font-size: 14px; padding: 10px 16px; }
+      .dropdown-item { font-size: 18px; padding: 16px 20px; }
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
+   ⏸️ REDUCIR MOVIMIENTO
+   ═══════════════════════════════════════════════════════════════════════════════════ */
+
+:host-context(:root.reduce-motion) {
+  .main-navbar {
+    * {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .user-dropdown {
+      animation: none;
+    }
+
+    .nav-items .nav-item:hover {
+      transform: none;
+    }
+
+    .user-section .user-btn:hover {
+      box-shadow: none;
     }
   }
 }

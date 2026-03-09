@@ -39,6 +39,37 @@
       <span>{{ errorMessage }}</span>
     </div>
 
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label for="categoryFilter" class="filter-label">
+          <span class="material-icons">filter_list</span>
+          Filtrar por categoría:
+        </label>
+        <select
+          id="categoryFilter"
+          class="filter-select"
+          [value]="selectedCategoryId || 'all'"
+          (change)="filterByCategory($any($event.target).value)">
+          <option value="all">Todas las categorías</option>
+          <option *ngFor="let category of categories" [value]="category.id">
+            {{ category.name }}
+          </option>
+        </select>
+        <button
+          class="btn-clear-filter"
+          *ngIf="selectedCategoryId"
+          (click)="clearCategoryFilter()"
+          title="Limpiar filtro">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="filter-info" *ngIf="selectedCategoryId">
+        <span class="material-icons">info</span>
+        Mostrando items de: <strong>{{ getSelectedCategoryName() }}</strong>
+      </div>
+    </div>
+
     <!-- Loading State -->
     <div class="loading-state" *ngIf="isLoading">
       <div class="spinner"></div>
@@ -62,7 +93,6 @@
             <th>Descripción</th>
             <th>Unidad</th>
             <th>Días Expiración</th>
-            <th>Stock Ideal</th>
             <th>Categoría</th>
             <th>Acciones</th>
           </tr>
@@ -74,7 +104,6 @@
             <td class="description-cell">{{ item.description }}</td>
             <td class="unit-cell">{{ item.unitOfMeasurement }}</td>
             <td class="expiration-cell">{{ item.expirationDays }} días</td>
-            <td class="ideal-stock-cell">{{ item.idealStock }}</td>
             <td class="category-cell">
               {{ getCategoryName(item.category) }}
             </td>

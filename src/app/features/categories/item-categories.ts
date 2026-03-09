@@ -100,8 +100,8 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
    */
   private initializeForm(): void {
     this.categoryForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(1)]],
-      description: ['', [Validators.required, Validators.minLength(1)]]
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      description: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(500)]]
     });
   }
 

@@ -1,9 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { Subject, forkJoin } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { StockBatch, StockBatchStatus, StockBatchService, CreateBatchRequest } from '../../core/services/stock-batch.service';
+import { SupplierService, SupplierDTO } from '../../core/services/supplier.service';
 
 // DTOs - Coincidiendo con el backend
 interface ItemStockDTO {
@@ -51,24 +53,39 @@ export class InventoryComponent implements OnInit {
   showLowStockOnly = false;
   lowStockCount = 0;
 
-  // Modal de ajuste de stock
-  showStockModal = false;
-  stockAction: 'increase' | 'decrease' | null = null;
-  adjustingItemStockId: number | null = null;
-  stockForm!: FormGroup;
+  // === Lotes (StockBatch) ===
+  expandedItemId: number | null = null;
+  itemBatches: Map<number, StockBatch[]> = new Map();
+  loadingBatches: Set<number> = new Set();
+
+  // Alertas globales de lotes
+  closeToExpireBatches: StockBatch[] = [];
+  expiredBatches: StockBatch[] = [];
+  showBatchAlerts = true;
+  showExpiredSection = false;  // Mostrar/ocultar sección de lotes expirados
+
+  // Modal para crear nuevo lote
+  showCreateBatchModal = false;
+  creatingBatchForItemId: number | null = null;
+  batchForm!: FormGroup;
+  suppliers: SupplierDTO[] = [];
 
   private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
-    private http: HttpClient
+    private http: HttpClient,
+    private stockBatchService: StockBatchService,
+    private supplierService: SupplierService
   ) {
-    this.initializeStockForm();
+    this.initializeBatchForm();
   }
 
   ngOnInit(): void {
     this.loadInventory();
+    this.loadBatchAlerts();
+    this.loadSuppliers();
   }
 
   ngOnDestroy(): void {
@@ -76,13 +93,55 @@ export class InventoryComponent implements OnInit {
     this.destroy$.complete();
   }
 
+
   /**
-   * Inicializa el formulario de ajuste de stock
+   * Inicializa el formulario para crear nuevo lote
+   * expiryDate es OPCIONAL - si no se proporciona, el backend lo calcula automáticamente
    */
-  private initializeStockForm(): void {
-    this.stockForm = this.fb.group({
-      quantity: [1, [Validators.required, Validators.min(1)]]
+  private initializeBatchForm(): void {
+    this.batchForm = this.fb.group({
+      quantity: [1, [Validators.required, Validators.min(1)]],
+      supplierId: [null, [Validators.required]],
+      batchNumber: ['', [Validators.required, Validators.minLength(3)]],
+      expiryDate: [null]  // OPCIONAL - el backend calcula: hoy + item.expirationDays
     });
+  }
+
+  /**
+   * Carga la lista de proveedores
+   */
+  private loadSuppliers(): void {
+    this.supplierService.getAll()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (suppliers) => {
+          this.suppliers = suppliers || [];
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error al cargar proveedores:', error);
+        }
+      });
+  }
+
+  /**
+   * Carga las alertas de lotes (próximos a expirar y expirados)
+   */
+  private loadBatchAlerts(): void {
+    forkJoin({
+      closeToExpire: this.stockBatchService.getCloseToExpire(),
+      expired: this.stockBatchService.getExpired()
+    }).pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ({ closeToExpire, expired }) => {
+          this.closeToExpireBatches = closeToExpire || [];
+          this.expiredBatches = expired || [];
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error al cargar alertas de lotes:', error);
+        }
+      });
   }
 
   /**
@@ -119,25 +178,314 @@ export class InventoryComponent implements OnInit {
       });
   }
 
+  // === NUEVO: Métodos para Lotes ===
+
   /**
-   * Obtiene el control de cantidad del formulario de stock
+   * Expande/colapsa los lotes de un item
    */
-  get stockQuantityControl(): FormControl {
-    return this.stockForm.get('quantity') as FormControl;
+  toggleItemBatches(itemStockId: number): void {
+    if (this.expandedItemId === itemStockId) {
+      this.expandedItemId = null;
+    } else {
+      this.expandedItemId = itemStockId;
+      this.loadItemBatches(itemStockId);
+    }
+    this.cdr.detectChanges();
   }
 
   /**
-   * Mensaje de error de cantidad del stock
+   * Carga los lotes de un ItemStock específico
    */
-  getStockQuantityError(): string {
-    if (this.stockQuantityControl.hasError('required')) {
+  private loadItemBatches(itemStockId: number): void {
+    if (this.itemBatches.has(itemStockId) && !this.loadingBatches.has(itemStockId)) {
+      return; // Ya cargados
+    }
+
+    this.loadingBatches.add(itemStockId);
+    this.cdr.detectChanges();
+
+    this.stockBatchService.getByItemStock(itemStockId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (batches) => {
+          this.itemBatches.set(itemStockId, batches || []);
+          this.loadingBatches.delete(itemStockId);
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error(`Error al cargar lotes del item ${itemStockId}:`, error);
+          this.itemBatches.set(itemStockId, []);
+          this.loadingBatches.delete(itemStockId);
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  /**
+   * Obtiene los lotes de un item (si están cargados)
+   */
+  getBatches(itemStockId: number): StockBatch[] {
+    return this.itemBatches.get(itemStockId) || [];
+  }
+
+  /**
+   * Verifica si un item tiene sus lotes expandidos
+   */
+  isExpanded(itemStockId: number): boolean {
+    return this.expandedItemId === itemStockId;
+  }
+
+  /**
+   * Verifica si los lotes de un item están cargando
+   */
+  isBatchesLoading(itemStockId: number): boolean {
+    return this.loadingBatches.has(itemStockId);
+  }
+
+  /**
+   * Obtiene la clase CSS según el estado del lote
+   */
+  getBatchStatusClass(status: StockBatchStatus): string {
+    switch (status) {
+      case 'EXPIRADO': return 'batch-expired';
+      case 'PROXIMO_A_EXPIRAR': return 'batch-warning';
+      case 'AGOTADO': return 'batch-depleted';
+      default: return 'batch-healthy';
+    }
+  }
+
+  /**
+   * Obtiene el texto del estado del lote
+   */
+  getBatchStatusText(batch: StockBatch): string {
+    return this.stockBatchService.getStatusText(batch.status);
+  }
+
+  /**
+   * Formatea una fecha ISO a formato legible
+   */
+  formatDate(dateString: string): string {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
+
+  /**
+   * Obtiene el total de alertas de lotes
+   */
+  get totalBatchAlerts(): number {
+    return this.closeToExpireBatches.length + this.expiredBatches.length;
+  }
+
+  /**
+   * Cierra las alertas de lotes
+   */
+  closeBatchAlerts(): void {
+    this.showBatchAlerts = false;
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Alterna la visibilidad de la sección de lotes expirados
+   */
+  toggleExpiredSection(): void {
+    this.showExpiredSection = !this.showExpiredSection;
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Recarga los lotes expirados desde el backend
+   */
+  refreshExpiredBatches(): void {
+    this.stockBatchService.getExpired()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (batches) => {
+          this.expiredBatches = batches || [];
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error al recargar lotes expirados:', error);
+        }
+      });
+  }
+
+  // === MÉTODOS PARA CREAR NUEVO LOTE ===
+
+  /**
+   * Abre el modal para crear un nuevo lote
+   */
+  openCreateBatchModal(itemStock: ItemStockDTO): void {
+    this.creatingBatchForItemId = itemStock.itemStockId;
+    // Generar número de lote sugerido
+    const suggestedBatchNumber = this.generateBatchNumber(itemStock.name);
+    this.batchForm.reset({
+      quantity: 1,
+      supplierId: null,
+      batchNumber: suggestedBatchNumber,
+      expiryDate: null
+    });
+    this.showCreateBatchModal = true;
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Genera un número de lote sugerido
+   */
+  private generateBatchNumber(itemName: string): string {
+    const prefix = itemName.substring(0, 3).toUpperCase().replace(/\s/g, '');
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `LOTE-${prefix}-${year}${month}${day}-${random}`;
+  }
+
+  /**
+   * Cierra el modal de crear lote
+   */
+  closeCreateBatchModal(): void {
+    this.showCreateBatchModal = false;
+    this.creatingBatchForItemId = null;
+    this.batchForm.reset();
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Obtiene el ItemStock para el cual se está creando un lote
+   */
+  getCreatingBatchItemStock(): ItemStockDTO | undefined {
+    return this.inventoryItems?.find(is => is.itemStockId === this.creatingBatchForItemId);
+  }
+
+  /**
+   * Getters para los controles del formulario de lotes
+   */
+  get batchQuantityControl(): FormControl {
+    return this.batchForm.get('quantity') as FormControl;
+  }
+
+  get batchSupplierControl(): FormControl {
+    return this.batchForm.get('supplierId') as FormControl;
+  }
+
+  get batchNumberControl(): FormControl {
+    return this.batchForm.get('batchNumber') as FormControl;
+  }
+
+  get batchExpiryDateControl(): FormControl {
+    return this.batchForm.get('expiryDate') as FormControl;
+  }
+
+  /**
+   * Obtiene el mensaje de error para cantidad del lote
+   */
+  getBatchQuantityError(): string {
+    if (this.batchQuantityControl.hasError('required')) {
       return 'La cantidad es requerida';
     }
-    if (this.stockQuantityControl.hasError('min')) {
+    if (this.batchQuantityControl.hasError('min')) {
       return 'La cantidad mínima es 1';
     }
     return '';
   }
+
+  /**
+   * Obtiene el mensaje de error para proveedor
+   */
+  getBatchSupplierError(): string {
+    if (this.batchSupplierControl.hasError('required')) {
+      return 'El proveedor es requerido';
+    }
+    return '';
+  }
+
+  /**
+   * Obtiene el mensaje de error para número de lote
+   */
+  getBatchNumberError(): string {
+    if (this.batchNumberControl.hasError('required')) {
+      return 'El número de lote es requerido';
+    }
+    if (this.batchNumberControl.hasError('minlength')) {
+      return 'Mínimo 3 caracteres';
+    }
+    return '';
+  }
+
+  /**
+   * Obtiene el mensaje de error para fecha de expiración
+   */
+  getBatchExpiryError(): string {
+    if (this.batchExpiryDateControl.hasError('required')) {
+      return 'La fecha de vencimiento es requerida';
+    }
+    return '';
+  }
+
+  /**
+   * Obtiene la fecha mínima para expiración (hoy)
+   */
+  getMinExpiryDate(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  /**
+   * Envía el formulario para crear un nuevo lote
+   * expiryDate es opcional - si no se proporciona, el backend lo calcula automáticamente
+   */
+  onCreateBatchSubmit(): void {
+    if (this.batchForm.invalid || !this.creatingBatchForItemId) {
+      this.batchForm.markAllAsTouched();
+      return;
+    }
+
+    this.isSubmitting = true;
+
+    // Construir request - expiryDate es opcional
+    const request: CreateBatchRequest = {
+      itemStockId: this.creatingBatchForItemId,
+      quantity: this.batchForm.get('quantity')?.value,
+      supplierId: this.batchForm.get('supplierId')?.value,
+      batchNumber: this.batchForm.get('batchNumber')?.value
+    };
+
+    // Solo incluir expiryDate si el usuario lo proporcionó
+    const expiryDate = this.batchForm.get('expiryDate')?.value;
+    if (expiryDate) {
+      request.expiryDate = expiryDate;
+    }
+
+    this.stockBatchService.createBatch(request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (newBatch) => {
+          console.log('Lote creado:', newBatch);
+          // Recargar inventario y lotes
+          this.loadInventory();
+          this.loadBatchAlerts();
+          // Si el item estaba expandido, recargar sus lotes
+          if (this.expandedItemId === this.creatingBatchForItemId && this.creatingBatchForItemId !== null) {
+            this.itemBatches.delete(this.creatingBatchForItemId);
+            this.loadItemBatches(this.creatingBatchForItemId);
+          }
+          this.closeCreateBatchModal();
+          this.isSubmitting = false;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error al crear lote:', error);
+          this.isSubmitting = false;
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
 
   /**
    * Getter para los items a mostrar (filtrados o todos)
@@ -179,12 +527,6 @@ export class InventoryComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  /**
-   * Obtiene el item stock que se está ajustando
-   */
-  getAdjustingItemStock(): ItemStockDTO | undefined {
-    return this.inventoryItems?.find(is => is.itemStockId === this.adjustingItemStockId);
-  }
 
   /**
    * Obtiene el nivel de stock basado en el stock ideal
@@ -221,98 +563,6 @@ export class InventoryComponent implements OnInit {
     return Math.min((quantity / idealStock) * 100, 100);
   }
 
-  /**
-   * Abre el modal para aumentar stock
-   */
-  openIncreaseStockModal(itemStock: ItemStockDTO): void {
-    this.stockAction = 'increase';
-    this.adjustingItemStockId = itemStock.itemStockId;
-    this.stockForm.reset({ quantity: 1 });
-    this.showStockModal = true;
-  }
-
-  /**
-   * Abre el modal para disminuir stock
-   */
-  openDecreaseStockModal(itemStock: ItemStockDTO): void {
-    this.stockAction = 'decrease';
-    this.adjustingItemStockId = itemStock.itemStockId;
-    this.stockForm.reset({ quantity: 1 });
-    this.showStockModal = true;
-  }
-
-  /**
-   * Cierra el modal de ajuste de stock
-   */
-  closeStockModal(): void {
-    this.showStockModal = false;
-    this.stockAction = null;
-    this.adjustingItemStockId = null;
-    this.stockForm.reset();
-  }
-
-  /**
-   * Ajusta el stock (aumentar o disminuir)
-   */
-  onAdjustStockSubmit(): void {
-    if (this.stockForm.invalid) {
-      this.stockForm.markAllAsTouched();
-      return;
-    }
-
-    try {
-      this.isSubmitting = true;
-
-      const quantity = this.stockForm.get('quantity')?.value;
-      const itemStock = this.getAdjustingItemStock();
-
-      if (!itemStock) {
-        this.isSubmitting = false;
-        return;
-      }
-
-      const itemStockId = itemStock.itemStockId;
-
-      if (this.stockAction === 'increase') {
-        // Llamar al endpoint de aumentar stock
-        this.http.put(`/api/staff/inventory/${itemStockId}/increase`, null, {
-          params: { quantity: quantity.toString() }
-        })
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.loadInventory();
-            this.closeStockModal();
-            this.isSubmitting = false;
-          },
-          error: (error) => {
-            console.error('Error al aumentar stock:', error);
-            this.isSubmitting = false;
-          }
-        });
-      } else if (this.stockAction === 'decrease') {
-        // Llamar al endpoint de disminuir stock
-        this.http.put(`/api/staff/inventory/${itemStockId}/decrease`, null, {
-          params: { quantity: quantity.toString() }
-        })
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.loadInventory();
-            this.closeStockModal();
-            this.isSubmitting = false;
-          },
-          error: (error) => {
-            console.error('Error al disminuir stock:', error);
-            this.isSubmitting = false;
-          }
-        });
-      }
-    } catch (error: any) {
-      this.isSubmitting = false;
-      console.error('Error al ajustar stock:', error);
-    }
-  }
 
   // Métodos de Paginación
   nextPage(): void {

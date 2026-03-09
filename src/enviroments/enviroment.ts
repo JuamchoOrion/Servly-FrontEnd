@@ -6,7 +6,8 @@ export const environment = {
   production: false,
 
   // API Configuration
-  apiUrl: 'http://localhost:8081',
+  // ✅ vacío: el proxy de Angular redirige /api/** → http://localhost:8081
+  apiUrl: '',
   apiVersion: 'v1',
 
   // Authentication
@@ -19,20 +20,20 @@ export const environment = {
     tokenKey: 'auth_token',
     refreshTokenKey: 'refresh_token',
     userKey: 'current_user',
-    tokenExpiry: 24 * 60 * 60 * 1000, // 24 horas en ms
-    refreshExpiry: 7 * 24 * 60 * 60 * 1000 // 7 días en ms
+    tokenExpiry: 24 * 60 * 60 * 1000,        // 24 horas en ms
+    refreshExpiry: 7 * 24 * 60 * 60 * 1000   // 7 días en ms
   },
 
   // reCAPTCHA
   recaptcha: {
-    siteKey: '6LcTHIEsAAAAAJuGnqtBdfztpJS1_nFvbzDkmYmm', // Tu clave v2
+    siteKey: '6LcTHIEsAAAAAJuGnqtBdfztpJS1_nFvbzDkmYmm',
     enabled: true,
-    version: 'v2' // v2 con checkbox
+    version: 'v2'
   },
 
   // Google OAuth
   google: {
-    clientId: '619549576770-oj20nuhmqcqu6c09qim0v6fj952jm93a.apps.googleusercontent.com', // Reemplaza con tu CLIENT_ID
+    clientId: '619549576770-oj20nuhmqcqu6c09qim0v6fj952jm93a.apps.googleusercontent.com',
     discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
     scopes: 'profile email'
   },

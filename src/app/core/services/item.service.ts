@@ -98,16 +98,18 @@ export class ItemService {
 
   /**
    * Obtener items de una categoría con paginación
-   * GET /api/items/category-paginated/{categoryId}?page=0&size=10
+   * GET /api/items/category-paginated/{categoryId}?page=0&size=10&sort=name,asc
    */
   getItemsByCategoryPaginated(
     categoryId: number,
     page: number = 0,
-    size: number = 10
+    size: number = 10,
+    sort: string = 'name,asc'
   ): Observable<PaginatedItemResponse> {
     let params = new HttpParams()
       .set('page', page.toString())
-      .set('size', size.toString());
+      .set('size', size.toString())
+      .set('sort', sort);
 
     return this.http.get<PaginatedItemResponse>(
       `${this.ITEMS_ENDPOINT}/category-paginated/${categoryId}`,

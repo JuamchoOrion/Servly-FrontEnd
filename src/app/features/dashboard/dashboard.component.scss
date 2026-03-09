@@ -225,8 +225,26 @@ $border-light:    #EFEFEF;
 
   &.stat-primary::before  { background: #F5E6C8; }
   &.stat-secondary::before { background: #F5E6C8; }
-  &.stat-warning::before  { background: #F5E6C8; }
-  &.stat-success::before  { background: #F5E6C8; }
+  &.stat-warning::before  { background: $warning-orange; }
+  &.stat-danger::before   { background: $error-red; }
+  &.stat-success::before  { background: $success-green; }
+
+  &.stat-danger {
+    .stat-icon {
+      background: rgba($error-red, 0.1);
+      color: $error-red;
+    }
+    .stat-content .stat-number {
+      color: $error-red;
+    }
+  }
+
+  &.stat-warning {
+    .stat-icon {
+      background: rgba($warning-orange, 0.1);
+      color: $warning-orange;
+    }
+  }
 
   .stat-icon {
     font-size: calc(var(--base-font-size) * 2.3);
@@ -364,6 +382,19 @@ $border-light:    #EFEFEF;
   margin-bottom: 24px;
   overflow: hidden;
 
+  &.expired-section {
+    border-color: rgba($error-red, 0.3);
+
+    .section-header {
+      background: rgba($error-red, 0.05);
+      border-bottom-color: rgba($error-red, 0.2);
+
+      h3 {
+        color: $error-red;
+      }
+    }
+  }
+
   .section-header {
     display: flex;
     justify-content: space-between;
@@ -376,6 +407,13 @@ $border-light:    #EFEFEF;
       font-weight: 700;
       color: $primary-black;
       margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .material-icons {
+        font-size: calc(var(--base-font-size) * 1.4);
+      }
     }
 
     .alert-count {
@@ -385,6 +423,10 @@ $border-light:    #EFEFEF;
       border-radius: 20px;
       font-size: calc(var(--base-font-size) * 0.85);
       font-weight: 600;
+
+      &.alert-critical {
+        background: $error-red;
+      }
     }
   }
 
@@ -442,6 +484,14 @@ $border-light:    #EFEFEF;
       .alert-category {
         font-size: calc(var(--base-font-size) * 0.85);
         color: $text-light;
+        margin-top: 2px;
+      }
+
+      .alert-expiry {
+        font-size: calc(var(--base-font-size) * 0.8);
+        color: $text-muted;
+        margin-top: 4px;
+        font-style: italic;
       }
     }
 

@@ -5,16 +5,25 @@ import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../enviroments/enviroment';
 import { ItemResponse, PaginatedItemResponse } from './item.service';
 import { ItemCategoryResponse } from '../dtos/category.dto';
+import { StockBatch, StockBatchStatus } from './stock-batch.service';
 
 export interface DashboardStats {
   totalItems: number;
   totalCategories: number;
   totalSuppliers: number;
-  lowStockItems: number;
+  // Nuevas métricas basadas en StockBatch
+  totalBatches: number;
+  batchesCloseToExpire: number;
+  batchesExpired: number;
+  batchesHealthy: number;
+  // Listas de lotes
+  closeToExpireBatches: StockBatch[];
+  expiredBatches: StockBatch[];
+  // Estadísticas de categorías
   itemsByCategory: CategoryStats[];
-  expirationAlerts: ExpirationAlert[];
-  recentActivity: ActivityItem[];
   topCategories: CategoryStats[];
+  // Actividad reciente
+  recentActivity: ActivityItem[];
 }
 
 export interface CategoryStats {
@@ -24,17 +33,22 @@ export interface CategoryStats {
   percentage: number;
 }
 
-export interface ExpirationAlert {
+/**
+ * Alerta de expiración basada en StockBatch
+ */
+export interface BatchExpirationAlert {
   id: number;
-  name: string;
-  expirationDays: number;
-  category: string;
-  status: 'warning' | 'critical';
+  batchNumber: string;
+  quantity: number;
+  supplierName: string;
+  expiryDate: string;
+  daysUntilExpiry: number;
+  status: StockBatchStatus;
 }
 
 export interface ActivityItem {
   id: string;
-  type: 'item_created' | 'item_updated' | 'item_deleted' | 'category_created';
+  type: 'item_created' | 'item_updated' | 'item_deleted' | 'category_created' | 'batch_expiring';
   description: string;
   timestamp: string;
   user: string;
@@ -50,10 +64,12 @@ export class DashboardService {
     return forkJoin({
       items: this.getItemsPaginated(),
       categories: this.getCategories(),
-      suppliers: this.getSuppliers().pipe(catchError(() => of([])))
+      suppliers: this.getSuppliers().pipe(catchError(() => of([]))),
+      closeToExpire: this.getCloseToExpireBatches().pipe(catchError(() => of([]))),
+      expired: this.getExpiredBatches().pipe(catchError(() => of([])))
     }).pipe(
-      map(({ items, categories, suppliers }) =>
-        this.calculateStats(items.content, categories, suppliers)
+      map(({ items, categories, suppliers, closeToExpire, expired }) =>
+        this.calculateStats(items.content, categories, suppliers, closeToExpire, expired)
       )
     );
   }
@@ -84,24 +100,58 @@ export class DashboardService {
     );
   }
 
+  /**
+   * Obtiene lotes próximos a expirar (menos de 7 días)
+   * GET /api/stock-batch/close-to-expire
+   */
+  private getCloseToExpireBatches(): Observable<StockBatch[]> {
+    return this.http.get<StockBatch[]>(
+      `${this.API_URL}/api/stock-batch/close-to-expire`,
+      { withCredentials: true }
+    );
+  }
+
+  /**
+   * Obtiene lotes ya expirados
+   * GET /api/stock-batch/expired
+   */
+  private getExpiredBatches(): Observable<StockBatch[]> {
+    return this.http.get<StockBatch[]>(
+      `${this.API_URL}/api/stock-batch/expired`,
+      { withCredentials: true }
+    );
+  }
+
   private calculateStats(
     items: ItemResponse[],
     categories: ItemCategoryResponse[],
-    suppliers: any[]
+    suppliers: any[],
+    closeToExpire: StockBatch[],
+    expired: StockBatch[]
   ): DashboardStats {
     const categoryStats = this.calculateCategoryStats(items, categories);
-    const expirationAlerts = this.calculateExpirationAlerts(items, categories);
-    const recentActivity = this.generateRecentActivity(items);
+    const recentActivity = this.generateRecentActivity(items, closeToExpire);
+
+    // Calcular total de lotes (aproximación basada en datos disponibles)
+    const totalBatches = closeToExpire.length + expired.length;
+    const batchesHealthy = Math.max(0, items.length - closeToExpire.length - expired.length);
 
     return {
       totalItems: items.length,
       totalCategories: categories.filter(cat => cat.active).length,
       totalSuppliers: suppliers.length,
-      lowStockItems: Math.floor(items.length * 0.15),
+      // Métricas de StockBatch
+      totalBatches: totalBatches,
+      batchesCloseToExpire: closeToExpire.length,
+      batchesExpired: expired.length,
+      batchesHealthy: batchesHealthy,
+      // Listas de lotes
+      closeToExpireBatches: closeToExpire,
+      expiredBatches: expired,
+      // Estadísticas
       itemsByCategory: categoryStats,
-      expirationAlerts,
-      recentActivity,
-      topCategories: categoryStats.slice(0, 8)
+      topCategories: categoryStats.slice(0, 8),
+      recentActivity
     };
   }
 
@@ -109,19 +159,16 @@ export class DashboardService {
     items: ItemResponse[],
     categories: ItemCategoryResponse[]
   ): CategoryStats[] {
-    // ✅ FIX: item.category llega como string con el NOMBRE ("Bebidas", "Pollo"...)
-    // no como ID numérico. Se construye el mapa con category.name como clave.
     const countByName = new Map<string, number>();
 
     items.forEach(item => {
-      const key = item.category; // "Bebidas", "Pollo", etc.
+      const key = item.category;
       countByName.set(key, (countByName.get(key) || 0) + 1);
     });
 
     const total = items.length;
     const activeCategories = categories.filter(cat => cat.active);
 
-    // Categorías conocidas en el backend
     const knownStats: CategoryStats[] = activeCategories.map(cat => ({
       id: cat.id,
       name: cat.name,
@@ -129,8 +176,6 @@ export class DashboardService {
       percentage: total > 0 ? ((countByName.get(cat.name) || 0) / total) * 100 : 0
     }));
 
-    // También incluir categorías que existan en los items pero no en el backend
-    // (datos inconsistentes / categorías borradas, etc.)
     const knownNames = new Set(activeCategories.map(c => c.name));
     const orphanStats: CategoryStats[] = [];
     let orphanId = -1;
@@ -147,39 +192,42 @@ export class DashboardService {
     });
 
     return [...knownStats, ...orphanStats]
-      .filter(s => s.count > 0)          // solo categorías con items
+      .filter(s => s.count > 0)
       .sort((a, b) => b.count - a.count);
   }
 
-  private calculateExpirationAlerts(
+  private generateRecentActivity(
     items: ItemResponse[],
-    categories: ItemCategoryResponse[]
-  ): ExpirationAlert[] {
-    // item.category ya viene como nombre — no necesita lookup
-    return items
-      .filter(item => item.expirationDays <= 30)
-      .map(item => ({
-        id: item.id,
-        name: item.name,
-        expirationDays: item.expirationDays,
-        category: item.category, // ✅ ya es el nombre legible
-        status: item.expirationDays <= 7 ? 'critical' as const : 'warning' as const
-      }))
-      .sort((a, b) => a.expirationDays - b.expirationDays)
-      .slice(0, 10);
-  }
+    closeToExpire: StockBatch[]
+  ): ActivityItem[] {
+    const activities: ActivityItem[] = [];
 
-  private generateRecentActivity(items: ItemResponse[]): ActivityItem[] {
-    return items
+    // Agregar alertas de lotes próximos a expirar como actividad
+    closeToExpire.slice(0, 3).forEach((batch, index) => {
+      activities.push({
+        id: `batch_alert_${batch.id}_${index}`,
+        type: 'batch_expiring',
+        description: `Lote "${batch.batchNumber}" expira en ${batch.daysUntilExpiry} días`,
+        timestamp: new Date().toISOString(),
+        user: 'Sistema'
+      });
+    });
+
+    // Agregar items actualizados recientemente
+    items
       .filter(item => item.updatedAt)
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-      .slice(0, 5)
-      .map((item, index) => ({
-        id: `activity_${item.id}_${index}`,
-        type: 'item_updated' as const,
-        description: `Item "${item.name}" fue actualizado`,
-        timestamp: item.updatedAt,
-        user: 'Sistema'
-      }));
+      .slice(0, 5 - activities.length)
+      .forEach((item, index) => {
+        activities.push({
+          id: `activity_${item.id}_${index}`,
+          type: 'item_updated',
+          description: `Item "${item.name}" fue actualizado`,
+          timestamp: item.updatedAt,
+          user: 'Sistema'
+        });
+      });
+
+    return activities;
   }
 }

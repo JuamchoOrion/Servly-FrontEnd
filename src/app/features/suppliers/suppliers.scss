@@ -1502,8 +1502,138 @@ $white: #FFFFFF;
   }
 }
 
-/* Tamaños de fuente */
-:host-context(.font-size-small) { .suppliers-page { font-size: 12px; } }
-:host-context(.font-size-medium) { .suppliers-page { font-size: 14px; } }
-:host-context(.font-size-large) { .suppliers-page { font-size: 16px; } }
-:host-context(.font-size-extra-large) { .suppliers-page { font-size: 18px; } }
+
+/* ===============================
+   🔤 ACCESIBILIDAD - FUENTES VARIABLES
+================================ */
+
+// Fuente pequeña
+:root.font-small .suppliers-page,
+:host-context(.font-small) .suppliers-page {
+  .suppliers-header h1 { font-size: 20px; }
+  .suppliers-header p { font-size: 11px; }
+  .supplier-name { font-size: 14px; }
+  .supplier-description { font-size: 11px; }
+  .page-info { font-size: 12px; }
+  .page-size-selector label { font-size: 11px; }
+  .page-size-select { font-size: 12px; padding: 6px 10px; }
+  .btn-pagination { font-size: 12px; padding: 6px 12px; }
+  .btn-page-number { font-size: 12px; min-width: 32px; height: 32px; }
+  .form-label { font-size: 11px; }
+  .form-input { font-size: 13px; padding: 10px 14px; }
+  .btn { font-size: 13px; }
+}
+
+// Fuente grande
+:root.font-large .suppliers-page,
+:host-context(.font-large) .suppliers-page {
+  .suppliers-header h1 { font-size: 32px; }
+  .suppliers-header p { font-size: 16px; }
+  .supplier-name { font-size: 20px; }
+  .supplier-description { font-size: 15px; }
+  .page-info { font-size: 16px; }
+  .page-size-selector label { font-size: 15px; }
+  .page-size-select { font-size: 15px; padding: 10px 14px; }
+  .btn-pagination { font-size: 15px; padding: 12px 20px; }
+  .btn-page-number { font-size: 15px; min-width: 44px; height: 44px; }
+  .form-label { font-size: 15px; }
+  .form-input { font-size: 17px; padding: 16px 20px; }
+  .btn { font-size: 16px; padding: 14px 24px; }
+}
+
+// Fuente extra grande
+:root.font-extra-large .suppliers-page,
+:host-context(.font-extra-large) .suppliers-page {
+  .suppliers-header h1 { font-size: 36px; }
+  .suppliers-header p { font-size: 18px; }
+  .supplier-name { font-size: 24px; }
+  .supplier-description { font-size: 17px; }
+  .page-info { font-size: 18px; }
+  .page-size-selector label { font-size: 17px; }
+  .page-size-select { font-size: 17px; padding: 12px 16px; }
+  .btn-pagination { font-size: 17px; padding: 14px 24px; }
+  .btn-page-number { font-size: 17px; min-width: 50px; height: 50px; }
+  .form-label { font-size: 17px; }
+  .form-input { font-size: 19px; padding: 18px 22px; }
+  .btn { font-size: 18px; padding: 16px 28px; }
+
+  .pagination-controls {
+    padding: 24px;
+    gap: 24px;
+  }
+
+  .modal-container {
+    max-width: 600px;
+
+    .modal-header h2 { font-size: 26px; }
+  }
+}
+
+
+/* ===============================
+   🌓 MODO OSCURO - PAGINACIÓN SUPPLIERS
+================================ */
+
+:host-context(.dark-mode) {
+  .pagination-controls {
+    background: #2a2a2a;
+    border-color: rgba(200,169,81,0.2);
+  }
+
+  .page-info {
+    color: #e0e0e0;
+  }
+
+  .page-size-selector {
+    label {
+      color: #999999;
+    }
+
+    .page-size-select {
+      background: #333333;
+      border-color: rgba(200,169,81,0.3);
+      color: #e0e0e0;
+
+      &:focus {
+        border-color: $accent-gold;
+        box-shadow: 0 0 0 3px rgba(200,169,81,0.2);
+      }
+
+      &:hover {
+        border-color: $accent-gold;
+      }
+    }
+  }
+
+  .btn-pagination {
+    background: rgba(200,169,81,0.9);
+    color: #1a1a1a;
+
+    &:hover:not(:disabled) {
+      background: $accent-gold;
+    }
+
+    &:disabled {
+      background: #444444;
+      color: #666666;
+    }
+  }
+
+  .btn-page-number {
+    background: #333333;
+    color: #e0e0e0;
+    border-color: rgba(200,169,81,0.3);
+
+    &:hover:not(:disabled) {
+      border-color: $accent-gold;
+      background: rgba(200,169,81,0.15);
+      color: $accent-gold;
+    }
+
+    &.active {
+      background: linear-gradient(135deg, $accent-gold 0%, #D4B875 100%);
+      color: #1a1a1a;
+      border-color: $accent-gold;
+    }
+  }
+}
