@@ -37,6 +37,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/auth/pages/force-password-change/force-password-change.component').then(m => m.ForcePasswordChangeComponent)
   },
+  {
+    path: 'welcome',
+    loadComponent: () =>
+      import('./features/welcome/welcome.component').then(m => m.WelcomeComponent)
+  },
 
   // Protected routes with lazy loading
   {

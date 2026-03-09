@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SecurityService } from '../../../../core/services/security.service';
 import { RateLimitService } from '../../../../core/services/rate-limit.service';
@@ -45,7 +45,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private rateLimitService: RateLimitService,
     private errorHandlingService: ErrorHandlingService,
     public i18n: I18nService,
-    private router: Router
+    private router: Router,
+    private activatedRoute: ActivatedRoute
   ) {
     this.initializeForm();
     // Exponer el callback globalmente para reCAPTCHA
@@ -56,6 +57,40 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.loadRecaptchaScript();
     this.setupRateLimitListener();
     this.availableLanguages = this.i18n.getSupportedLanguages();
+    this.checkOAuth2Error();
+  }
+
+  /**
+   * Verifica si hay errores de OAuth2 en los query params
+   */
+  private checkOAuth2Error(): void {
+    this.activatedRoute.queryParams.subscribe(params => {
+      const error = params['error'];
+      if (error) {
+        console.log('🔵 [LoginComponent] Error OAuth2 detectado:', error);
+        this.handleOAuth2ErrorFromParams(error);
+      }
+    });
+  }
+
+  /**
+   * Maneja errores OAuth2 provenientes de los query params
+   */
+  private handleOAuth2ErrorFromParams(error: string): void {
+    const errorMessages: Record<string, string> = {
+      'oauth2_failed': 'Error en la autenticación con Google',
+      'missing_tokens': 'No se recibieron los tokens de autenticación',
+      'missing_email': 'No se recibió el email del usuario',
+      'user_not_found': 'Usuario no encontrado en el sistema',
+      'access_denied': 'Acceso denegado por Google',
+      'invalid_token': 'Token de autenticación inválido'
+    };
+
+    this.loginError = errorMessages[error] || 'Error en la autenticación con Google';
+    console.log('🔵 [LoginComponent] Error mostrado al usuario:', this.loginError);
+
+    // Limpiar el query param después de mostrar el error
+    this.router.navigate(['/login'], { replaceUrl: true });
   }
 
   /**
@@ -225,11 +260,17 @@ export class LoginComponent implements OnInit, OnDestroy {
       // Realizar login
       this.authService.login(email, password, this.recaptchaToken).subscribe({
         next: (response) => {
+          console.log('═══════════════════════════════════════════════════════════');
+          console.log('🔵 [Login] Autenticación exitosa');
+          console.log('🔵 [Login] Response:', response);
+
           this.isLoading = false;
           this.loginSuccess = this.i18n.translate('success.login');
 
           // Limpiar intentos fallidos
           this.rateLimitService.clearFailedAttempts();
+          // 🔐 Inicializar CSRF después del login
+          this.securityService.initCsrf();
 
           // Resetear token reCAPTCHA
           this.recaptchaToken = null;
@@ -239,20 +280,29 @@ export class LoginComponent implements OnInit, OnDestroy {
 
           // Redirigir según el flujo
           setTimeout(() => {
+            console.log('🔵 [Login] Preparando redirección...');
+
             // Verificar si debe cambiar contraseña (primer login)
             if (response.mustChangePassword) {
+              console.log('🔵 [Login] mustChangePassword=true, redirigiendo a force-password-change');
               // El token temporal ya se guardó en el servicio
               this.router.navigate(['/auth/force-password-change']);
               return;
             }
 
-            // Login normal - redirigir según rol
+            // Login normal - guardar tokens y ejecutar redirección por rol
+            console.log('🔵 [Login] Guardando tokens...');
+
+            // El authService ya guardó los tokens en el método login()
+            // Ahora ejecutar redirección basada en rol
             const userRole = response.role?.toUpperCase();
-            if (userRole === 'STOREKEEPER') {
-              this.router.navigate(['/inventory']);
-            } else {
-              this.router.navigate(['/dashboard']);
-            }
+            console.log('🔵 [Login] Rol detectado:', userRole);
+            console.log('🔵 [Login] Ejecutando redirección por rol');
+
+            // Usar el método centralizado de redirección por rol
+            this.authService.redirectUserByRole(userRole);
+
+            console.log('═══════════════════════════════════════════════════════════');
           }, 1500);
         },
         error: (error) => {

@@ -1,9 +1,24 @@
 <div class="oauth2-callback-container">
-  <div class="loading-spinner">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Cargando...</span>
-    </div>
-    <h3 class="mt-3">Procesando login con Google...</h3>
-    <p class="text-muted">Por favor espera, te estamos redirigiendo.</p>
+  <div class="callback-card">
+    @if (isProcessing) {
+      <div class="processing-state">
+        <div class="spinner"></div>
+        <h2>Procesando autenticación...</h2>
+        <p>Completando el inicio de sesión con Google</p>
+      </div>
+    } @else if (errorMessage) {
+      <div class="error-state">
+        <div class="error-icon">❌</div>
+        <h2>Error de autenticación</h2>
+        <p>{{ errorMessage }}</p>
+        <p class="redirect-message">Redirigiendo al login...</p>
+      </div>
+    } @else {
+      <div class="success-state">
+        <div class="success-icon">✅</div>
+        <h2>¡Autenticación exitosa!</h2>
+        <p>Redirigiendo al dashboard...</p>
+      </div>
+    }
   </div>
 </div>

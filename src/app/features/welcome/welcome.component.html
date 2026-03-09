@@ -1,0 +1,37 @@
+<div class="welcome-container">
+  <div class="welcome-card">
+    <div class="welcome-header">
+      <h1>¡Bienvenido a Servly!</h1>
+      <p>Gracias por iniciar sesión</p>
+    </div>
+
+    <div class="welcome-body">
+      <div class="user-info">
+        <div class="avatar">
+          <span>{{ userName.charAt(0).toUpperCase() }}</span>
+        </div>
+        <div class="user-details">
+          <h2>{{ userName }}</h2>
+          <p class="roles">
+            <span *ngFor="let role of userRoles; let last = last">
+              {{ role }}{{ last ? '' : ', ' }}
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <div class="welcome-message">
+        <p>Has iniciado sesión correctamente.</p>
+      </div>
+
+      <div class="welcome-actions">
+        <button class="btn btn-primary" (click)="goToDashboard()">
+          Ir al Dashboard
+        </button>
+        <button class="btn btn-secondary" (click)="logout()">
+          Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

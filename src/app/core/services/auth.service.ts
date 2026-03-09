@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, throwError, of } from 'rxjs';
 import { tap, catchError, switchMap } from 'rxjs/operators';
 import { environment } from '../../../enviroments/enviroment';
@@ -51,7 +52,10 @@ export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(!!this.getUserFromStorage());
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {
     this.restoreSessionFromStorage();
   }
 
@@ -207,36 +211,72 @@ export class AuthService {
    *
    * @param refreshToken Token de refresco (opcional, se obtiene de storage)
    * @returns Observable<LoginResponseDTO> con nuevo access token
+   *
+   * Logging detallado:
+   * - Inicio del refresh
+   * - Token utilizado
+   * - Respuesta del servidor
+   * - Actualización de tokens
    */
   refreshToken(refreshToken?: string): Observable<LoginResponseDTO> {
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🔵 [RefreshToken] INICIANDO REFRESH DE TOKEN');
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🔵 [RefreshToken] Timestamp:', new Date().toISOString());
+
     const token = refreshToken || this.getRefreshToken();
+    console.log('🔵 [RefreshToken] Refresh token desde parámetro:', refreshToken ? '✅ SÍ' : '❌ NO');
+    console.log('🔵 [RefreshToken] Refresh token desde storage:', this.getRefreshToken() ? '✅ SÍ' : '❌ NO');
 
     if (!token) {
+      console.error('❌ [RefreshToken] No hay refresh token disponible');
+      console.log('═══════════════════════════════════════════════════════════');
       return throwError(() => new Error('No refresh token available'));
     }
 
+    console.log('🔵 [RefreshToken] Refresh token (primeros 20 chars):', token.substring(0, 20) + '...');
+
     const request = { refreshToken: token };
+    console.log('🔵 [RefreshToken] Enviando request a:', this.REFRESH_ENDPOINT);
 
     return this.http.post<LoginResponseDTO>(this.REFRESH_ENDPOINT, request, { withCredentials: true }).pipe(
       tap((response: LoginResponseDTO) => {
+        console.log('🔵 [RefreshToken] Respuesta del servidor:', response);
+
         // Normalizar el token (puede venir como 'token' o 'accessToken')
         const accessToken = response.token || response.accessToken;
         if (!accessToken) {
+          console.error('❌ [RefreshToken] No access token en respuesta');
           throw new Error('No access token in response');
         }
 
+        console.log('🔵 [RefreshToken] Access token recibido (primeros 20 chars):', accessToken.substring(0, 20) + '...');
+        console.log('🔵 [RefreshToken] Refresh token recibido:', response.refreshToken ? '✅ SÍ (rotado)' : '❌ NO (mismo token)');
+
         // Actualizar tokens en sessionStorage
-        this.setTokens(accessToken, response.refreshToken || '');
+        console.log('🔵 [RefreshToken] Actualizando tokens en sessionStorage...');
+        this.setTokens(accessToken, response.refreshToken || token);
+        console.log('✅ [RefreshToken] Tokens actualizados correctamente');
+
         // Actualizamos el usuario si cambió
-        this.setCurrentUser({
+        const updatedUser = {
           email: response.email || '',
           name: response.name || '',
           roles: response.roles || (response.role ? [response.role] : []),
           mustChangePassword: response.mustChangePassword || false
-        });
+        };
+        console.log('🔵 [RefreshToken] Actualizando datos del usuario:', updatedUser);
+        this.setCurrentUser(updatedUser);
+        console.log('✅ [RefreshToken] Usuario actualizado');
+
+        console.log('✅ [RefreshToken] REFRESH COMPLETADO EXITOSAMENTE');
+        console.log('═══════════════════════════════════════════════════════════');
       }),
       catchError(error => {
+        console.error('❌ [RefreshToken] Error en refresh:', error);
+        console.log('🔵 [RefreshToken] Ejecutando logout...');
         this.logout();
+        console.log('═══════════════════════════════════════════════════════════');
         return this.handleError(error);
       })
     );
@@ -246,13 +286,35 @@ export class AuthService {
    * Realiza logout limpiando sesión
    *
    * @returns Observable<void>
+   *
+   * Logging detallado:
+   * - Inicio del logout
+   * - Limpieza de sessionStorage
+   * - Actualización de estado
    */
   logout(): Observable<void> {
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🔵 [Logout] INICIANDO LOGOUT');
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🔵 [Logout] Timestamp:', new Date().toISOString());
+    console.log('🔵 [Logout] Usuario actual:', this.getCurrentUser());
+    console.log('🔵 [Logout] Enviando request a:', this.LOGOUT_ENDPOINT);
+
     return this.http.post<void>(this.LOGOUT_ENDPOINT, {}, { withCredentials: true }).pipe(
-      tap(() => this.clearSessionInternal()),
-      catchError(() => {
+      tap(() => {
+        console.log('🔵 [Logout] Respuesta del servidor: OK');
+        console.log('🔵 [Logout] Limpiando sesión local...');
+        this.clearSessionInternal();
+        console.log('✅ [Logout] Sesión limpiada correctamente');
+        console.log('═══════════════════════════════════════════════════════════');
+      }),
+      catchError((error) => {
+        console.error('❌ [Logout] Error en logout del servidor:', error);
+        console.log('🔵 [Logout] Limpiando sesión localmente (fallback)...');
         // Si el servidor falla, limpiar sesión localmente de todas formas
         this.clearSessionInternal();
+        console.log('✅ [Logout] Sesión limpiada (fallback)');
+        console.log('═══════════════════════════════════════════════════════════');
         return throwError(() => new Error('Logout failed'));
       })
     );
@@ -263,10 +325,47 @@ export class AuthService {
    *
    * @param accessToken Token JWT de acceso
    * @param refreshToken Token JWT de refresco
+   *
+   * Logging:
+   * - Tokens guardados (primeros 20 caracteres)
+   * - Keys utilizadas
+   * - Verificación post-guardado
    */
   setTokens(accessToken: string, refreshToken: string): void {
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🔵 [TokenStorage] setTokens() llamado');
+    console.log('  - accessToken (primeros 30 chars):', accessToken.substring(0, 30) + '...');
+    console.log('  - refreshToken (primeros 30 chars):', refreshToken.substring(0, 30) + '...');
+    console.log('  - TOKEN_KEY:', this.TOKEN_KEY);
+    console.log('  - REFRESH_TOKEN_KEY:', this.REFRESH_TOKEN_KEY);
+
+    // Guardar tokens
     sessionStorage.setItem(this.TOKEN_KEY, accessToken);
     sessionStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
+
+    // VERIFICAR INMEDIATAMENTE QUE SE GUARDARON
+    const verifyAccessToken = sessionStorage.getItem(this.TOKEN_KEY);
+    const verifyRefreshToken = sessionStorage.getItem(this.REFRESH_TOKEN_KEY);
+
+    console.log('🔵 [TokenStorage] VERIFICACIÓN POST-GUARDADO:');
+    console.log('  - accessToken verificado:', verifyAccessToken ? '✅ SÍ' : '❌ NO');
+    console.log('  - refreshToken verificado:', verifyRefreshToken ? '✅ SÍ' : '❌ NO');
+
+    if (!verifyAccessToken) {
+      console.error('❌ [TokenStorage] ERROR: accessToken NO se guardó en sessionStorage!');
+      console.error('  - Valor intentado:', accessToken.substring(0, 30) + '...');
+      console.error('  - Key usada:', this.TOKEN_KEY);
+      console.error('  - sessionStorage disponible:', typeof sessionStorage !== 'undefined');
+    }
+
+    if (!verifyRefreshToken) {
+      console.error('❌ [TokenStorage] ERROR: refreshToken NO se guardó en sessionStorage!');
+      console.error('  - Valor intentado:', refreshToken.substring(0, 30) + '...');
+      console.error('  - Key usada:', this.REFRESH_TOKEN_KEY);
+    }
+
+    console.log('✅ [TokenStorage] Tokens guardados en sessionStorage');
+    console.log('═══════════════════════════════════════════════════════════');
   }
 
   /**
@@ -275,7 +374,9 @@ export class AuthService {
    * @returns Token JWT o null si no existe
    */
   getAccessToken(): string | null {
-    return sessionStorage.getItem(this.TOKEN_KEY);
+    const token = sessionStorage.getItem(this.TOKEN_KEY);
+    console.log('🔵 [TokenStorage] getAccessToken():', token ? `✅ SÍ (${token.substring(0, 20)}...)` : '❌ NO');
+    return token;
   }
 
   /**
@@ -284,7 +385,9 @@ export class AuthService {
    * @returns Refresh token o null si no existe
    */
   getRefreshToken(): string | null {
-    return sessionStorage.getItem(this.REFRESH_TOKEN_KEY);
+    const token = sessionStorage.getItem(this.REFRESH_TOKEN_KEY);
+    console.log('🔵 [TokenStorage] getRefreshToken():', token ? `✅ SÍ (${token.substring(0, 20)}...)` : '❌ NO');
+    return token;
   }
 
   /**
@@ -342,6 +445,229 @@ export class AuthService {
   setCurrentUser(user: CurrentUser): void {
     this.currentUserSubject.next(user);
     sessionStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    console.log('🔵 [Auth] setCurrentUser() llamado - Usuario:', user);
+  }
+
+  /**
+   * Decodifica un JWT y extrae el payload
+   *
+   * @param token JWT token
+   * @returns Payload decodificado o null si es inválido
+   *
+   * Logging:
+   * - Token recibido
+   * - Decodificación del JWT
+   * - Payload extraído
+   */
+  decodeJwtToken(token: string): any {
+    console.log('🔵 [Auth] Token recibido para decodificación');
+
+    try {
+      // Un token JWT tiene 3 partes separadas por puntos: header.payload.signature
+      const parts = token.split('.');
+
+      if (parts.length !== 3) {
+        console.error('❌ [Auth] Token JWT inválido: no tiene 3 partes');
+        return null;
+      }
+
+      // La parte del payload es la segunda (índice 1)
+      const payload = parts[1];
+      console.log('🔵 [Auth] Decodificando JWT (payload)...');
+
+      // Decodificar base64url a base64 estándar
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+
+      // Decodificar base64
+      const decoded = atob(base64);
+      console.log('🔵 [Auth] JWT decodificado:', decoded);
+
+      // Parsear JSON
+      const payloadObj = JSON.parse(decoded);
+      console.log('🔵 [Auth] Payload parseado:', payloadObj);
+
+      return payloadObj;
+    } catch (error) {
+      console.error('❌ [Auth] Error decodificando JWT:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Extrae el rol del token JWT
+   *
+   * @param token JWT token
+   * @returns Rol del usuario o null si no se encuentra
+   *
+   * Busca el rol en los siguientes campos (por orden):
+   * - role
+   * - roles (array, toma el primero)
+   * - authorities (array, toma el primero)
+   * - http://schemas.microsoft.com/ws/2008/06/identity/claims/role (claim de Azure AD)
+   */
+  extractRoleFromToken(token: string): string | null {
+    console.log('🔵 [Auth] extractRoleFromToken() llamado');
+    console.log('🔵 [Auth] Token (primeros 30 chars):', token.substring(0, 30) + '...');
+
+    const payload = this.decodeJwtToken(token);
+
+    if (!payload) {
+      console.error('❌ [Auth] No se pudo decodificar el payload del token');
+      return null;
+    }
+
+    console.log('🔵 [Auth] Payload completo del JWT:', JSON.stringify(payload, null, 2));
+
+    let role: string | null = null;
+
+    // Intentar extraer el rol de diferentes campos posibles
+    console.log('🔵 [Auth] Buscando rol en campos conocidos...');
+
+    // Campo 1: role (simple)
+    if (payload.role) {
+      role = payload.role;
+      console.log('🔵 [Auth] Rol encontrado en campo "role":', role);
+    }
+    // Campo 2: roles (array)
+    else if (payload.roles && Array.isArray(payload.roles) && payload.roles.length > 0) {
+      role = payload.roles[0];
+      console.log('🔵 [Auth] Rol encontrado en campo "roles":', role);
+    }
+    // Campo 3: authorities (array, común en Spring Security)
+    else if (payload.authorities && Array.isArray(payload.authorities) && payload.authorities.length > 0) {
+      role = payload.authorities[0];
+      console.log('🔵 [Auth] Rol encontrado en campo "authorities":', role);
+    }
+    // Campo 4: Azure AD claim
+    else if (payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']) {
+      role = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+      console.log('🔵 [Auth] Rol encontrado en claim de Azure AD');
+    }
+    // Campo 5: roles como string separado por comas
+    else if (payload.roles && typeof payload.roles === 'string' && payload.roles.includes(',')) {
+      role = payload.roles.split(',')[0].trim();
+      console.log('🔵 [Auth] Rol encontrado en "roles" (string comma-separated):', role);
+    }
+    // Campo 6: role como string con prefijo ROLE_
+    else if (payload.role && typeof payload.role === 'string' && payload.role.startsWith('ROLE_')) {
+      role = payload.role.replace('ROLE_', '');
+      console.log('🔵 [Auth] Rol encontrado con prefijo ROLE_, extraído:', role);
+    }
+    // Campo 7: Buscar en claims de Spring Security (formato común)
+    else if (payload.claims && payload.claims.role) {
+      role = payload.claims.role;
+      console.log('🔵 [Auth] Rol encontrado en "claims.role":', role);
+    }
+    else {
+      console.log('🔵 [Auth] Campo "role" no encontrado:', payload.role);
+      console.log('🔵 [Auth] Campo "roles" no encontrado:', payload.roles);
+      console.log('🔵 [Auth] Campo "authorities" no encontrado:', payload.authorities);
+    }
+
+    if (role) {
+      console.log('✅ [Auth] Rol detectado:', role.toUpperCase());
+      return role.toUpperCase();
+    } else {
+      console.warn('⚠️ [Auth] Rol no encontrado en token');
+      console.log('🔵 [Auth] Campos disponibles en payload:', Object.keys(payload));
+      return null;
+    }
+  }
+
+  /**
+   * Determina la ruta de destino según el rol del usuario
+   *
+   * @param role Rol del usuario
+   * @returns Ruta a la que debe ser redirigido
+   *
+   * Mapeo de roles:
+   * - ADMIN → /dashboard
+   * - STOREKEEPER → /inventory
+   * - KITCHEN → /dashboard
+   * - WAITER → /dashboard
+   * - CASHIER → /dashboard
+   * - DEFAULT → /welcome
+   */
+  getRouteByRole(role: string): string {
+    const normalizedRole = role ? role.toUpperCase() : '';
+
+    console.log('🔵 [Auth] getRouteByRole() llamado con rol:', normalizedRole);
+
+    // Mapa de roles a rutas
+    const roleRoutes: Record<string, string> = {
+      'ADMIN': '/dashboard',
+      'STOREKEEPER': '/inventory',
+      'KITCHEN': '/dashboard',
+      'WAITER': '/dashboard',
+      'CASHIER': '/dashboard'
+    };
+
+    const route = roleRoutes[normalizedRole];
+
+    if (route) {
+      console.log('🔵 [Auth] Ruta elegida para rol', normalizedRole, ':', route);
+      return route;
+    } else {
+      console.log('🔵 [Auth] Rol', normalizedRole, 'no tiene ruta específica, redirigiendo a /welcome');
+      return '/welcome';
+    }
+  }
+
+  /**
+   * Ejecuta la redirección basada en el rol del usuario
+   *
+   * @param role Rol del usuario (opcional, si no se proporciona se obtiene del usuario actual)
+   *
+   * Flujo:
+   * 1. Obtener rol del usuario
+   * 2. Determinar ruta según rol
+   * 3. Ejecutar redirección con Router
+   *
+   * Logs:
+   * - Inicio de redirección
+   * - Rol actual
+   * - Ruta elegida
+   * - Redirección ejecutada
+   */
+  redirectUserByRole(role?: string): void {
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🔵 [Auth] Ejecutando redirección basada en rol');
+    console.log('═══════════════════════════════════════════════════════════');
+
+    // Si no se proporciona el rol, obtenerlo del usuario actual
+    let userRole = role;
+
+    if (!userRole) {
+      const user = this.getCurrentUser();
+      if (user && user.roles && user.roles.length > 0) {
+        userRole = user.roles[0];
+        console.log('🔵 [Auth] Rol obtenido del usuario actual:', userRole);
+      } else {
+        console.error('❌ [Auth] No se pudo determinar el rol del usuario');
+        console.log('🔵 [Auth] Redirigiendo a /welcome por defecto');
+        this.router.navigate(['/welcome'], { replaceUrl: true });
+        console.log('═══════════════════════════════════════════════════════════');
+        return;
+      }
+    }
+
+    console.log('🔵 [Auth] Rol actual:', userRole);
+
+    // Determinar ruta según rol
+    const destinationRoute = this.getRouteByRole(userRole);
+    console.log('🔵 [Auth] Redirigiendo a:', destinationRoute);
+
+    // Ejecutar redirección
+    this.router.navigate([destinationRoute], {
+      replaceUrl: true,
+      skipLocationChange: false
+    }).then(() => {
+      console.log('✅ [Auth] Redirección ejecutada exitosamente a:', destinationRoute);
+      console.log('═══════════════════════════════════════════════════════════');
+    }).catch(err => {
+      console.error('❌ [Auth] Error en redirección:', err);
+      console.log('═══════════════════════════════════════════════════════════');
+    });
   }
 
   /**
@@ -358,36 +684,80 @@ export class AuthService {
   }
 
   /**
-   * Limpia toda la sesión del usuario
+   * Limpia toda la sesión del usuario (interno, con logging)
+   *
+   * Logging:
+   * - Keys eliminadas
+   * - Estado actualizado
    */
   private clearSessionInternal(): void {
+    console.log('🔵 [SessionClear] clearSessionInternal() llamado');
+    console.log('  - Eliminando:', this.TOKEN_KEY);
+    console.log('  - Eliminando:', this.REFRESH_TOKEN_KEY);
+    console.log('  - Eliminando:', this.USER_KEY);
+    console.log('  - Eliminando: temp_login_email');
+    console.log('  - Eliminando: temp_login_token');
+
     sessionStorage.removeItem(this.TOKEN_KEY);
     sessionStorage.removeItem(this.REFRESH_TOKEN_KEY);
     sessionStorage.removeItem(this.USER_KEY);
     sessionStorage.removeItem('temp_login_email');
     sessionStorage.removeItem('temp_login_token');
+
     this.currentUserSubject.next(null);
     this.isAuthenticatedSubject.next(false);
+
+    console.log('✅ [SessionClear] Sesión limpiada - isAuthenticated = false');
   }
 
   /**
    * Restaura la sesión desde el storage si existe
+   *
+   * Logging:
+   * - Verificación de storage
+   * - Sesión restaurada (sí/no)
    */
   private restoreSessionFromStorage(): void {
+    console.log('🔵 [SessionRestore] restoreSessionFromStorage() llamado');
+
     const user = this.getUserFromStorage();
     const token = this.getAccessToken();
+
+    console.log('🔵 [SessionRestore] Usuario en storage:', user ? '✅ SÍ' : '❌ NO');
+    console.log('🔵 [SessionRestore] Token en storage:', token ? '✅ SÍ' : '❌ NO');
+
     if (user && token) {
+      console.log('🔵 [SessionRestore] Restaurando sesión...');
       this.currentUserSubject.next(user);
       this.isAuthenticatedSubject.next(true);
+      console.log('✅ [SessionRestore] Sesión restaurada - isAuthenticated = true');
+    } else {
+      console.log('🔵 [SessionRestore] No hay sesión para restaurar');
     }
   }
 
   /**
-   * Obtiene el usuario del storage
+   * Obtiene el usuario del storage (interno)
+   *
+   * Logging:
+   * - Usuario encontrado (sí/no)
+   * - Datos del usuario (si existe)
    */
   private getUserFromStorage(): CurrentUser | null {
     const userJson = sessionStorage.getItem(this.USER_KEY);
-    return userJson ? JSON.parse(userJson) : null;
+    console.log('🔵 [UserStorage] getUserFromStorage():', userJson ? '✅ SÍ' : '❌ NO');
+
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        console.log('🔵 [UserStorage] Usuario:', user);
+        return user;
+      } catch (e) {
+        console.error('❌ [UserStorage] Error parseando usuario:', e);
+        return null;
+      }
+    }
+    return null;
   }
 
   /**
@@ -441,12 +811,158 @@ export class AuthService {
    * 2. Recibir el callback con el código de autorización
    * 3. Intercambiar el código por tokens
    * 4. Redirigir al frontend con los tokens
+   *
+   * Logging detallado para debugging:
+   * - Inicio del flujo
+   * - URL de redirección
+   * - Estado de la sesión actual
    */
   loginWithGoogle(): void {
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🔵 [Google OAuth2] INICIANDO LOGIN CON GOOGLE');
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🔵 [Google OAuth2] Timestamp:', new Date().toISOString());
+    console.log('🔵 [Google OAuth2] Estado actual de autenticación:', this.isAuthenticated());
+    console.log('🔵 [Google OAuth2] Usuario actual:', this.getCurrentUser());
+
     const url = `${this.API_URL}/oauth2/authorize/google`;
-    console.log('🔵 Iniciando login con Google...');
-    console.log('🔵 URL:', `${this.API_URL}/oauth2/authorize/google`);
+    console.log('🔵 [Google OAuth2] URL de autorización:', url);
+    console.log('🔵 [Google OAuth2] Redirigiendo al usuario...');
+
+    // Guardar estado pre-login para posible recuperación
+    sessionStorage.setItem('oauth2_pre_login_state', JSON.stringify({
+      timestamp: new Date().toISOString(),
+      hadUser: !!this.getCurrentUser(),
+      hadToken: !!this.getAccessToken()
+    }));
+
+    console.log('🔵 [Google OAuth2] Estado pre-login guardado en sessionStorage');
+    console.log('═══════════════════════════════════════════════════════════');
+
     window.location.href = url;
+  }
+
+  /**
+   * Procesa el callback de OAuth2 con Google
+   * Este método es llamado desde el OAuth2CallbackComponent
+   *
+   * @param params Query parameters del callback
+   * @returns Objeto con el resultado del procesamiento
+   *
+   * Parámetros esperados:
+   * - accessToken: Token JWT de acceso
+   * - refreshToken: Token JWT de refresco
+   * - email: Email del usuario
+   * - name: Nombre del usuario
+   * - role: Rol del usuario
+   * - error: (opcional) Código de error
+   */
+  processGoogleCallback(params: { [key: string]: any }): {
+    success: boolean;
+    error?: string;
+    user?: CurrentUser;
+  } {
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🔵 [Google OAuth2] PROCESANDO CALLBACK');
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🔵 [Google OAuth2] Timestamp:', new Date().toISOString());
+    console.log('🔵 [Google OAuth2] Query params recibidos:', params);
+
+    // 1. Verificar si hay error
+    const error = params['error'];
+    if (error) {
+      console.error('❌ [Google OAuth2] Error en callback:', error);
+      console.log('═══════════════════════════════════════════════════════════');
+      return { success: false, error };
+    }
+
+    // 2. Extraer parámetros
+    const accessToken = params['accessToken'];
+    const refreshToken = params['refreshToken'];
+    const email = params['email'];
+    const name = params['name'];
+    const role = params['role'];
+
+    console.log('🔵 [Google OAuth2] Extrayendo parámetros:');
+    console.log('  - accessToken:', accessToken ? '✅ PRESENTE (' + accessToken.substring(0, 20) + '...)' : '❌ AUSENTE');
+    console.log('  - refreshToken:', refreshToken ? '✅ PRESENTE (' + refreshToken.substring(0, 20) + '...)' : '❌ AUSENTE');
+    console.log('  - email:', email || '❌ AUSENTE');
+    console.log('  - name:', name || '❌ AUSENTE');
+    console.log('  - role:', role || '❌ AUSENTE');
+
+    // 3. Validar tokens requeridos
+    if (!accessToken || !refreshToken) {
+      console.error('❌ [Google OAuth2] TOKENS FALTANTES');
+      console.error('  - accessToken:', accessToken ? 'presente' : 'FALTANTE');
+      console.error('  - refreshToken:', refreshToken ? 'presente' : 'FALTANTE');
+      console.log('═══════════════════════════════════════════════════════════');
+      return { success: false, error: 'missing_tokens' };
+    }
+
+    // 4. Validar email requerido
+    if (!email) {
+      console.error('❌ [Google OAuth2] EMAIL FALTANTE');
+      console.log('═══════════════════════════════════════════════════════════');
+      return { success: false, error: 'missing_email' };
+    }
+
+    // 5. Guardar tokens
+    console.log('🔵 [Google OAuth2] Guardando tokens en sessionStorage...');
+    this.setTokens(accessToken, refreshToken);
+    console.log('✅ [Google OAuth2] Tokens guardados correctamente');
+
+    // 6. Determinar el rol del usuario
+    let userRole = role ? role.toUpperCase() : null;
+
+    console.log('🔵 [Google OAuth2] === DIAGNÓSTICO DE ROL ===');
+    console.log('🔵 [Google OAuth2] role desde params:', role);
+    console.log('🔵 [Google OAuth2] role.toUpperCase():', role ? role.toUpperCase() : 'null');
+    console.log('🔵 [Google OAuth2] userRole inicial:', userRole);
+
+    // Si el rol no viene en los query params, intentar extraerlo del token JWT
+    if (!userRole) {
+      console.log('🔵 [Google OAuth2] Rol no viene en query params, intentando extraer del token JWT...');
+      const roleFromToken = this.extractRoleFromToken(accessToken);
+      if (roleFromToken) {
+        userRole = roleFromToken;
+        console.log('✅ [Google OAuth2] Rol extraído del token JWT:', userRole);
+      } else {
+        console.warn('⚠️ [Google OAuth2] No se pudo extraer rol del token, usando USER por defecto');
+        userRole = 'USER';
+      }
+    } else {
+      console.log('✅ [Google OAuth2] Rol recibido del backend:', userRole);
+    }
+
+    console.log('🔵 [Google OAuth2] userRole final:', userRole);
+    console.log('🔵 [Google OAuth2] ============================');
+
+    const userName = name || email.split('@')[0];
+
+    const user: CurrentUser = {
+      email: email,
+      name: userName,
+      roles: [userRole],
+      mustChangePassword: false
+    };
+
+    console.log('🔵 [Google OAuth2] Guardando datos del usuario:', user);
+    this.setCurrentUser(user);
+    console.log('✅ [Google OAuth2] Usuario guardado correctamente');
+
+    // 7. Actualizar estado de autenticación
+    this.isAuthenticatedSubject.next(true);
+    console.log('✅ [Google OAuth2] Estado de autenticación actualizado: isAuthenticated = true');
+
+    // 8. Limpiar estado pre-login
+    sessionStorage.removeItem('oauth2_pre_login_state');
+    console.log('🔵 [Google OAuth2] Estado pre-login eliminado');
+
+    console.log('✅ [Google OAuth2] CALLBACK PROCESADO EXITOSAMENTE');
+    console.log('🔵 [Google OAuth2] Usuario autenticado:', user);
+    console.log('═══════════════════════════════════════════════════════════');
+
+    return { success: true, user };
   }
 
   /**
