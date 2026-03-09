@@ -10,9 +10,25 @@ import { CommonModule } from '@angular/common';
 })
 export class FooterComponent {
   currentYear = new Date().getFullYear();
+  showContactModal = false;
+  email = 'servly41@gmail.com';
 
-  contactUs(): void {
-    window.location.href = 'mailto:contacto@servly.com';
+  openContactModal(): void {
+    this.showContactModal = true;
+  }
+
+  closeContactModal(): void {
+    this.showContactModal = false;
+  }
+
+  copyEmail(): void {
+    navigator.clipboard.writeText(this.email).then(() => {
+      alert('Email copiado al portapapeles');
+    });
+  }
+
+  sendEmail(): void {
+    window.location.href = `mailto:${this.email}`;
   }
 }
 

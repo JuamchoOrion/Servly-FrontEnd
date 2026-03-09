@@ -8,7 +8,16 @@
 
     <!-- Center Section -->
     <div class="footer-center">
-      <button class="footer-contact" (click)="contactUs()">
+      <a
+        href="https://scintillating-semolina-107290.netlify.app"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="footer-btn">
+        <span class="material-icons">menu_book</span>
+        <span>Manual de Usuario</span>
+      </a>
+      <button class="footer-btn" (click)="openContactModal()">
+        <span class="material-icons">email</span>
         <span>Contáctanos</span>
       </button>
     </div>
@@ -19,4 +28,41 @@
     </div>
   </div>
 </footer>
+
+<!-- Contact Modal -->
+<div class="contact-modal-overlay" *ngIf="showContactModal" (click)="closeContactModal()">
+  <div class="contact-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>
+        <span class="material-icons">mail</span>
+        Contáctanos
+      </h2>
+      <button class="modal-close" (click)="closeContactModal()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <p class="contact-intro">¿Tienes dudas o sugerencias? Escríbenos a través de Gmail:</p>
+
+      <div class="email-container">
+        <span class="material-icons email-icon">email</span>
+        <span class="email-address">{{ email }}</span>
+        <button class="copy-btn" (click)="copyEmail()" title="Copiar email">
+          <span class="material-icons">content_copy</span>
+        </button>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="closeContactModal()">
+          Cerrar
+        </button>
+        <button class="btn-primary" (click)="sendEmail()">
+          <span class="material-icons">send</span>
+          Enviar Email
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 

@@ -71,28 +71,52 @@ $text-light: #666666;
 
     .footer-center {
       flex: 0 1 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
 
-      .footer-contact {
-        padding: 8px 16px;
+      @media (min-width: 768px) {
+        gap: 16px;
+      }
+
+      .footer-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 18px;
         background: transparent;
         border: 1px solid $accent-gold;
         color: $accent-gold;
         border-radius: 8px;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 600;
+        text-decoration: none;
         cursor: pointer;
         transition: all 0.3s ease;
+        min-width: 160px;
 
         @media (min-width: 768px) {
           padding: 10px 20px;
           font-size: 13px;
         }
 
-        &:hover {
-          background: rgba($accent-gold, 0.1);
-          border-color: $accent-gold;
-          box-shadow: 0 2px 8px rgba($accent-gold, 0.2);
+        @media (max-width: 480px) {
+          padding: 8px 14px;
+          font-size: 11px;
+          min-width: 140px;
         }
+
+        .material-icons {
+          font-size: 18px;
+        }
+
+        &:hover {
+          background: $accent-gold;
+          color: $primary-black;
+          box-shadow: 0 2px 8px rgba($accent-gold, 0.3);
+        }
+
 
         span {
           white-space: nowrap;
@@ -183,14 +207,14 @@ $text-light: #666666;
       }
 
       .footer-center {
-        .footer-contact {
+        .footer-btn {
           border-color: $accent-gold !important;
           color: $accent-gold !important;
 
           &:hover {
-            background: rgba($accent-gold, 0.15) !important;
-            border-color: $accent-gold !important;
-            box-shadow: 0 2px 8px rgba($accent-gold, 0.3) !important;
+            background: $accent-gold !important;
+            color: #1a1a1a !important;
+            box-shadow: 0 2px 8px rgba($accent-gold, 0.4) !important;
           }
         }
       }
@@ -201,6 +225,403 @@ $text-light: #666666;
         }
       }
     }
+  }
+
+  .contact-modal-overlay {
+    background: rgba(0, 0, 0, 0.8) !important;
+  }
+
+  .contact-modal {
+    background: #2a2a2a !important;
+    border-color: #3a3a3a !important;
+
+    .modal-header {
+      background: #333333 !important;
+      border-bottom-color: #444444 !important;
+
+      h2 {
+        color: #f5f5f5 !important;
+      }
+
+      .modal-close {
+        color: #999999 !important;
+
+        &:hover {
+          background: #444444 !important;
+          color: #f5f5f5 !important;
+        }
+      }
+    }
+
+    .modal-body {
+      .contact-intro {
+        color: #cccccc !important;
+      }
+
+      .email-container {
+        background: #333333 !important;
+        border-color: rgba($accent-gold, 0.3) !important;
+
+        .email-icon {
+          color: $accent-gold !important;
+        }
+
+        .email-address {
+          color: #f5f5f5 !important;
+        }
+
+        .copy-btn {
+          color: #999999 !important;
+
+          &:hover {
+            background: rgba($accent-gold, 0.15) !important;
+            color: $accent-gold !important;
+          }
+        }
+      }
+
+      .btn-secondary {
+        background: #333333 !important;
+        border-color: #555555 !important;
+        color: #cccccc !important;
+
+        &:hover {
+          background: #444444 !important;
+          border-color: #666666 !important;
+        }
+      }
+
+      .btn-primary {
+        background: $accent-gold !important;
+        color: #1a1a1a !important;
+      }
+    }
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
+   📧 CONTACT MODAL
+   ═══════════════════════════════════════════════════════════════════════════════════ */
+
+.contact-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+.contact-modal {
+  background: $white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    background: $light-bg;
+    border-bottom: 1px solid $border-light;
+
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+      color: $text-dark;
+
+      .material-icons {
+        font-size: 24px;
+        color: $accent-gold;
+      }
+    }
+
+    .modal-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: $text-light;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      .material-icons {
+        font-size: 22px;
+      }
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.05);
+        color: $text-dark;
+      }
+    }
+  }
+
+  .modal-body {
+    padding: 24px;
+
+    .contact-intro {
+      font-size: 14px;
+      color: $text-light;
+      margin: 0 0 20px 0;
+      line-height: 1.5;
+    }
+
+    .email-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: $light-bg;
+      border: 2px solid $border-light;
+      border-radius: 12px;
+      margin-bottom: 24px;
+
+      .email-icon {
+        font-size: 28px;
+        color: $accent-gold;
+      }
+
+      .email-address {
+        flex: 1;
+        font-size: 16px;
+        font-weight: 600;
+        color: $text-dark;
+        word-break: break-all;
+      }
+
+      .copy-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        color: $text-light;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        .material-icons {
+          font-size: 20px;
+        }
+
+        &:hover {
+          background: rgba($accent-gold, 0.1);
+          color: $accent-gold;
+        }
+      }
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+
+      @media (max-width: 480px) {
+        flex-direction: column;
+      }
+
+      .btn-secondary,
+      .btn-primary {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        .material-icons {
+          font-size: 18px;
+        }
+
+        @media (max-width: 480px) {
+          width: 100%;
+        }
+      }
+
+      .btn-secondary {
+        background: $white;
+        border: 2px solid $border-light;
+        color: $text-dark;
+
+        &:hover {
+          background: $light-bg;
+          border-color: darken($border-light, 10%);
+        }
+      }
+
+      .btn-primary {
+        background: $accent-gold;
+        border: 2px solid $accent-gold;
+        color: $primary-black;
+
+        &:hover {
+          background: darken($accent-gold, 8%);
+          border-color: darken($accent-gold, 8%);
+          box-shadow: 0 4px 12px rgba($accent-gold, 0.3);
+        }
+      }
+    }
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
+   👁️ ALTO CONTRASTE - Modal
+   ═══════════════════════════════════════════════════════════════════════════════════ */
+
+:host-context(:root.high-contrast) {
+  .contact-modal {
+    border: 3px solid #000000;
+
+    .modal-header {
+      background: #f0f0f0;
+      border-bottom: 3px solid #000000;
+
+      h2 {
+        color: #000000;
+        font-weight: 900;
+
+        .material-icons {
+          color: #000000;
+        }
+      }
+
+      .modal-close {
+        border: 2px solid #000000;
+      }
+    }
+
+    .modal-body {
+      .contact-intro {
+        color: #000000;
+        font-weight: 600;
+      }
+
+      .email-container {
+        border: 3px solid #000000;
+        background: #ffffff;
+
+        .email-icon,
+        .email-address {
+          color: #000000;
+        }
+
+        .copy-btn {
+          border: 2px solid #000000;
+        }
+      }
+
+      .btn-secondary {
+        background: #ffffff;
+        border: 3px solid #000000;
+        color: #000000;
+        font-weight: 700;
+      }
+
+      .btn-primary {
+        background: #000000;
+        border: 3px solid #000000;
+        color: #ffffff;
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
+   🔤 FUENTES VARIABLES - Modal
+   ═══════════════════════════════════════════════════════════════════════════════════ */
+
+:host-context(:root.font-small) {
+  .contact-modal {
+    .modal-header h2 { font-size: 16px; }
+    .modal-body {
+      .contact-intro { font-size: 12px; }
+      .email-address { font-size: 14px; }
+      .btn-secondary, .btn-primary { font-size: 12px; padding: 10px 18px; }
+    }
+  }
+}
+
+:host-context(:root.font-large) {
+  .contact-modal {
+    max-width: 480px;
+    .modal-header h2 { font-size: 24px; }
+    .modal-body {
+      .contact-intro { font-size: 16px; }
+      .email-address { font-size: 18px; }
+      .btn-secondary, .btn-primary { font-size: 16px; padding: 14px 28px; }
+    }
+  }
+}
+
+:host-context(:root.font-extra-large) {
+  .contact-modal {
+    max-width: 520px;
+    .modal-header h2 { font-size: 28px; }
+    .modal-body {
+      padding: 28px;
+      .contact-intro { font-size: 18px; }
+      .email-address { font-size: 20px; }
+      .email-container { padding: 20px; }
+      .btn-secondary, .btn-primary { font-size: 18px; padding: 16px 32px; }
+    }
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════════════
+   ⏸️ REDUCIR MOVIMIENTO
+   ═══════════════════════════════════════════════════════════════════════════════════ */
+
+:host-context(:root.reduce-motion) {
+  .contact-modal-overlay,
+  .contact-modal {
+    animation: none !important;
   }
 }
 

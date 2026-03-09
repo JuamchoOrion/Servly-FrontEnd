@@ -1,4 +1,9 @@
 <nav class="main-navbar">
+  <!-- Mobile Menu Toggle (visible only on mobile) -->
+  <button class="mobile-menu-btn" *ngIf="isAuthenticated" (click)="toggleMobileMenu()">
+    <span class="material-icons">{{ mobileMenuOpen ? 'close' : 'menu' }}</span>
+  </button>
+
   <!-- Left Section: Logo + Nav Items -->
   <div class="navbar-left">
     <!-- Logo -->
@@ -6,8 +11,8 @@
       <span class="logo-text">Servly</span>
     </div>
 
-    <!-- Nav Items (Desktop) -->
-    <div class="nav-items" *ngIf="isAuthenticated">
+    <!-- Nav Items (Desktop only) -->
+    <div class="nav-items desktop-only" *ngIf="isAuthenticated">
       <a
         *ngFor="let item of visibleNavItems"
         [routerLink]="item.route"
@@ -60,10 +65,44 @@
       <span>Iniciar Sesión</span>
     </a>
   </div>
-
-  <!-- Mobile Menu Toggle -->
-  <button class="mobile-menu-btn" *ngIf="isAuthenticated" (click)="toggleDropdown()">
-    <span class="material-icons">menu</span>
-  </button>
 </nav>
+
+<!-- Mobile Menu Overlay -->
+<div class="mobile-menu-overlay" *ngIf="mobileMenuOpen && isAuthenticated" (click)="closeMobileMenu()"></div>
+
+<!-- Mobile Menu Panel -->
+<div class="mobile-menu" [class.open]="mobileMenuOpen" *ngIf="isAuthenticated">
+  <div class="mobile-menu-header">
+    <span class="mobile-menu-title">Menú</span>
+    <button class="mobile-menu-close" (click)="closeMobileMenu()">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+
+  <div class="mobile-menu-content">
+    <a
+      *ngFor="let item of visibleNavItems"
+      [routerLink]="item.route"
+      [routerLinkActive]="['active']"
+      class="mobile-nav-item"
+      (click)="onNavItemClick()">
+      <span class="material-icons">{{ item.icon }}</span>
+      <span>{{ item.label }}</span>
+    </a>
+  </div>
+
+  <div class="mobile-menu-footer">
+    <div class="mobile-user-info">
+      <span class="material-icons">account_circle</span>
+      <div class="user-details">
+        <span class="user-email-mobile">{{ userEmail }}</span>
+        <span class="user-role-mobile">{{ userRole }}</span>
+      </div>
+    </div>
+    <button class="mobile-logout-btn" (click)="logout()">
+      <span class="material-icons">logout</span>
+      <span>Cerrar Sesión</span>
+    </button>
+  </div>
+</div>
 
