@@ -76,11 +76,9 @@ export class ManageUsersComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading = false;
-        if (error.status === 401 || error.status === 403) {
-          this.router.navigate(['/login']);
-        } else {
-          this.errorMessage = error.message || 'Error al cargar usuarios';
-        }
+        // El interceptor maneja 401/403 globalmente (logout y redirección)
+        // Aquí solo mostramos el mensaje de error para otros casos
+        this.errorMessage = error.message || 'Error al cargar usuarios';
       }
     });
   }

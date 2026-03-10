@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, throwError, of } from 'rxjs';
 import { tap, catchError, switchMap } from 'rxjs/operators';
 import { environment } from '../../../enviroments/enviroment';
 import { LoginRequestDTO } from '../dtos/login-request.dto';
 import { LoginResponseDTO, ErrorResponseDTO } from '../dtos/login-response.dto';
+import { UserProfile } from '../dtos/user-profile.dto';
 
 /**
  * Error especial para 2FA requerido
@@ -1107,6 +1108,56 @@ export class AuthService {
         console.log('🔵 error.error.message:', error.error?.message);
         console.log('🔵 error.error.errors:', error.error?.errors);
         return this.handleError(error);
+      })
+    );
+  }
+
+  /**
+   * Obtiene el perfil del usuario autenticado
+   * Endpoint: GET /api/auth/me
+   * Requiere: @PreAuthorize("isAuthenticated()")
+   *
+   * @returns Observable<UserProfile> con los datos del usuario
+   *
+   * Posibles errores:
+   * - 401: Usuario no autenticado
+   * - 403: Acceso denegado
+   * - 500: Error del servidor
+   */
+  getUserProfile(): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${this.API_URL}/api/auth/me`, {
+      withCredentials: true
+    }).pipe(
+      tap((profile: UserProfile) => {
+        console.log('🔵 [Auth] getUserProfile() - Perfil obtenido:', profile);
+        // Actualizar el usuario actual con la información del perfil
+        const currentUser = this.getCurrentUser();
+        if (currentUser) {
+          this.setCurrentUser({
+            ...currentUser,
+            email: profile.email,
+            name: profile.name
+          });
+        }
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('❌ [Auth] Error al obtener perfil:', error);
+
+        // Manejar errores 401 y 403 - redirigir al login
+        if (error.status === 401 || error.status === 403) {
+          console.log('🔵 [Auth] Usuario no autenticado (401/403), limpiando sesión');
+          this.clearSession();
+          this.router.navigate(['/login']);
+          return throwError(() => ({
+            status: error.status,
+            message: 'Sesión expirada o no autorizada. Por favor inicie sesión nuevamente.'
+          }));
+        }
+
+        return throwError(() => ({
+          status: error.status,
+          message: error.error?.message || 'Error al cargar el perfil del usuario'
+        }));
       })
     );
   }

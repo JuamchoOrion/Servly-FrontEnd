@@ -41,6 +41,10 @@
         <div class="dropdown-header">
           <span class="role-badge">{{ userRole }}</span>
         </div>
+        <a routerLink="/profile" class="dropdown-item" (click)="closeDropdown()">
+          <span class="material-icons">account_circle</span>
+          <span>Mi Perfil</span>
+        </a>
         <a routerLink="/dashboard" class="dropdown-item" (click)="closeDropdown()">
           <span class="material-icons">dashboard</span>
           <span>Dashboard</span>
