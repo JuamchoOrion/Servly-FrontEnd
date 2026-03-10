@@ -7,7 +7,8 @@ export const environment = {
 
   // API Configuration
   // ✅ vacío: el proxy de Angular redirige /api/** → http://localhost:8081
-  apiUrl: 'http://18.228.157.112:8080',
+  apiUrl: 'http://localhost:8081',
+  //apiUrl: 'http://18.228.157.112:8080',
   apiVersion: 'v1',
 
   // Authentication
