@@ -141,25 +141,28 @@ export class CreateEmployeeComponent implements OnInit {
       error: (error) => {
         this.isLoading = false;
 
-        if (error.status === 403) {
-          this.errorMessage = 'No tiene permisos';
-          setTimeout(() => {
-            this.router.navigate(['/login']);
-          }, 2000);
+        // Manejar errores SIN redirigir al login
+        // Solo 401 (token expirado) debería causar logout, y eso lo maneja el interceptor
+        if (error.status === 400) {
+          this.errorMessage = error.message || 'Datos inválidos. Verifica los campos';
+        } else if (error.status === 403) {
+          // 403 = Sin permisos, mostrar error pero NO redirigir
+          this.errorMessage = 'No tiene permisos para crear empleados';
         } else if (error.status === 404) {
-          this.errorMessage = 'Usuario no encontrado';
-          setTimeout(() => {
-            this.router.navigate(['/login']);
-          }, 2000);
+          // 404 = Recurso no encontrado, mostrar error pero NO redirigir
+          this.errorMessage = 'Recurso no encontrado';
+        } else if (error.status === 409) {
+          // Email duplicado - marcar el campo y mostrar error
+          this.errorMessage = 'Ya existe una cuenta con ese email';
+          this.emailControl?.setErrors({ duplicate: true });
+          this.emailControl?.markAsTouched();
+        } else if (error.status === 500) {
+          this.errorMessage = 'Error del servidor. Intente más tarde';
         } else {
           this.errorMessage = error.message || 'Error al crear el empleado';
-
-          // Mantener datos en formulario para que el usuario pueda corregir
-          if (error.status === 409) {
-            this.emailControl?.setErrors({ duplicate: true });
-            this.emailControl?.markAsTouched();
-          }
         }
+        // Nota: El interceptor ya maneja 401/403 globales para logout
+        // No redirigimos aquí para mantener al usuario en la página y preservar los datos del formulario
       }
     });
   }

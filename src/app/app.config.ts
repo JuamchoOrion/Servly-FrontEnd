@@ -2,6 +2,7 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { provideCharts } from 'ng2-charts';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { routes } from './app.routes';
 
@@ -14,5 +15,6 @@ export const appConfig: ApplicationConfig = {
       withFetch(),
       withInterceptors([authInterceptor])
     ),
+    provideCharts(),
   ]
 };

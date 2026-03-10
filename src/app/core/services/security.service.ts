@@ -17,10 +17,7 @@ export class SecurityService {
   private readonly CSRF_TOKEN_KEY = 'X-CSRF-TOKEN';
   private readonly CSRF_HEADER_NAME = 'X-CSRF-TOKEN';
 
-  constructor(private http: HttpClient) {
-    this.initializeCsrfToken();
-  }
-
+  constructor(private http: HttpClient) {}
   /**
    * Obtiene el token CSRF del servidor
    */
@@ -39,6 +36,12 @@ export class SecurityService {
           sessionStorage.setItem(this.CSRF_TOKEN_KEY, localToken);
         }
       });
+  }
+
+  initCsrf(): void {
+    if (!this.getCsrfToken()) {
+      this.initializeCsrfToken();
+    }
   }
 
   /**

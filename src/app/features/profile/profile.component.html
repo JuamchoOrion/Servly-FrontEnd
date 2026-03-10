@@ -1,0 +1,111 @@
+<div class="profile-page">
+  <div class="profile-container">
+    <!-- Header -->
+    <header class="profile-header">
+      <div class="header-content">
+        <h1>Perfil de Usuario</h1>
+        <p>Información de tu cuenta</p>
+      </div>
+      <button
+        class="btn-back"
+        (click)="goBack()"
+        type="button"
+        aria-label="Volver al dashboard"
+      >
+        <span class="material-icons">arrow_back</span>
+        Volver
+      </button>
+    </header>
+
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando perfil...</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (!isLoading && errorMessage) {
+      <div class="alert alert-error">
+        <span class="material-icons alert-icon">error_outline</span>
+        <div class="alert-content">
+          <strong>Error al cargar el perfil</strong>
+          <p>{{ errorMessage }}</p>
+        </div>
+        <button
+          class="btn-retry"
+          (click)="retry()"
+          type="button"
+          aria-label="Reintentar"
+        >
+          <span class="material-icons">refresh</span>
+          Reintentar
+        </button>
+      </div>
+    }
+
+    <!-- Profile Content -->
+    @if (!isLoading && profile && !errorMessage) {
+      <div class="profile-content">
+        <!-- Profile Card -->
+        <div class="profile-card">
+          <div class="profile-avatar">
+            <span class="material-icons">account_circle</span>
+          </div>
+
+          <div class="profile-info">
+            <h2 class="profile-name">{{ profile.name }}</h2>
+            <span class="profile-role" [ngClass]="'role-' + profile.role.toLowerCase()">
+              {{ getFormattedRole(profile.role) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Profile Details -->
+        <div class="profile-details">
+          <!-- Email -->
+          <div class="detail-item">
+            <div class="detail-icon">
+              <span class="material-icons">alternate_email</span>
+            </div>
+            <div class="detail-content">
+              <label>Correo Electrónico</label>
+              <span class="detail-value">{{ profile.email }}</span>
+            </div>
+          </div>
+
+          <!-- Role -->
+          <div class="detail-item">
+            <div class="detail-icon">
+              <span class="material-icons">badge</span>
+            </div>
+            <div class="detail-content">
+              <label>Rol</label>
+              <span class="detail-value">{{ getFormattedRole(profile.role) }}</span>
+            </div>
+          </div>
+
+          <!-- User ID -->
+          <div class="detail-item">
+            <div class="detail-icon">
+              <span class="material-icons">fingerprint</span>
+            </div>
+            <div class="detail-content">
+              <label>ID de Usuario</label>
+              <span class="detail-value">{{ profile.userId }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="profile-footer">
+          <p class="footer-text">
+            <span class="material-icons">info</span>
+            Esta información se actualiza automáticamente desde el servidor
+          </p>
+        </div>
+      </div>
+    }
+  </div>
+</div>

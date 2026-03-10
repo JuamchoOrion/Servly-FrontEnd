@@ -1,0 +1,545 @@
+/* ═══════════════════════════════════════════════════════════════
+   🎨 PROFILE COMPONENT STYLES
+   Paleta alineada con verify-2fa (olive green, gold, beige)
+   ═══════════════════════════════════════════════════════════════ */
+
+// ── Variables ──────────────────────────────────────────────────────────────
+$olive-green: #556B2F;
+$light-olive: #6B8E23;
+$beige: #E8DCC8;
+$gold: #C8A951;
+$cream: #F5F5DC;
+$text-dark: #556B2F;
+$text-light: #6B6B47;
+$text-muted: #8B7355;
+$white: #FFFFFF;
+$error-red: #C62828;
+$border-color: #DDD;
+$light-bg: #E8E4C9;
+
+// ── Page Layout ────────────────────────────────────────────────────────────
+
+.profile-page {
+  width: 100%;
+  min-height: 100vh;
+  background: #F5F5DC;
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 16px;
+
+  @media (min-width: 768px) {
+    padding: 32px 24px;
+  }
+}
+
+// ── Header ─────────────────────────────────────────────────────────────────
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid rgba($gold, 0.3);
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .header-content {
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      color: $olive-green;
+      margin: 0 0 4px 0;
+      letter-spacing: -0.5px;
+
+      @media (min-width: 768px) {
+        font-size: 36px;
+      }
+    }
+
+    p {
+      font-size: 14px;
+      color: $text-light;
+      margin: 0;
+      font-weight: 500;
+    }
+  }
+
+  .btn-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: transparent;
+    border: 2px solid $gold;
+    border-radius: 8px;
+    color: $olive-green;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    .material-icons {
+      font-size: 18px;
+    }
+
+    &:hover {
+      background: rgba($gold, 0.1);
+      border-color: $olive-green;
+      color: $olive-green;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba($gold, 0.2);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    &:focus {
+      outline: 2px solid $olive-green;
+      outline-offset: 2px;
+    }
+  }
+}
+
+// ── Loading State ──────────────────────────────────────────────────────────
+
+.loading-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: $cream;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba($olive-green, 0.1);
+  border: 2px solid rgba($gold, 0.2);
+
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid rgba($gold, 0.2);
+    border-top: 5px solid $olive-green;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 24px;
+  }
+
+  p {
+    font-size: 16px;
+    color: $text-light;
+    margin: 0;
+    font-weight: 500;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Alert / Error State ────────────────────────────────────────────────────
+
+.alert {
+  padding: 20px 24px;
+  border-radius: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+  animation: slideDown 0.3s ease-out;
+
+  &.alert-error {
+    background: rgba($error-red, 0.08);
+    border-left: 4px solid $error-red;
+
+    .alert-icon {
+      color: $error-red;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .alert-content {
+      flex: 1;
+
+      strong {
+        display: block;
+        color: $error-red;
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+
+      p {
+        margin: 0;
+        color: $error-red;
+        font-size: 14px;
+        opacity: 0.9;
+      }
+    }
+
+    .btn-retry {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      background: $error-red;
+      border: none;
+      border-radius: 8px;
+      color: $white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+
+      .material-icons {
+        font-size: 16px;
+      }
+
+      &:hover {
+        background: darken($error-red, 10%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba($error-red, 0.3);
+      }
+
+      &:focus {
+        outline: 2px solid $error-red;
+        outline-offset: 2px;
+      }
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ── Profile Content ────────────────────────────────────────────────────────
+
+.profile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// ── Profile Card ───────────────────────────────────────────────────────────
+
+.profile-card {
+  background: $cream;
+  border-radius: 16px;
+  padding: 32px 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 8px 24px rgba($olive-green, 0.1);
+  border: 2px solid $gold;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, $gold, transparent);
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    text-align: center;
+    padding: 24px 16px;
+  }
+
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba($gold, 0.1), rgba($beige, 0.2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 3px solid $gold;
+
+    .material-icons {
+      font-size: 64px;
+      color: $olive-green;
+    }
+
+    @media (max-width: 480px) {
+      width: 80px;
+      height: 80px;
+
+      .material-icons {
+        font-size: 48px;
+      }
+    }
+  }
+
+  .profile-info {
+    flex: 1;
+
+    .profile-name {
+      font-size: 28px;
+      font-weight: 800;
+      color: $olive-green;
+      margin: 0 0 8px 0;
+      letter-spacing: -0.5px;
+
+      @media (max-width: 480px) {
+        font-size: 24px;
+      }
+    }
+
+    .profile-role {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba($gold, 0.15);
+      color: $olive-green;
+      border: 1px solid rgba($gold, 0.3);
+
+      &.role-admin {
+        background: rgba($olive-green, 0.15);
+        color: $olive-green;
+        border-color: rgba($olive-green, 0.3);
+      }
+
+      &.role-storekeeper {
+        background: rgba(25, 118, 210, 0.15);
+        color: #1976D2;
+        border-color: rgba(25, 118, 210, 0.3);
+      }
+
+      &.role-kitchen {
+        background: rgba(245, 127, 23, 0.15);
+        color: #F57F17;
+        border-color: rgba(245, 127, 23, 0.3);
+      }
+
+      &.role-waiter {
+        background: rgba(76, 175, 80, 0.15);
+        color: #4CAF50;
+        border-color: rgba(76, 175, 80, 0.3);
+      }
+
+      &.role-cashier {
+        background: rgba(156, 39, 176, 0.15);
+        color: #9C27B0;
+        border-color: rgba(156, 39, 176, 0.3);
+      }
+    }
+  }
+}
+
+// ── Profile Details ────────────────────────────────────────────────────────
+
+.profile-details {
+  background: $cream;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba($olive-green, 0.1);
+  border: 2px solid $gold;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  @media (max-width: 480px) {
+    padding: 16px;
+  }
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: $light-bg;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba($gold, 0.1);
+    transform: translateX(4px);
+  }
+
+  .detail-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba($gold, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    .material-icons {
+      font-size: 24px;
+      color: $olive-green;
+    }
+  }
+
+  .detail-content {
+    flex: 1;
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: $text-light;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .detail-value {
+      display: block;
+      font-size: 16px;
+      font-weight: 600;
+      color: $text-dark;
+      word-break: break-word;
+    }
+  }
+}
+
+// ── Profile Footer ─────────────────────────────────────────────────────────
+
+.profile-footer {
+  background: $cream;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 16px rgba($olive-green, 0.08);
+  border: 1px solid rgba($gold, 0.2);
+
+  .footer-text {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 13px;
+    color: $text-light;
+    font-style: italic;
+
+    .material-icons {
+      font-size: 18px;
+      color: $gold;
+      flex-shrink: 0;
+    }
+  }
+}
+
+// ── Dark Mode ──────────────────────────────────────────────────────────────
+
+:host-context(.dark-mode) {
+  .profile-page {
+    background: #1a1a1a;
+  }
+
+  .profile-header {
+    border-bottom-color: rgba($gold, 0.4);
+
+    .header-content {
+      h1 {
+        color: $cream;
+      }
+
+      p {
+        color: $text-muted;
+      }
+    }
+
+    .btn-back {
+      background: #2a2a2a;
+      color: $cream;
+
+      &:hover {
+        background: #3a3a3a;
+      }
+    }
+  }
+
+  .loading-state,
+  .profile-card,
+  .profile-details,
+  .profile-footer {
+    background: #2a2a2a !important;
+    border-color: rgba($gold, 0.3) !important;
+  }
+
+  .profile-name {
+    color: $cream !important;
+  }
+
+  .detail-item {
+    background: rgba($gold, 0.05) !important;
+
+    &:hover {
+      background: rgba($gold, 0.1) !important;
+    }
+
+    .detail-content {
+      label {
+        color: $text-muted;
+      }
+
+      .detail-value {
+        color: $cream;
+      }
+    }
+  }
+
+  .footer-text {
+    color: $text-muted;
+  }
+}
+
+// ── Accessibility ──────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-state .spinner,
+  .detail-item,
+  .btn-back,
+  .btn-retry {
+    transition: none;
+  }
+
+  .loading-state .spinner {
+    animation: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .profile-card,
+  .profile-details {
+    border-width: 3px;
+  }
+
+  .btn-back {
+    border-width: 3px;
+    font-weight: 800;
+  }
+
+  .profile-role {
+    border-width: 2px;
+    font-weight: 800;
+  }
+}

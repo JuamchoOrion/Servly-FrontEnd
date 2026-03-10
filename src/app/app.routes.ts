@@ -37,6 +37,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/auth/pages/force-password-change/force-password-change.component').then(m => m.ForcePasswordChangeComponent)
   },
+  {
+    path: 'welcome',
+    loadComponent: () =>
+      import('./features/welcome/welcome.component').then(m => m.WelcomeComponent)
+  },
 
   // Protected routes with lazy loading
   {
@@ -80,6 +85,18 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/users/pages/manage-users/manage-users.component').then(m => m.ManageUsersComponent),
     canActivate: [authGuard, roleGuard(['ADMIN'])]
+  },
+  {
+    path: 'admin/audit-metrics',
+    loadComponent: () =>
+      import('./features/admin/pages/audit-metrics/audit-metrics.component').then(m => m.AuditMetricsComponent),
+    canActivate: [authGuard, roleGuard(['ADMIN'])]
+  },
+  {
+    path: 'profile',
+    loadComponent: () =>
+      import('./features/profile/profile.component').then(m => m.ProfileComponent),
+    canActivate: [authGuard]
   },
 
   // Wildcard - must be last
