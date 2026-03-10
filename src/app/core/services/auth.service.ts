@@ -780,19 +780,19 @@ export class AuthService {
           errorMessage = body?.message || 'reCAPTCHA inválido o validación fallida';
           break;
         case 401:
-          errorMessage = 'Email o contraseña incorrectos';
+          errorMessage = body?.message || 'Email o contraseña incorrectos';
           break;
         case 403:
-          errorMessage = 'Cuenta deshabilitada. Contacta con administración';
+          errorMessage = body?.message || 'Cuenta deshabilitada. Contacta con administración';
           break;
         case 422:
           errorMessage = body?.message || 'Datos de entrada inválidos';
           break;
         case 429:
-          errorMessage = 'Demasiados intentos. Intenta más tarde';
+          errorMessage = body?.message || 'Demasiados intentos. Intenta más tarde';
           break;
         case 500:
-          errorMessage = 'Error del servidor. Intenta más tarde';
+          errorMessage = body?.message || 'Error del servidor. Intenta más tarde';
           break;
         default:
           errorMessage = body?.message || 'Error al procesar la solicitud';
@@ -800,7 +800,13 @@ export class AuthService {
     }
 
     console.error('Auth error:', error);
-    return throwError(() => new Error(errorMessage));
+    // Retornar el error con el status original para que el componente lo use
+    return throwError(() => ({
+      status: error.status || 0,
+      message: errorMessage,
+      error: error.error || {},
+      originalError: error
+    }));
   }
 
   /**

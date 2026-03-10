@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -46,7 +46,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private errorHandlingService: ErrorHandlingService,
     public i18n: I18nService,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     this.initializeForm();
     // Exponer el callback globalmente para reCAPTCHA
@@ -306,8 +307,12 @@ export class LoginComponent implements OnInit, OnDestroy {
           }, 1500);
         },
         error: (error) => {
-          console.log('🔵 Login error handler:', error);
-          console.log('🔵 error.is2faRequired:', error?.is2faRequired);
+          console.log('═══════════════════════════════════════════════════════════');
+          console.log('🔴 [Login] ERROR en login');
+          console.log('🔴 [Login] error.status:', error?.status);
+          console.log('🔴 [Login] error.error:', error?.error);
+          console.log('🔴 [Login] error.is2faRequired:', error?.is2faRequired);
+          console.log('🔴 [Login] error.message:', error?.message);
 
           // Caso especial: 2FA requerido - redirigir inmediatamente
           if (error?.is2faRequired) {
@@ -326,20 +331,31 @@ export class LoginComponent implements OnInit, OnDestroy {
             return;
           }
 
+          console.log('🔴 [Login] Antes de setear isLoading = false');
           this.isLoading = false;
+          console.log('🔴 [Login] isLoading después de setear:', this.isLoading);
 
           // Registrar intento fallido para rate limiting
           this.rateLimitService.recordFailedAttempt('/api/auth/login');
 
           // Manejar error con granularidad
+          console.log('🔴 [Login] Llamando a handleLoginError...');
           const errorMessage = this.handleLoginError(error);
+          console.log('🔴 [Login] errorMessage obtenido:', errorMessage);
+
           this.loginError = errorMessage;
+          console.log('🔴 [Login] loginError seteado:', this.loginError);
+
+          // Forzar detección de cambios
+          this.cdr.detectChanges();
 
           // Resetear reCAPTCHA
           this.recaptchaToken = null;
           if (window.grecaptcha) {
             window.grecaptcha.reset();
           }
+
+          console.log('═══════════════════════════════════════════════════════════');
         }
       });
     } catch (error: any) {

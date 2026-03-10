@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -18,7 +18,8 @@ export class ProfileComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -37,10 +38,17 @@ export class ProfileComponent implements OnInit {
         this.profile = profile;
         this.isLoading = false;
         console.log('🔵 [ProfileComponent] Perfil cargado exitosamente:', profile);
+        console.log('🔵 [ProfileComponent] profile.createdAt:', profile.createdAt);
+
+        // Forzar detección de cambios
+        this.cdr.detectChanges();
       },
       error: (error: any) => {
         this.isLoading = false;
         console.error('❌ [ProfileComponent] Error al cargar perfil:', error);
+
+        // Forzar detección de cambios
+        this.cdr.detectChanges();
 
         // El AuthService ya redirige al login en caso de 401/403
         // Aquí manejamos otros errores

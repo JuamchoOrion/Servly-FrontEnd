@@ -82,6 +82,8 @@ export class AccessibilityService {
   private applySettings(settings: AccessibilitySettings): void {
     const root = document.documentElement;
 
+    console.log('🔵 [AccessibilityService] Aplicando configuración:', settings);
+
     // Remover todas las clases de font-size anteriores
     root.classList.remove('font-small', 'font-medium', 'font-large', 'font-extra-large');
 
@@ -89,12 +91,14 @@ export class AccessibilityService {
     root.classList.add(`font-${settings.fontSize}`);
 
     // Aplicar modo oscuro
+    console.log('🔵 [AccessibilityService] Dark mode:', settings.darkMode);
     if (settings.darkMode) {
       root.classList.add('dark-mode');
+      console.log('✅ [AccessibilityService] Clase dark-mode AGREGADA');
     } else {
       root.classList.remove('dark-mode');
+      console.log('✅ [AccessibilityService] Clase dark-mode REMOVIDA');
     }
-
 
     // Aplicar alto contraste
     if (settings.highContrast) {
@@ -109,6 +113,8 @@ export class AccessibilityService {
     } else {
       root.classList.remove('reduce-motion');
     }
+
+    console.log('🔵 [AccessibilityService] Clases actuales en root:', root.classList.toString());
   }
 
   /**

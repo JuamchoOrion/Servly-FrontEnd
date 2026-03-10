@@ -7,13 +7,13 @@
         <p>Información de tu cuenta</p>
       </div>
       <button
-        class="btn-back"
+        class="btn btn-back"
         (click)="goBack()"
         type="button"
         aria-label="Volver al dashboard"
       >
         <span class="material-icons">arrow_back</span>
-        Volver
+        <span>Volver</span>
       </button>
     </header>
 
@@ -86,14 +86,14 @@
             </div>
           </div>
 
-          <!-- User ID -->
+          <!-- Created At -->
           <div class="detail-item">
             <div class="detail-icon">
-              <span class="material-icons">fingerprint</span>
+              <span class="material-icons">event</span>
             </div>
             <div class="detail-content">
-              <label>ID de Usuario</label>
-              <span class="detail-value">{{ profile.userId }}</span>
+              <label>Fecha de Creación</label>
+              <span class="detail-value">{{ profile.createdAt ? (profile.createdAt | date:'dd/MM/yyyy HH:mm') : 'No disponible' }}</span>
             </div>
           </div>
         </div>

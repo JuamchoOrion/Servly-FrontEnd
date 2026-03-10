@@ -16,6 +16,7 @@ $bg-light: #F5F5F5;             // Fondo claro
   padding: 24px;
   background: $light-gray;
   min-height: 100vh;
+  font-size: var(--base-font-size);
 }
 
 // Header
@@ -38,12 +39,12 @@ $bg-light: #F5F5F5;             // Fondo claro
       align-items: center;
       gap: 12px;
       margin: 0 0 8px 0;
-      font-size: 28px;
+      font-size: calc(var(--base-font-size) * 2);
       font-weight: 700;
       color: $beige-tan;
 
       .material-icons {
-        font-size: 32px;
+        font-size: calc(var(--base-font-size) * 2.3);
         color: $dark-olive;
       }
     }
@@ -51,7 +52,7 @@ $bg-light: #F5F5F5;             // Fondo claro
     p {
       margin: 0;
       color: rgba($beige-tan, 0.9);
-      font-size: 14px;
+      font-size: calc(var(--base-font-size) * 1);
     }
   }
 
@@ -80,10 +81,10 @@ $bg-light: #F5F5F5;             // Fondo claro
       gap: 6px;
       color: $beige-tan;
       font-weight: 600;
-      font-size: 14px;
+      font-size: calc(var(--base-font-size) * 1);
 
       .material-icons {
-        font-size: 18px;
+        font-size: calc(var(--base-font-size) * 1.3);
         color: $dark-olive;
       }
     }
@@ -95,6 +96,7 @@ $bg-light: #F5F5F5;             // Fondo claro
       background: $beige-tan;
       color: $primary-olive;
       font-weight: 600;
+      font-size: calc(var(--base-font-size) * 1);
       cursor: pointer;
       transition: all 0.2s ease;
 
@@ -112,7 +114,7 @@ $bg-light: #F5F5F5;             // Fondo claro
     .form-group {
       label {
         color: $beige-tan;
-        font-size: 12px;
+        font-size: calc(var(--base-font-size) * 0.85);
       }
 
       .date-input {
@@ -122,6 +124,7 @@ $bg-light: #F5F5F5;             // Fondo claro
         background: $beige-tan;
         color: $primary-olive;
         font-weight: 600;
+        font-size: calc(var(--base-font-size) * 1);
         cursor: pointer;
       }
     }
@@ -137,11 +140,12 @@ $bg-light: #F5F5F5;             // Fondo claro
   border: none;
   border-radius: 8px;
   font-weight: 600;
+  font-size: calc(var(--base-font-size) * 1);
   cursor: pointer;
   transition: all 0.2s ease;
 
   .material-icons {
-    font-size: 18px;
+    font-size: calc(var(--base-font-size) * 1.3);
   }
 
   &:disabled {
@@ -194,7 +198,7 @@ $bg-light: #F5F5F5;             // Fondo claro
 
   p {
     color: $primary-olive;
-    font-size: 16px;
+    font-size: calc(var(--base-font-size) * 1.14);
     font-weight: 600;
     margin: 0;
   }
@@ -216,13 +220,13 @@ $bg-light: #F5F5F5;             // Fondo claro
   border-radius: 16px;
 
   .material-icons {
-    font-size: 32px;
+    font-size: calc(var(--base-font-size) * 2.3);
     color: $status-critical;
   }
 
   p {
     color: #c62828;
-    font-size: 16px;
+    font-size: calc(var(--base-font-size) * 1.14);
     font-weight: 600;
     margin: 0;
   }
@@ -289,7 +293,7 @@ $bg-light: #F5F5F5;             // Fondo claro
       background: rgba($primary-olive, 0.1);
 
       .material-icons {
-        font-size: 28px;
+        font-size: calc(var(--base-font-size) * 2);
       }
     }
 
@@ -297,7 +301,7 @@ $bg-light: #F5F5F5;             // Fondo claro
       padding: 6px 12px;
       border-radius: 20px;
       color: white;
-      font-size: 12px;
+      font-size: calc(var(--base-font-size) * 0.85);
       font-weight: 700;
       text-transform: uppercase;
     }
@@ -306,7 +310,7 @@ $bg-light: #F5F5F5;             // Fondo claro
   .card-body {
     h3 {
       margin: 0 0 12px 0;
-      font-size: 14px;
+      font-size: calc(var(--base-font-size) * 1);
       font-weight: 600;
       color: #666;
       line-height: 1.4;
@@ -319,13 +323,13 @@ $bg-light: #F5F5F5;             // Fondo claro
       margin-bottom: 8px;
 
       .value {
-        font-size: 36px;
+        font-size: calc(var(--base-font-size) * 2.57);
         font-weight: 700;
         color: $dark-charcoal;
       }
 
       .unit {
-        font-size: 16px;
+        font-size: calc(var(--base-font-size) * 1.14);
         font-weight: 600;
         color: #999;
       }
@@ -333,7 +337,7 @@ $bg-light: #F5F5F5;             // Fondo claro
 
     .card-description {
       margin: 0;
-      font-size: 13px;
+      font-size: calc(var(--base-font-size) * 0.93);
       color: #999;
     }
   }
@@ -381,19 +385,19 @@ $bg-light: #F5F5F5;             // Fondo claro
       align-items: center;
       gap: 10px;
       margin: 0 0 8px 0;
-      font-size: 18px;
+      font-size: calc(var(--base-font-size) * 1.29);
       font-weight: 700;
       color: $dark-charcoal;
 
       .material-icons {
-        font-size: 24px;
+        font-size: calc(var(--base-font-size) * 1.7);
         color: $primary-olive;
       }
     }
 
     p {
       margin: 0;
-      font-size: 13px;
+      font-size: calc(var(--base-font-size) * 0.93);
       color: #999;
     }
   }
@@ -414,7 +418,7 @@ $bg-light: #F5F5F5;             // Fondo claro
       th {
         padding: 12px 16px;
         text-align: left;
-        font-size: 13px;
+        font-size: calc(var(--base-font-size) * 0.93);
         font-weight: 700;
         color: $dark-charcoal;
         border-bottom: 3px solid $dark-olive;
@@ -435,7 +439,7 @@ $bg-light: #F5F5F5;             // Fondo claro
 
       td {
         padding: 12px 16px;
-        font-size: 14px;
+        font-size: calc(var(--base-font-size) * 1);
         color: $dark-charcoal;
         border-bottom: 1px solid #eee;
 
@@ -452,7 +456,7 @@ $bg-light: #F5F5F5;             // Fondo claro
   display: inline-block;
   padding: 4px 12px;
   border-radius: 12px;
-  font-size: 13px;
+  font-size: calc(var(--base-font-size) * 0.93);
   font-weight: 700;
 
   &.badge-ok {
@@ -485,11 +489,11 @@ $bg-light: #F5F5F5;             // Fondo claro
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 14px;
+    font-size: calc(var(--base-font-size) * 1);
     color: #666;
 
     .material-icons {
-      font-size: 20px;
+      font-size: calc(var(--base-font-size) * 1.4);
       color: $primary-olive;
     }
 

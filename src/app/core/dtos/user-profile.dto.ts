@@ -7,6 +7,9 @@ export interface UserProfile {
   email: string;
   name: string;
   role: string;
+  createdAt?: string;
+  enabled?: boolean;
+  twoFactorEnabled?: boolean;
 }
 
 /**

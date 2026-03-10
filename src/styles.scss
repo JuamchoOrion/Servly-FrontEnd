@@ -167,7 +167,8 @@ label {
 
   // Todas las páginas
   .dashboard-page, .inventory-page, .items-page, .suppliers-page,
-  .login-page, .categories-page, .table-orders-page {
+  .login-page, .categories-page, .table-orders-page, .audit-metrics-page,
+  .profile-page {
     background: #1a1a1a !important;
     color: #f5f5f5 !important;
   }
@@ -177,7 +178,9 @@ label {
   .activity-card, .quick-actions-card, .empty-dashboard, .loading-state,
   .inventory-container, .item-card, .items-table-wrapper, .suppliers-container,
   .categories-container, .category-card, .login-container, .login-card,
-  .table-orders-container {
+  .table-orders-container, .audit-metrics-container, .metrics-header,
+  .metric-card, .chart-card, .profile-container, .profile-card,
+  .profile-details, .profile-footer, .profile-header {
     background: #2a2a2a !important;
     color: #f5f5f5 !important;
     border-color: #3a3a3a !important;
@@ -252,6 +255,199 @@ label {
   // Labels de formularios
   .form-label, label {
     color: #f5f5f5 !important;
+  }
+
+  // Audit-metrics específico
+  .audit-metrics-container {
+    .metrics-header {
+      h1, p {
+        color: #f5f5f5 !important;
+      }
+
+      .material-icons {
+        color: #f5f5f5 !important;
+      }
+    }
+
+    .date-filter-form {
+      label, .date-select, .date-input {
+        color: #f5f5f5 !important;
+        background: #333333 !important;
+        border-color: #444444 !important;
+      }
+    }
+
+    .btn-export {
+      background: #333333 !important;
+      color: #f5f5f5 !important;
+      border-color: #444444 !important;
+    }
+
+    .metric-card {
+      background: #2a2a2a !important;
+      color: #f5f5f5 !important;
+
+      h3, .card-value .value {
+        color: #f5f5f5 !important;
+      }
+
+      .card-description, .card-value .unit {
+        color: #cccccc !important;
+      }
+
+      .card-footer {
+        border-top-color: #444444 !important;
+      }
+    }
+
+    .chart-card {
+      background: #2a2a2a !important;
+      color: #f5f5f5 !important;
+
+      h3 {
+        color: #f5f5f5 !important;
+      }
+
+      p {
+        color: #cccccc !important;
+      }
+    }
+
+    .loading-spinner {
+      background: #2a2a2a !important;
+      border-color: #444444 !important;
+
+      p {
+        color: #f5f5f5 !important;
+      }
+    }
+
+    .error-message {
+      background: #3a2a2a !important;
+      border-color: #ef5350 !important;
+
+      p {
+        color: #ef5350 !important;
+      }
+    }
+  }
+
+  // Profile específico
+  .profile-page {
+    .profile-header {
+      h1, p {
+        color: #f5f5f5 !important;
+      }
+
+      .btn-back {
+        color: #f5f5f5 !important;
+        border-color: #C8A951 !important;
+        background: #2a2a2a !important;
+
+        &:hover {
+          background: #3a3a3a !important;
+        }
+      }
+    }
+
+    .profile-card {
+      background: #2a2a2a !important;
+      color: #f5f5f5 !important;
+      border-color: #C8A951 !important;
+
+      .profile-name {
+        color: #f5f5f5 !important;
+      }
+
+      .profile-role {
+        background: rgba(200, 169, 81, 0.2) !important;
+        color: #f5f5f5 !important;
+        border-color: rgba(200, 169, 81, 0.4) !important;
+      }
+
+      .profile-avatar {
+        background: rgba(200, 169, 81, 0.1) !important;
+        border-color: #C8A951 !important;
+
+        .material-icons {
+          color: #C8A951 !important;
+        }
+      }
+    }
+
+    .profile-details {
+      background: #2a2a2a !important;
+      color: #f5f5f5 !important;
+      border-color: #C8A951 !important;
+
+      .detail-item {
+        background: #333333 !important;
+
+        &:hover {
+          background: #3a3a3a !important;
+        }
+
+        .detail-icon {
+          background: rgba(200, 169, 81, 0.15) !important;
+
+          .material-icons {
+            color: #C8A951 !important;
+          }
+        }
+
+        .detail-content {
+          label {
+            color: #cccccc !important;
+          }
+
+          .detail-value {
+            color: #f5f5f5 !important;
+          }
+        }
+      }
+    }
+
+    .profile-footer {
+      background: #2a2a2a !important;
+      color: #f5f5f5 !important;
+      border-color: #C8A951 !important;
+
+      .footer-text {
+        color: #cccccc !important;
+
+        .material-icons {
+          color: #C8A951 !important;
+        }
+      }
+    }
+
+    .loading-state {
+      background: #2a2a2a !important;
+      border-color: #C8A951 !important;
+
+      .spinner {
+        border-color: rgba(200, 169, 81, 0.2) !important;
+        border-top-color: #C8A951 !important;
+      }
+
+      p {
+        color: #f5f5f5 !important;
+      }
+    }
+
+    .alert-error {
+      background: rgba(198, 40, 40, 0.1) !important;
+      border-left-color: #ef5350 !important;
+
+      strong, p {
+        color: #ef5350 !important;
+      }
+
+      .btn-retry {
+        background: #ef5350 !important;
+        color: #f5f5f5 !important;
+      }
+    }
   }
 
   // Mensajes de error

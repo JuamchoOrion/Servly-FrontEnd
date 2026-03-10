@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { ChartConfiguration, ChartData, ChartType, registerables } from 'chart.js';
@@ -99,7 +99,8 @@ export class AuditMetricsComponent implements OnInit {
     private fb: FormBuilder,
     private auditMetricsService: AuditMetricsService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -168,6 +169,9 @@ export class AuditMetricsComponent implements OnInit {
         this.updateCharts();
 
         console.log('✅ [AuditMetrics] Componente actualizado correctamente');
+
+        // Forzar detección de cambios
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.log('═══════════════════════════════════════════════════════════');

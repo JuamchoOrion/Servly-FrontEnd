@@ -1,31 +1,31 @@
 /* ═══════════════════════════════════════════════════════════════
    🎨 PROFILE COMPONENT STYLES
-   Paleta alineada con verify-2fa (olive green, gold, beige)
+   Paleta alineada con categories (gold, beige)
    ═══════════════════════════════════════════════════════════════ */
 
 // ── Variables ──────────────────────────────────────────────────────────────
-$olive-green: #556B2F;
-$light-olive: #6B8E23;
+$primary-black: #1E1E1E;
+$accent-gold: #C8A951;
+$light-bg: #F5F5F5;
 $beige: #E8DCC8;
-$gold: #C8A951;
 $cream: #F5F5DC;
-$text-dark: #556B2F;
-$text-light: #6B6B47;
-$text-muted: #8B7355;
+$text-dark: #2C2C2C;
+$text-light: #666666;
+$text-muted: #999999;
 $white: #FFFFFF;
 $error-red: #C62828;
-$border-color: #DDD;
-$light-bg: #E8E4C9;
+$border-light: #EFEFEF;
 
 // ── Page Layout ────────────────────────────────────────────────────────────
 
 .profile-page {
   width: 100%;
   min-height: 100vh;
-  background: #F5F5DC;
+  background: $light-bg;
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: var(--base-font-size);
 }
 
 .profile-container {
@@ -46,7 +46,7 @@ $light-bg: #E8E4C9;
   align-items: center;
   margin-bottom: 32px;
   padding-bottom: 20px;
-  border-bottom: 2px solid rgba($gold, 0.3);
+  border-bottom: 2px solid rgba($accent-gold, 0.3);
 
   @media (max-width: 480px) {
     flex-direction: column;
@@ -56,19 +56,19 @@ $light-bg: #E8E4C9;
 
   .header-content {
     h1 {
-      font-size: 32px;
+      font-size: calc(var(--base-font-size) * 2.29);
       font-weight: 800;
-      color: $olive-green;
+      color: $primary-black;
       margin: 0 0 4px 0;
       letter-spacing: -0.5px;
 
       @media (min-width: 768px) {
-        font-size: 36px;
+        font-size: calc(var(--base-font-size) * 2.57);
       }
     }
 
     p {
-      font-size: 14px;
+      font-size: calc(var(--base-font-size) * 1);
       color: $text-light;
       margin: 0;
       font-weight: 500;
@@ -79,34 +79,49 @@ $light-bg: #E8E4C9;
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 18px;
-    background: transparent;
-    border: 2px solid $gold;
-    border-radius: 8px;
-    color: $olive-green;
-    font-size: 14px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, $accent-gold 0%, #D4B875 100%);
+    color: $primary-black;
     font-weight: 600;
+    font-size: calc(var(--base-font-size) * 1);
+    border: none;
+    border-radius: 8px;
     cursor: pointer;
+    box-shadow: 0 8px 24px rgba(200, 169, 81, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
     transition: all 0.3s ease;
 
     .material-icons {
-      font-size: 18px;
+      font-size: calc(var(--base-font-size) * 1.4);
     }
 
-    &:hover {
-      background: rgba($gold, 0.1);
-      border-color: $olive-green;
-      color: $olive-green;
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    &:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba($gold, 0.2);
+      box-shadow: 0 12px 32px rgba(200, 169, 81, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15);
+
+      &::before {
+        left: 100%;
+      }
     }
 
-    &:active {
+    &:active:not(:disabled) {
       transform: translateY(0);
     }
 
     &:focus {
-      outline: 2px solid $olive-green;
+      outline: 2px solid $accent-gold;
       outline-offset: 2px;
     }
   }
@@ -117,23 +132,23 @@ $light-bg: #E8E4C9;
 .loading-state {
   text-align: center;
   padding: 80px 20px;
-  background: $cream;
+  background: $white;
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba($olive-green, 0.1);
-  border: 2px solid rgba($gold, 0.2);
+  box-shadow: 0 8px 24px rgba($accent-gold, 0.1);
+  border: 2px solid rgba($accent-gold, 0.2);
 
   .spinner {
     width: 60px;
     height: 60px;
-    border: 5px solid rgba($gold, 0.2);
-    border-top: 5px solid $olive-green;
+    border: 5px solid rgba($accent-gold, 0.2);
+    border-top: 5px solid $accent-gold;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin: 0 auto 24px;
   }
 
   p {
-    font-size: 16px;
+    font-size: calc(var(--base-font-size) * 1.14);
     color: $text-light;
     margin: 0;
     font-weight: 500;
@@ -154,6 +169,7 @@ $light-bg: #E8E4C9;
   gap: 16px;
   margin-bottom: 24px;
   animation: slideDown 0.3s ease-out;
+  font-size: calc(var(--base-font-size) * 1);
 
   &.alert-error {
     background: rgba($error-red, 0.08);
@@ -161,7 +177,7 @@ $light-bg: #E8E4C9;
 
     .alert-icon {
       color: $error-red;
-      font-size: 28px;
+      font-size: calc(var(--base-font-size) * 2);
       flex-shrink: 0;
     }
 
@@ -171,14 +187,14 @@ $light-bg: #E8E4C9;
       strong {
         display: block;
         color: $error-red;
-        font-size: 16px;
+        font-size: calc(var(--base-font-size) * 1.14);
         margin-bottom: 4px;
       }
 
       p {
         margin: 0;
         color: $error-red;
-        font-size: 14px;
+        font-size: calc(var(--base-font-size) * 1);
         opacity: 0.9;
       }
     }
@@ -192,14 +208,14 @@ $light-bg: #E8E4C9;
       border: none;
       border-radius: 8px;
       color: $white;
-      font-size: 13px;
+      font-size: calc(var(--base-font-size) * 0.93);
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
       flex-shrink: 0;
 
       .material-icons {
-        font-size: 16px;
+        font-size: calc(var(--base-font-size) * 1.14);
       }
 
       &:hover {
@@ -238,14 +254,14 @@ $light-bg: #E8E4C9;
 // ── Profile Card ───────────────────────────────────────────────────────────
 
 .profile-card {
-  background: $cream;
+  background: $white;
   border-radius: 16px;
   padding: 32px 24px;
   display: flex;
   align-items: center;
   gap: 24px;
-  box-shadow: 0 8px 24px rgba($olive-green, 0.1);
-  border: 2px solid $gold;
+  box-shadow: 0 8px 24px rgba($accent-gold, 0.1);
+  border: 2px solid $accent-gold;
   position: relative;
   overflow: hidden;
 
@@ -256,7 +272,7 @@ $light-bg: #E8E4C9;
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, transparent, $gold, transparent);
+    background: linear-gradient(90deg, transparent, $accent-gold, transparent);
   }
 
   @media (max-width: 480px) {
@@ -269,16 +285,16 @@ $light-bg: #E8E4C9;
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba($gold, 0.1), rgba($beige, 0.2));
+    background: linear-gradient(135deg, rgba($accent-gold, 0.1), rgba($beige, 0.2));
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    border: 3px solid $gold;
+    border: 3px solid $accent-gold;
 
     .material-icons {
-      font-size: 64px;
-      color: $olive-green;
+      font-size: calc(var(--base-font-size) * 4.57);
+      color: $primary-black;
     }
 
     @media (max-width: 480px) {
@@ -286,7 +302,7 @@ $light-bg: #E8E4C9;
       height: 80px;
 
       .material-icons {
-        font-size: 48px;
+        font-size: calc(var(--base-font-size) * 3.4);
       }
     }
   }
@@ -295,14 +311,14 @@ $light-bg: #E8E4C9;
     flex: 1;
 
     .profile-name {
-      font-size: 28px;
+      font-size: calc(var(--base-font-size) * 2);
       font-weight: 800;
-      color: $olive-green;
+      color: $accent-gold;
       margin: 0 0 8px 0;
       letter-spacing: -0.5px;
 
       @media (max-width: 480px) {
-        font-size: 24px;
+        font-size: calc(var(--base-font-size) * 1.7);
       }
     }
 
@@ -310,18 +326,18 @@ $light-bg: #E8E4C9;
       display: inline-block;
       padding: 6px 16px;
       border-radius: 20px;
-      font-size: 13px;
+      font-size: calc(var(--base-font-size) * 0.93);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      background: rgba($gold, 0.15);
-      color: $olive-green;
-      border: 1px solid rgba($gold, 0.3);
+      background: rgba($accent-gold, 0.15);
+      color: $accent-gold;
+      border: 1px solid rgba($accent-gold, 0.3);
 
       &.role-admin {
-        background: rgba($olive-green, 0.15);
-        color: $olive-green;
-        border-color: rgba($olive-green, 0.3);
+        background: rgba($accent-gold, 0.15);
+        color: $accent-gold;
+        border-color: rgba($accent-gold, 0.3);
       }
 
       &.role-storekeeper {
@@ -354,11 +370,11 @@ $light-bg: #E8E4C9;
 // ── Profile Details ────────────────────────────────────────────────────────
 
 .profile-details {
-  background: $cream;
+  background: $white;
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 8px 24px rgba($olive-green, 0.1);
-  border: 2px solid $gold;
+  box-shadow: 0 8px 24px rgba($accent-gold, 0.1);
+  border: 2px solid $accent-gold;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -378,7 +394,7 @@ $light-bg: #E8E4C9;
   transition: all 0.3s ease;
 
   &:hover {
-    background: rgba($gold, 0.1);
+    background: rgba($accent-gold, 0.1);
     transform: translateX(4px);
   }
 
@@ -386,15 +402,15 @@ $light-bg: #E8E4C9;
     width: 48px;
     height: 48px;
     border-radius: 12px;
-    background: rgba($gold, 0.15);
+    background: rgba($accent-gold, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 
     .material-icons {
-      font-size: 24px;
-      color: $olive-green;
+      font-size: calc(var(--base-font-size) * 1.7);
+      color: $accent-gold;
     }
   }
 
@@ -403,7 +419,7 @@ $light-bg: #E8E4C9;
 
     label {
       display: block;
-      font-size: 12px;
+      font-size: calc(var(--base-font-size) * 0.85);
       font-weight: 700;
       color: $text-light;
       text-transform: uppercase;
@@ -413,7 +429,7 @@ $light-bg: #E8E4C9;
 
     .detail-value {
       display: block;
-      font-size: 16px;
+      font-size: calc(var(--base-font-size) * 1.14);
       font-weight: 600;
       color: $text-dark;
       word-break: break-word;
@@ -424,24 +440,24 @@ $light-bg: #E8E4C9;
 // ── Profile Footer ─────────────────────────────────────────────────────────
 
 .profile-footer {
-  background: $cream;
+  background: $white;
   border-radius: 12px;
   padding: 20px 24px;
-  box-shadow: 0 4px 16px rgba($olive-green, 0.08);
-  border: 1px solid rgba($gold, 0.2);
+  box-shadow: 0 4px 16px rgba($accent-gold, 0.08);
+  border: 1px solid rgba($accent-gold, 0.2);
 
   .footer-text {
     display: flex;
     align-items: center;
     gap: 10px;
     margin: 0;
-    font-size: 13px;
+    font-size: calc(var(--base-font-size) * 0.93);
     color: $text-light;
     font-style: italic;
 
     .material-icons {
-      font-size: 18px;
-      color: $gold;
+      font-size: calc(var(--base-font-size) * 1.3);
+      color: $accent-gold;
       flex-shrink: 0;
     }
   }
@@ -455,11 +471,11 @@ $light-bg: #E8E4C9;
   }
 
   .profile-header {
-    border-bottom-color: rgba($gold, 0.4);
+    border-bottom-color: rgba($accent-gold, 0.4);
 
     .header-content {
       h1 {
-        color: $cream;
+        color: #f5f5f5;
       }
 
       p {
@@ -468,11 +484,16 @@ $light-bg: #E8E4C9;
     }
 
     .btn-back {
-      background: #2a2a2a;
-      color: $cream;
+      background: linear-gradient(135deg, $accent-gold 0%, #D4B875 100%);
+      color: $primary-black;
+      border-color: $accent-gold;
+
+      .material-icons {
+        color: $primary-black;
+      }
 
       &:hover {
-        background: #3a3a3a;
+        background: linear-gradient(135deg, #D4B875 0%, $accent-gold 100%);
       }
     }
   }
@@ -482,18 +503,41 @@ $light-bg: #E8E4C9;
   .profile-details,
   .profile-footer {
     background: #2a2a2a !important;
-    border-color: rgba($gold, 0.3) !important;
+    border-color: rgba($accent-gold, 0.3) !important;
   }
 
   .profile-name {
-    color: $cream !important;
+    color: $accent-gold !important;
+  }
+
+  .profile-role {
+    background: rgba($accent-gold, 0.15) !important;
+    color: $accent-gold !important;
+    border-color: rgba($accent-gold, 0.3) !important;
+  }
+
+  .profile-avatar {
+    background: rgba($accent-gold, 0.1) !important;
+    border-color: $accent-gold !important;
+
+    .material-icons {
+      color: #f5f5f5 !important;
+    }
   }
 
   .detail-item {
-    background: rgba($gold, 0.05) !important;
+    background: rgba($accent-gold, 0.05) !important;
 
     &:hover {
-      background: rgba($gold, 0.1) !important;
+      background: rgba($accent-gold, 0.1) !important;
+    }
+
+    .detail-icon {
+      background: rgba($accent-gold, 0.15) !important;
+
+      .material-icons {
+        color: $accent-gold !important;
+      }
     }
 
     .detail-content {
@@ -502,13 +546,30 @@ $light-bg: #E8E4C9;
       }
 
       .detail-value {
-        color: $cream;
+        color: #f5f5f5;
       }
     }
   }
 
-  .footer-text {
-    color: $text-muted;
+  .profile-footer {
+    .footer-text {
+      color: $text-muted;
+
+      .material-icons {
+        color: $accent-gold !important;
+      }
+    }
+  }
+
+  .loading-state {
+    .spinner {
+      border-color: rgba($accent-gold, 0.2) !important;
+      border-top-color: $accent-gold !important;
+    }
+
+    p {
+      color: #f5f5f5;
+    }
   }
 }
 
@@ -524,6 +585,206 @@ $light-bg: #E8E4C9;
 
   .loading-state .spinner {
     animation: none;
+  }
+}
+
+/* ===============================
+   👁️ HIGH CONTRAST MODE
+================================ */
+
+:host-context(.high-contrast) {
+  .profile-page {
+    background: $white !important;
+  }
+
+  .profile-header {
+    background: $white !important;
+    border-bottom: 3px solid $primary-black !important;
+
+    .header-content {
+      h1 {
+        color: $primary-black !important;
+        font-weight: 800 !important;
+      }
+
+      p {
+        color: $primary-black !important;
+        font-weight: 700 !important;
+      }
+    }
+
+    .btn-back {
+      background: $primary-black !important;
+      color: $accent-gold !important;
+      border: 3px solid $primary-black !important;
+      font-weight: 800 !important;
+
+      .material-icons {
+        color: $accent-gold !important;
+      }
+
+      &:hover {
+        background: $accent-gold !important;
+        color: $primary-black !important;
+      }
+    }
+  }
+
+  .loading-state {
+    background: $white !important;
+    border: 3px solid $accent-gold !important;
+
+    .spinner {
+      border-color: rgba($accent-gold, 0.3) !important;
+      border-top-color: $accent-gold !important;
+    }
+
+    p {
+      color: $primary-black !important;
+      font-weight: 700 !important;
+    }
+  }
+
+  .alert {
+    border-width: 3px !important;
+
+    &.alert-error {
+      background: $white !important;
+      border-left-color: $error-red !important;
+      color: $error-red !important;
+
+      .alert-icon {
+        color: $error-red !important;
+      }
+
+      strong {
+        color: $error-red !important;
+      }
+
+      p {
+        color: $error-red !important;
+        font-weight: 700 !important;
+      }
+
+      .btn-retry {
+        background: $error-red !important;
+        color: $white !important;
+        border: 2px solid $error-red !important;
+        font-weight: 800 !important;
+
+        &:hover {
+          background: darken($error-red, 10%) !important;
+        }
+      }
+    }
+  }
+
+  .profile-card {
+    background: $white !important;
+    border: 3px solid $accent-gold !important;
+
+    .profile-avatar {
+      background: $white !important;
+      border: 3px solid $accent-gold !important;
+
+      .material-icons {
+        color: $accent-gold !important;
+      }
+    }
+
+    .profile-info {
+      .profile-name {
+        color: $primary-black !important;
+        font-weight: 800 !important;
+      }
+
+      .profile-role {
+        background: $white !important;
+        color: $accent-gold !important;
+        border: 2px solid $accent-gold !important;
+        font-weight: 800 !important;
+
+        &.role-admin {
+          background: $white !important;
+          color: $accent-gold !important;
+          border-color: $accent-gold !important;
+        }
+
+        &.role-storekeeper {
+          background: $white !important;
+          color: #1976D2 !important;
+          border-color: #1976D2 !important;
+        }
+
+        &.role-kitchen {
+          background: $white !important;
+          color: #F57F17 !important;
+          border-color: #F57F17 !important;
+        }
+
+        &.role-waiter {
+          background: $white !important;
+          color: #4CAF50 !important;
+          border-color: #4CAF50 !important;
+        }
+
+        &.role-cashier {
+          background: $white !important;
+          color: #9C27B0 !important;
+          border-color: #9C27B0 !important;
+        }
+      }
+    }
+  }
+
+  .profile-details {
+    background: $white !important;
+    border: 3px solid $accent-gold !important;
+
+    .detail-item {
+      background: $white !important;
+      border: 2px solid $primary-black !important;
+
+      &:hover {
+        background: $light-bg !important;
+        border-color: $accent-gold !important;
+      }
+
+      .detail-icon {
+        background: $white !important;
+        border: 2px solid $accent-gold !important;
+
+        .material-icons {
+          color: $accent-gold !important;
+        }
+      }
+
+      .detail-content {
+        label {
+          color: $primary-black !important;
+          font-weight: 800 !important;
+        }
+
+        .detail-value {
+          color: $primary-black !important;
+          font-weight: 700 !important;
+        }
+      }
+    }
+  }
+
+  .profile-footer {
+    background: $white !important;
+    border: 2px solid $primary-black !important;
+
+    .footer-text {
+      color: $primary-black !important;
+      font-weight: 500 !important;
+
+      .material-icons {
+        color: $accent-gold !important;
+      }
+    }
   }
 }
 

@@ -2,6 +2,7 @@
   min-height: 100vh;
   background-color: #f5f5f5;
   padding: 24px;
+  font-size: var(--base-font-size);
 }
 
 .create-employee-container {
@@ -18,21 +19,21 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      font-size: 28px;
-      font-weight: 600;
+      font-size: calc(var(--base-font-size) * 2);
+      font-weight: 800;
       color: #1a1a1a;
       margin: 0 0 8px 0;
 
       .material-icons {
         color: #C8A951;
-        font-size: 32px;
+        font-size: calc(var(--base-font-size) * 2.3);
       }
     }
 
     p {
       color: #666;
       margin: 0;
-      font-size: 14px;
+      font-size: calc(var(--base-font-size) * 1);
     }
   }
 }
@@ -45,10 +46,10 @@
   padding: 16px 20px;
   border-radius: 8px;
   margin-bottom: 20px;
-  font-size: 14px;
+  font-size: calc(var(--base-font-size) * 1);
 
   .alert-icon {
-    font-size: 24px;
+    font-size: calc(var(--base-font-size) * 1.7);
     flex-shrink: 0;
   }
 
@@ -111,7 +112,7 @@
 
     label {
       display: block;
-      font-size: 14px;
+      font-size: calc(var(--base-font-size) * 1);
       font-weight: 500;
       color: #333;
       margin-bottom: 8px;
@@ -131,7 +132,7 @@
     .form-control {
       width: 100%;
       padding: 12px 16px;
-      font-size: 15px;
+      font-size: calc(var(--base-font-size) * 1.07);
       border: 2px solid #e0e0e0;
       border-radius: 8px;
       transition: all 0.2s ease;
@@ -169,7 +170,7 @@
 
     .error-message {
       display: block;
-      font-size: 12px;
+      font-size: calc(var(--base-font-size) * 0.85);
       color: #c62828;
       margin-top: 6px;
     }
@@ -188,7 +189,7 @@
       align-items: center;
       gap: 8px;
       padding: 12px 24px;
-      font-size: 15px;
+      font-size: calc(var(--base-font-size) * 1.07);
       font-weight: 500;
       border: none;
       border-radius: 8px;
@@ -196,7 +197,7 @@
       transition: all 0.2s ease;
 
       .material-icons {
-        font-size: 20px;
+        font-size: calc(var(--base-font-size) * 1.4);
       }
 
       &:disabled {
@@ -235,7 +236,7 @@
   border: 1px solid #bbdefb;
 
   .info-icon {
-    font-size: 28px;
+    font-size: calc(var(--base-font-size) * 2);
     color: #1976d2;
     flex-shrink: 0;
   }
@@ -243,14 +244,14 @@
   .info-content {
     h4 {
       margin: 0 0 8px 0;
-      font-size: 15px;
+      font-size: calc(var(--base-font-size) * 1.07);
       font-weight: 600;
       color: #1976d2;
     }
 
     p {
       margin: 0;
-      font-size: 14px;
+      font-size: calc(var(--base-font-size) * 1);
       color: #424242;
       line-height: 1.5;
     }

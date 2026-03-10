@@ -98,6 +98,9 @@ export class CreateEmployeeComponent implements OnInit {
       const maxLength = control.errors?.['maxlength']?.requiredLength || 100;
       return `Máximo ${maxLength} caracteres`;
     }
+    if (control.hasError('duplicate')) {
+      return 'Ya existe una cuenta con ese email';
+    }
 
     return '';
   }
@@ -141,10 +144,23 @@ export class CreateEmployeeComponent implements OnInit {
       error: (error) => {
         this.isLoading = false;
 
+        // Logging para depuración
+        console.error('❌ Error al crear empleado:', error);
+        console.error('Status:', error.status);
+        console.error('Error body:', error.error);
+
         // Manejar errores SIN redirigir al login
         // Solo 401 (token expirado) debería causar logout, y eso lo maneja el interceptor
         if (error.status === 400) {
-          this.errorMessage = error.message || 'Datos inválidos. Verifica los campos';
+          // Verificar si el error 400 es por email duplicado (algunos backends lo devuelven así)
+          const errorMsg = error.error?.message || error.message || '';
+          if (errorMsg.toLowerCase().includes('email') || errorMsg.toLowerCase().includes('duplic')) {
+            this.errorMessage = 'Ya existe una cuenta con ese email';
+            this.emailControl?.setErrors({ duplicate: true });
+            this.emailControl?.markAsTouched();
+          } else {
+            this.errorMessage = errorMsg || 'Datos inválidos. Verifica los campos';
+          }
         } else if (error.status === 403) {
           // 403 = Sin permisos, mostrar error pero NO redirigir
           this.errorMessage = 'No tiene permisos para crear empleados';

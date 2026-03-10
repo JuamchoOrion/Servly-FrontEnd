@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -49,7 +49,8 @@ export class ManageUsersComponent implements OnInit {
   constructor(
     private userService: UserService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -73,9 +74,16 @@ export class ManageUsersComponent implements OnInit {
       next: (users) => {
         this.users = users;
         this.isLoading = false;
+
+        // Forzar detección de cambios
+        this.cdr.detectChanges();
       },
       error: (error) => {
         this.isLoading = false;
+
+        // Forzar detección de cambios
+        this.cdr.detectChanges();
+
         // El interceptor maneja 401/403 globalmente (logout y redirección)
         // Aquí solo mostramos el mensaje de error para otros casos
         this.errorMessage = error.message || 'Error al cargar usuarios';

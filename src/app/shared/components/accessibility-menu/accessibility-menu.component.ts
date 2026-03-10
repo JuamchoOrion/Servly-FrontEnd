@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AccessibilityService, type AccessibilitySettings } from '../../services/accessibility.service';
@@ -37,12 +37,15 @@ export class AccessibilityMenuComponent implements OnInit {
     { value: 'extra-large', label: 'Muy Grande (18px)' }
   ];
 
-  constructor(private accessibilityService: AccessibilityService) {}
+  constructor(private accessibilityService: AccessibilityService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     // Suscribirse a los cambios de configuración
     this.accessibilityService.settings$.subscribe(settings => {
       this.settings = { ...settings };
+      console.log('🔵 [AccessibilityMenu] Configuración actualizada:', settings);
+      // Forzar detección de cambios
+      this.cdr.detectChanges();
     });
   }
 

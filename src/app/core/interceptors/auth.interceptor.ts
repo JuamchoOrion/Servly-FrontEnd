@@ -98,6 +98,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
       if (error.status === 401) {
         console.log('🔵 [AuthInterceptor] Error 401 - Token posiblemente expirado');
+        console.log('🔵 [AuthInterceptor] Request URL:', req.url);
+
+        // Si es el endpoint de login, NO intentar refresh - dejar que el componente maneje el error
+        if (req.url.includes('/api/auth/login')) {
+          console.log('🔵 [AuthInterceptor] 401 en /login - pasando error al componente');
+          console.log('🔵 [AuthInterceptor] Error completo:', error);
+          console.log('🔵 [AuthInterceptor] error.error:', error.error);
+          return throwError(() => error);
+        }
 
         // No hacer refresh si la solicitud ya es al endpoint de refresh
         if (req.url.includes('/api/auth/refresh')) {

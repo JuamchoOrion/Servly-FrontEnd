@@ -82,8 +82,14 @@
             [class.error]="emailControl?.invalid && emailControl?.touched"
             placeholder="ejemplo@servly.com"
             autocomplete="off">
-          <span class="error-message" *ngIf="emailControl?.invalid && emailControl?.touched">
-            {{ getFieldError('email') }}
+          <span class="error-message" *ngIf="emailControl?.hasError('duplicate')">
+            Ya existe una cuenta con ese email
+          </span>
+          <span class="error-message" *ngIf="emailControl?.hasError('email')">
+            Email inválido
+          </span>
+          <span class="error-message" *ngIf="emailControl?.hasError('required') && emailControl?.touched">
+            Este campo es obligatorio
           </span>
         </div>
 
