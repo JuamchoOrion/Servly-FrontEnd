@@ -1,0 +1,259 @@
+<div class="audit-metrics-container">
+
+  <!-- Header con Filtros y Export -->
+  <div class="metrics-header">
+    <div class="header-title">
+      <h1>
+        <span class="material-icons">analytics</span>
+        Métricas de Auditoría
+      </h1>
+      <p>Monitoreo de autenticación y seguridad del sistema</p>
+    </div>
+
+    <div class="header-actions">
+      <!-- Filtro de Fechas -->
+      <form [formGroup]="filterForm" class="date-filter-form">
+        <div class="form-group">
+          <label for="dateFilter">
+            <span class="material-icons">calendar_today</span>
+            Período:
+          </label>
+          <select formControlName="dateFilter" class="date-select">
+            <option value="7days">Últimos 7 días</option>
+            <option value="30days">Últimos 30 días</option>
+            <option value="custom">Rango personalizado</option>
+          </select>
+        </div>
+
+        <!-- Rango Personalizado -->
+        <div class="custom-date-range" *ngIf="showCustomDateRange">
+          <div class="form-group">
+            <label for="startDate">Desde:</label>
+            <input type="date" formControlName="startDate" class="date-input">
+          </div>
+          <div class="form-group">
+            <label for="endDate">Hasta:</label>
+            <input type="date" formControlName="endDate" class="date-input">
+          </div>
+          <button type="button" class="btn btn-apply" (click)="onApplyCustomDate()">
+            <span class="material-icons">check</span>
+            Aplicar
+          </button>
+        </div>
+      </form>
+
+      <!-- Botón Exportar -->
+      <button class="btn btn-export" (click)="onExportCSV()" [disabled]="!metrics || isLoading">
+        <span class="material-icons">download</span>
+        Exportar CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Spinner de Carga -->
+  <div class="loading-spinner" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Cargando métricas de auditoría...</p>
+  </div>
+
+  <!-- Mensaje de Error -->
+  <div class="error-message" *ngIf="errorMessage && !isLoading">
+    <span class="material-icons">error_outline</span>
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <!-- Contenido Principal -->
+  <div class="metrics-content" *ngIf="!isLoading && metrics">
+
+    <!-- Cards de Métricas -->
+    <div class="metrics-cards">
+      <div class="metric-card" *ngFor="let card of metricCards" [class]="'status-' + card.status.toLowerCase()">
+        <div class="card-header">
+          <div class="card-icon" [style.color]="getStatusColor(card.status)">
+            <span class="material-icons">{{ card.icon }}</span>
+          </div>
+          <div class="card-status" [style.background]="getStatusColor(card.status)">
+            {{ card.status }}
+          </div>
+        </div>
+
+        <div class="card-body">
+          <h3>{{ card.title }}</h3>
+          <div class="card-value">
+            <span class="value">{{ card.value }}</span>
+            <span class="unit">{{ card.unit }}</span>
+          </div>
+          <p class="card-description">{{ card.description }}</p>
+        </div>
+
+        <div class="card-footer">
+          <div class="status-indicator" [style.background]="getStatusColor(card.status)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="charts-grid">
+      <!-- Gráfico de Barras - Tasas de Éxito -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>
+            <span class="material-icons">bar_chart</span>
+            Tasas de Éxito por Rol
+          </h3>
+          <p>Porcentaje de autenticaciones exitosas</p>
+        </div>
+        <div class="chart-body">
+          <canvas baseChart
+            [data]="barChartData"
+            [type]="barChartType"
+            [options]="barChartOptions">
+          </canvas>
+        </div>
+      </div>
+
+      <!-- Gráfico de Línea - Tiempos Promedio -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>
+            <span class="material-icons">timeline</span>
+            Tiempos Promedio de Autenticación
+          </h3>
+          <p>Duración en milisegundos por rol</p>
+        </div>
+        <div class="chart-body">
+          <canvas baseChart
+            [data]="lineChartData"
+            [type]="lineChartType"
+            [options]="lineChartOptions">
+          </canvas>
+        </div>
+      </div>
+
+      <!-- Gráfico Doughnut - Distribución -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>
+            <span class="material-icons">donut_large</span>
+            Distribución de Intentos por Rol
+          </h3>
+          <p>Total de intentos de login</p>
+        </div>
+        <div class="chart-body">
+          <canvas baseChart
+            [data]="doughnutChartData"
+            [type]="doughnutChartType"
+            [options]="doughnutChartOptions">
+          </canvas>
+        </div>
+      </div>
+
+      <!-- Estadísticas Detalladas por Rol -->
+      <div class="chart-card full-width">
+        <div class="chart-header">
+          <h3>
+            <span class="material-icons">table_chart</span>
+            Estadísticas Detalladas por Rol
+          </h3>
+        </div>
+        <div class="chart-body">
+          <table class="metrics-table">
+            <thead>
+              <tr>
+                <th>Rol</th>
+                <th>Intentos Totales</th>
+                <th>Exitosos</th>
+                <th>Fallidos</th>
+                <th>Tasa de Éxito</th>
+                <th>Tiempo Promedio</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>ADMIN</strong></td>
+                <td>{{ metrics.adminAuthMetrics.totalAttempts }}</td>
+                <td>{{ metrics.adminAuthMetrics.successfulAttempts }}</td>
+                <td>{{ metrics.adminAuthMetrics.totalAttempts - metrics.adminAuthMetrics.successfulAttempts }}</td>
+                <td>
+                  <span class="badge" [class]="getRateBadgeClassByRate(metrics.adminAuthMetrics.successRate)">
+                    {{ metrics.adminAuthMetrics.successRate | number:'1.1-1' }}%
+                  </span>
+                </td>
+                <td>{{ metrics.adminAuthMetrics.averageDurationMs | number:'1.0-0' }} ms</td>
+              </tr>
+              <tr>
+                <td><strong>WAITER</strong></td>
+                <td>{{ metrics.waiterAuthMetrics.totalAttempts }}</td>
+                <td>{{ metrics.waiterAuthMetrics.successfulAttempts }}</td>
+                <td>{{ metrics.waiterAuthMetrics.totalAttempts - metrics.waiterAuthMetrics.successfulAttempts }}</td>
+                <td>
+                  <span class="badge" [class]="getRateBadgeClassByRate(metrics.waiterAuthMetrics.successRate)">
+                    {{ metrics.waiterAuthMetrics.successRate | number:'1.1-1' }}%
+                  </span>
+                </td>
+                <td>{{ metrics.waiterAuthMetrics.averageDurationMs | number:'1.0-0' }} ms</td>
+              </tr>
+              <tr>
+                <td><strong>CASHIER</strong></td>
+                <td>{{ metrics.cashierAuthMetrics.totalAttempts }}</td>
+                <td>{{ metrics.cashierAuthMetrics.successfulAttempts }}</td>
+                <td>{{ metrics.cashierAuthMetrics.totalAttempts - metrics.cashierAuthMetrics.successfulAttempts }}</td>
+                <td>
+                  <span class="badge" [class]="getRateBadgeClassByRate(metrics.cashierAuthMetrics.successRate)">
+                    {{ metrics.cashierAuthMetrics.successRate | number:'1.1-1' }}%
+                  </span>
+                </td>
+                <td>{{ metrics.cashierAuthMetrics.averageDurationMs | number:'1.0-0' }} ms</td>
+              </tr>
+              <tr *ngIf="metrics.kitchenAuthMetrics">
+                <td><strong>KITCHEN</strong></td>
+                <td>{{ metrics.kitchenAuthMetrics.totalAttempts }}</td>
+                <td>{{ metrics.kitchenAuthMetrics.successfulAttempts }}</td>
+                <td>{{ metrics.kitchenAuthMetrics.totalAttempts - metrics.kitchenAuthMetrics.successfulAttempts }}</td>
+                <td>
+                  <span class="badge" [class]="getRateBadgeClassByRate(metrics.kitchenAuthMetrics.successRate)">
+                    {{ metrics.kitchenAuthMetrics.successRate | number:'1.1-1' }}%
+                  </span>
+                </td>
+                <td>{{ metrics.kitchenAuthMetrics.averageDurationMs | number:'1.0-0' }} ms</td>
+              </tr>
+              <tr *ngIf="metrics.storekeeperAuthMetrics">
+                <td><strong>STOREKEEPER</strong></td>
+                <td>{{ metrics.storekeeperAuthMetrics.totalAttempts }}</td>
+                <td>{{ metrics.storekeeperAuthMetrics.successfulAttempts }}</td>
+                <td>{{ metrics.storekeeperAuthMetrics.totalAttempts - metrics.storekeeperAuthMetrics.successfulAttempts }}</td>
+                <td>
+                  <span class="badge" [class]="getRateBadgeClassByRate(metrics.storekeeperAuthMetrics.successRate)">
+                    {{ metrics.storekeeperAuthMetrics.successRate | number:'1.1-1' }}%
+                  </span>
+                </td>
+                <td>{{ metrics.storekeeperAuthMetrics.averageDurationMs | number:'1.0-0' }} ms</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información del Período -->
+    <div class="period-info">
+      <div class="info-item">
+        <span class="material-icons">event</span>
+        <span>Período: <strong>{{ getPeriodDays() }} días</strong></span>
+      </div>
+      <div class="info-item">
+        <span class="material-icons">calendar_range</span>
+        <span>Desde: <strong>{{ metrics.periodStart | date:'dd/MM/yyyy' }}</strong></span>
+      </div>
+      <div class="info-item">
+        <span class="material-icons">calendar_today</span>
+        <span>Hasta: <strong>{{ metrics.periodEnd | date:'dd/MM/yyyy' }}</strong></span>
+      </div>
+      <div class="info-item">
+        <span class="material-icons">update</span>
+        <span>Actualizado: <strong>{{ today | date:'dd/MM/yyyy HH:mm' }}</strong></span>
+      </div>
+    </div>
+
+  </div>
+</div>

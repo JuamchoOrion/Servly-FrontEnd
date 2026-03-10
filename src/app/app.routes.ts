@@ -86,6 +86,12 @@ export const routes: Routes = [
       import('./features/users/pages/manage-users/manage-users.component').then(m => m.ManageUsersComponent),
     canActivate: [authGuard, roleGuard(['ADMIN'])]
   },
+  {
+    path: 'admin/audit-metrics',
+    loadComponent: () =>
+      import('./features/admin/pages/audit-metrics/audit-metrics.component').then(m => m.AuditMetricsComponent),
+    canActivate: [authGuard, roleGuard(['ADMIN'])]
+  },
 
   // Wildcard - must be last
   { path: '**', redirectTo: 'login' }
