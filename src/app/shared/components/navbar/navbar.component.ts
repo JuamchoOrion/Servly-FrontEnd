@@ -30,6 +30,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isAuthenticated = false;
   currentUser: CurrentUser | null = null;
   dropdownOpen = false;
+  mobileMenuOpen = false;
   userEmail = '';
   userRole = '';
 
@@ -117,6 +118,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   closeDropdown(): void {
     this.dropdownOpen = false;
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen = false;
   }
 
   logout(): void {

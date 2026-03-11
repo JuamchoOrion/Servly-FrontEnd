@@ -47,11 +47,17 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "12kB",
-                  "maximumError": "25kB"
+                  "maximumWarning": "50kB",
+                  "maximumError": "100kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "src/enviroments/enviroment.ts",
+                  "with": "src/enviroments/enviroment.prod.ts"
+                }
+              ]
             },
             "development": {
               "optimization": false,

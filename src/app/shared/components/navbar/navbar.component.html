@@ -66,8 +66,45 @@
   </div>
 
   <!-- Mobile Menu Toggle -->
-  <button class="mobile-menu-btn" *ngIf="isAuthenticated" (click)="toggleDropdown()">
-    <span class="material-icons">menu</span>
+  <button class="mobile-menu-btn" *ngIf="isAuthenticated" (click)="toggleMobileMenu()" [class.active]="mobileMenuOpen">
+    <span class="material-icons">{{ mobileMenuOpen ? 'close' : 'menu' }}</span>
   </button>
 </nav>
+
+<!-- Mobile Navigation Menu -->
+<div class="mobile-nav-menu" *ngIf="isAuthenticated && mobileMenuOpen">
+  <div class="mobile-nav-overlay" (click)="closeMobileMenu()"></div>
+  <div class="mobile-nav-content">
+    <div class="mobile-nav-header">
+      <span class="mobile-nav-title">Menú</span>
+      <button class="mobile-nav-close" (click)="closeMobileMenu()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="mobile-nav-items">
+      <a
+        *ngFor="let item of visibleNavItems"
+        [routerLink]="item.route"
+        [routerLinkActive]="['active']"
+        class="mobile-nav-item"
+        (click)="closeMobileMenu()">
+        <span class="material-icons">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    </div>
+    <div class="mobile-nav-footer">
+      <div class="mobile-user-info">
+        <span class="material-icons">account_circle</span>
+        <div class="mobile-user-details">
+          <span class="mobile-user-email">{{ userEmail }}</span>
+          <span class="mobile-user-role">{{ userRole }}</span>
+        </div>
+      </div>
+      <button class="mobile-logout-btn" (click)="logout(); closeMobileMenu()">
+        <span class="material-icons">logout</span>
+        <span>Cerrar Sesión</span>
+      </button>
+    </div>
+  </div>
+</div>
 

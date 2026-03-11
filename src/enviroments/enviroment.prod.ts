@@ -1,14 +1,12 @@
 /**
- * Configuración del entorno de desarrollo
+ * Configuración del entorno de PRODUCCIÓN
  * URL del API y claves públicas
  */
 export const environment = {
-  production: false,
+  production: true,
 
-  // API Configuration
-  // En desarrollo: vacío para usar el proxy de Angular que redirige /api/** → localhost:8081
-  // En producción: se usa enviroment.prod.ts con la URL completa
-  apiUrl: '',
+  // API Configuration - URL completa del backend en producción
+  apiUrl: 'http://18.228.157.112:8081',
   apiVersion: 'v1',
 
   // Authentication
@@ -46,3 +44,4 @@ export const environment = {
     description: 'Sistema de gestión para restaurantes'
   }
 };
+
