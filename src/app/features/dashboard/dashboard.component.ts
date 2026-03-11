@@ -118,7 +118,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private dashboardService: DashboardService,
-    private i18n: I18nService,
+    public i18n: I18nService,
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone
   ) {}
@@ -182,7 +182,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       labels: this.stats.topCategories.map(c => c.name),
       datasets: [
         {
-          label: 'Items',
+          label: this.i18n.translate('common.total'),
           data: this.stats.topCategories.map(c => c.count),
           backgroundColor: [
             'rgba(200, 169, 81, 0.85)',
@@ -212,7 +212,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const expiredCount = this.stats.batchesExpired;
 
     this.pieChartData = {
-      labels: ['Vigentes', 'Próximos a Expirar', 'Expirados'],
+      labels: [
+        this.i18n.translate('dashboard.charts.vigentes'),
+        this.i18n.translate('dashboard.charts.proximosExpirar'),
+        this.i18n.translate('dashboard.charts.expirados')
+      ],
       datasets: [
         {
           data: [healthyCount, closeToExpireCount, expiredCount],
@@ -252,9 +256,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   getGreeting(): string {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Buenos días';
-    if (hour < 18) return 'Buenas tardes';
-    return 'Buenas noches';
+    if (hour < 12) return this.i18n.translate('dashboard.greeting.morning');
+    if (hour < 18) return this.i18n.translate('dashboard.greeting.afternoon');
+    return this.i18n.translate('dashboard.greeting.evening');
   }
 
   /** Obtiene la clase CSS según el estado del lote */
@@ -270,22 +274,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
   /** Obtiene el texto del estado del lote */
   getBatchStatusText(batch: StockBatch): string {
     if (batch.status === 'EXPIRADO') {
-      return 'EXPIRADO';
+      return this.i18n.translate('dashboard.batches.expiredText');
     }
     if (batch.status === 'PROXIMO_A_EXPIRAR') {
-      return `${batch.daysUntilExpiry} días`;
+      return `${batch.daysUntilExpiry} ${this.i18n.translate('dashboard.batches.days')}`;
     }
     if (batch.status === 'AGOTADO') {
-      return 'AGOTADO';
+      return this.i18n.translate('dashboard.batches.depletedText');
     }
-    return 'Vigente';
+    return this.i18n.translate('dashboard.batches.healthyText');
   }
 
   /** Formatea la fecha de expiración */
   formatExpiryDate(dateString: string): string {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
+    const lang = this.i18n.getCurrentLanguage();
+    const localeMap: Record<string, string> = {
+      'es': 'es-ES',
+      'en': 'en-US',
+      'pt': 'pt-BR'
+    };
+    return date.toLocaleDateString(localeMap[lang] || 'es-ES', {
       day: '2-digit',
       month: 'short',
       year: 'numeric'

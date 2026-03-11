@@ -5,22 +5,22 @@
     <div class="dashboard-header">
       <div class="header-content">
         <h1>{{ getGreeting() }}, {{ userName }}</h1>
-        <p>Panel de control — {{ userRoles.join(', ') }}</p>
+        <p>{{ i18n.translate('dashboard.subtitle') }} — {{ userRoles.join(', ') }}</p>
       </div>
       <button
         class="btn btn-refresh"
         (click)="refreshData()"
         [disabled]="isLoading"
-        title="Actualizar datos">
+        [title]="i18n.translate('common.refresh')">
         <span class="material-icons">refresh</span>
-        Actualizar
+        {{ i18n.translate('common.refresh') }}
       </button>
     </div>
 
     <!-- ══ Loading State ════════════════════════════════════════════════════ -->
     <div class="loading-state" *ngIf="isLoading">
       <div class="spinner"></div>
-      <p>Cargando estadísticas...</p>
+      <p>{{ i18n.translate('dashboard.stats.loading') }}</p>
     </div>
 
     <!-- ══ Error Message ════════════════════════════════════════════════════ -->
@@ -29,7 +29,7 @@
       <span>{{ errorMessage }}</span>
     </div>
 
-    <!-- ══ Dashboard Content ════════════════════════════════════════════════ -->
+    <!-- ══ Dashboard Contents ════════════════════════════════════════════════ -->
     <div class="dashboard-content" *ngIf="!isLoading && stats">
 
       <!-- Stats Cards -->
@@ -39,10 +39,10 @@
           <span class="material-icons stat-icon">inventory_2</span>
           <div class="stat-content">
             <div class="stat-number">{{ stats.totalItems }}</div>
-            <div class="stat-label">Items Totales</div>
+            <div class="stat-label">{{ i18n.translate('dashboard.stats.totalItems') }}</div>
           </div>
           <div class="stat-action" *ngIf="canViewItems()">
-            <a routerLink="/items" class="stat-link">Ver items →</a>
+            <a routerLink="/items" class="stat-link">{{ i18n.translate('dashboard.stats.viewItems') }}</a>
           </div>
         </div>
 
@@ -50,10 +50,10 @@
           <span class="material-icons stat-icon">label</span>
           <div class="stat-content">
             <div class="stat-number">{{ stats.totalCategories }}</div>
-            <div class="stat-label">Categorías</div>
+            <div class="stat-label">{{ i18n.translate('dashboard.stats.totalCategories') }}</div>
           </div>
           <div class="stat-action" *ngIf="canManageCategories()">
-            <a routerLink="/categories" class="stat-link">Gestionar →</a>
+            <a routerLink="/categories" class="stat-link">{{ i18n.translate('dashboard.stats.manageCategories') }}</a>
           </div>
         </div>
 
@@ -61,10 +61,10 @@
           <span class="material-icons stat-icon">schedule</span>
           <div class="stat-content">
             <div class="stat-number">{{ stats.batchesCloseToExpire }}</div>
-            <div class="stat-label">Lotes por Expirar</div>
+            <div class="stat-label">{{ i18n.translate('dashboard.stats.batchesCloseToExpire') }}</div>
           </div>
           <div class="stat-action" *ngIf="canViewInventory()">
-            <a routerLink="/inventory" class="stat-link">Revisar →</a>
+            <a routerLink="/inventory" class="stat-link">{{ i18n.translate('dashboard.stats.reviewInventory') }}</a>
           </div>
         </div>
 
@@ -72,10 +72,10 @@
           <span class="material-icons stat-icon">error</span>
           <div class="stat-content">
             <div class="stat-number">{{ stats.batchesExpired }}</div>
-            <div class="stat-label">Lotes Expirados</div>
+            <div class="stat-label">{{ i18n.translate('dashboard.stats.batchesExpired') }}</div>
           </div>
           <div class="stat-action" *ngIf="canViewInventory()">
-            <a routerLink="/inventory" class="stat-link">Ver →</a>
+            <a routerLink="/inventory" class="stat-link">{{ i18n.translate('dashboard.stats.view') }}</a>
           </div>
         </div>
 
@@ -83,10 +83,10 @@
           <span class="material-icons stat-icon">handshake</span>
           <div class="stat-content">
             <div class="stat-number">{{ stats.totalSuppliers }}</div>
-            <div class="stat-label">Proveedores</div>
+            <div class="stat-label">{{ i18n.translate('dashboard.stats.totalSuppliers') }}</div>
           </div>
           <div class="stat-action" *ngIf="canViewInventory()">
-            <a routerLink="/inventory/providers" class="stat-link">Ver todos →</a>
+            <a routerLink="/inventory/providers" class="stat-link">{{ i18n.translate('dashboard.stats.viewAll') }}</a>
           </div>
         </div>
 
@@ -98,8 +98,8 @@
         <!-- Bar Chart: Distribución por Categorías -->
         <div class="analytics-card">
           <div class="card-header">
-            <h3><span class="material-icons">bar_chart</span> Distribución por Categorías</h3>
-            <span class="card-subtitle">Items por categoría</span>
+            <h3><span class="material-icons">bar_chart</span> {{ i18n.translate('dashboard.charts.categoriesTitle') }}</h3>
+            <span class="card-subtitle">{{ i18n.translate('dashboard.charts.categoriesSubtitle') }}</span>
           </div>
           <div class="chart-container">
             <canvas baseChart
@@ -113,8 +113,8 @@
         <!-- Pie Chart: Estado de Lotes -->
         <div class="analytics-card">
           <div class="card-header">
-            <h3><span class="material-icons">pie_chart</span> Estado de Lotes</h3>
-            <span class="card-subtitle">Distribución por estado de expiración</span>
+            <h3><span class="material-icons">pie_chart</span> {{ i18n.translate('dashboard.charts.batchesTitle') }}</h3>
+            <span class="card-subtitle">{{ i18n.translate('dashboard.charts.batchesSubtitle') }}</span>
           </div>
           <div class="chart-container">
             <canvas baseChart
@@ -130,8 +130,8 @@
       <!-- ── Batch Expiration Alerts ─────────────────────────────────────── -->
       <div class="alerts-section">
         <div class="section-header">
-          <h3><span class="material-icons">schedule</span> Lotes Próximos a Expirar</h3>
-          <span class="alert-count">{{ getCloseToExpireBatches().length }} lotes</span>
+          <h3><span class="material-icons">schedule</span> {{ i18n.translate('dashboard.batches.closeToExpire') }}</h3>
+          <span class="alert-count">{{ getCloseToExpireBatches().length }} {{ i18n.translate('dashboard.batches.lotes') }}</span>
         </div>
         <div class="alerts-container">
           <div
@@ -141,10 +141,10 @@
             <div class="alert-info">
               <div class="alert-name">{{ batch.batchNumber }}</div>
               <div class="alert-category">
-                {{ batch.supplierName }} • {{ batch.quantity }} unidades
+                {{ batch.supplierName }} • {{ batch.quantity }} {{ i18n.translate('dashboard.batches.units') }}
               </div>
               <div class="alert-expiry">
-                Vence: {{ formatExpiryDate(batch.expiryDate) }}
+                {{ i18n.translate('dashboard.batches.expires') }}: {{ formatExpiryDate(batch.expiryDate) }}
               </div>
             </div>
             <div class="alert-status">
@@ -152,7 +152,7 @@
             </div>
           </div>
           <div *ngIf="getCloseToExpireBatches().length === 0" class="no-alerts">
-            <span class="material-icons">check_circle</span> No hay lotes próximos a expirar
+            <span class="material-icons">check_circle</span> {{ i18n.translate('dashboard.batches.noAlerts') }}
           </div>
         </div>
       </div>
@@ -160,8 +160,8 @@
       <!-- ── Expired Batches Section ─────────────────────────────────────── -->
       <div class="alerts-section expired-section" *ngIf="getExpiredBatches().length > 0">
         <div class="section-header">
-          <h3><span class="material-icons">error</span> Lotes Expirados</h3>
-          <span class="alert-count alert-critical">{{ getExpiredBatches().length }} lotes</span>
+          <h3><span class="material-icons">error</span> {{ i18n.translate('dashboard.batches.expiredSection') }}</h3>
+          <span class="alert-count alert-critical">{{ getExpiredBatches().length }} {{ i18n.translate('dashboard.batches.lotes') }}</span>
         </div>
         <div class="alerts-container">
           <div
@@ -170,14 +170,14 @@
             <div class="alert-info">
               <div class="alert-name">{{ batch.batchNumber }}</div>
               <div class="alert-category">
-                {{ batch.supplierName }} • {{ batch.quantity }} unidades
+                {{ batch.supplierName }} • {{ batch.quantity }} {{ i18n.translate('dashboard.batches.units') }}
               </div>
               <div class="alert-expiry">
-                Expiró: {{ formatExpiryDate(batch.expiryDate) }}
+                {{ i18n.translate('dashboard.batches.expiredDate') }}: {{ formatExpiryDate(batch.expiryDate) }}
               </div>
             </div>
             <div class="alert-status">
-              EXPIRADO
+              {{ i18n.translate('dashboard.batches.expiredText') }}
             </div>
           </div>
         </div>
@@ -186,33 +186,33 @@
       <!-- ── Quick Actions ──────────────────────────────────────────────── -->
       <div class="quick-actions-card">
         <div class="card-header">
-          <h3><span class="material-icons">bolt</span> Acciones Rápidas</h3>
-          <span class="card-subtitle">Tareas comunes</span>
+          <h3><span class="material-icons">bolt</span> {{ i18n.translate('dashboard.actions.quickActions') }}</h3>
+          <span class="card-subtitle">{{ i18n.translate('dashboard.actions.subtitle') }}</span>
         </div>
         <div class="quick-actions-grid">
           <a routerLink="/employees/create" class="quick-action" *ngIf="isAdmin">
             <span class="material-icons action-icon">person_add</span>
-            <div class="action-text">Crear Empleado</div>
+            <div class="action-text">{{ i18n.translate('dashboard.actions.createEmployee') }}</div>
           </a>
           <a routerLink="/users/manage" class="quick-action" *ngIf="isAdmin">
             <span class="material-icons action-icon">people</span>
-            <div class="action-text">Gestionar Usuarios</div>
+            <div class="action-text">{{ i18n.translate('dashboard.actions.manageUsers') }}</div>
           </a>
           <a routerLink="/items" class="quick-action" *ngIf="canViewItems()">
             <span class="material-icons action-icon">add_circle</span>
-            <div class="action-text">Crear Item</div>
+            <div class="action-text">{{ i18n.translate('dashboard.actions.createItem') }}</div>
           </a>
           <a routerLink="/categories" class="quick-action" *ngIf="canManageCategories()">
             <span class="material-icons action-icon">label</span>
-            <div class="action-text">Nueva Categoría</div>
+            <div class="action-text">{{ i18n.translate('dashboard.actions.createCategory') }}</div>
           </a>
           <a routerLink="/inventory" class="quick-action" *ngIf="canViewInventory()">
             <span class="material-icons action-icon">inventory_2</span>
-            <div class="action-text">Revisar Inventario</div>
+            <div class="action-text">{{ i18n.translate('dashboard.actions.reviewInventory') }}</div>
           </a>
           <a routerLink="/inventory/providers" class="quick-action" *ngIf="canViewInventory()">
             <span class="material-icons action-icon">handshake</span>
-            <div class="action-text">Gestionar Proveedores</div>
+            <div class="action-text">{{ i18n.translate('dashboard.actions.manageSuppliers') }}</div>
           </a>
         </div>
       </div>
@@ -222,8 +222,8 @@
     <!-- ══ Empty State ══════════════════════════════════════════════════════ -->
     <div class="empty-dashboard" *ngIf="!isLoading && !stats && !errorMessage">
       <span class="material-icons empty-icon">insights</span>
-      <h3>Dashboard no disponible</h3>
-      <p>No se pudieron cargar las estadísticas</p>
+      <h3>{{ i18n.translate('dashboard.stats.empty') }}</h3>
+      <p>{{ i18n.translate('dashboard.stats.emptyMessage') }}</p>
     </div>
 
   </div>
