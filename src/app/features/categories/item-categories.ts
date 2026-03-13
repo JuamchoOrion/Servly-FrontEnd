@@ -12,7 +12,7 @@ import { I18nService } from '../../core/services/i18n.service';
 @Component({
   selector: 'app-item-categories',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './item-categories.html',
   styleUrls: ['./item-categories.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
