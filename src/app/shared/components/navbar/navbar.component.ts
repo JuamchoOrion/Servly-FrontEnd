@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../directives/click-outside.directive';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { I18nService } from '../../../core/services/i18n.service';
 
 interface NavItem {
   label: string;
@@ -35,37 +36,37 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   navItems: NavItem[] = [
     {
-      label: 'Dashboard',
+      label: 'navbar.dashboard',
       route: '/dashboard',
       icon: 'dashboard',
       roles: ['ADMIN', 'STOREKEEPER', 'STAFF']
     },
     {
-      label: 'Inventario',
+      label: 'navbar.inventory',
       route: '/inventory',
       icon: 'inventory_2',
       roles: ['ADMIN', 'STOREKEEPER']
     },
     {
-      label: 'Categorías',
+      label: 'navbar.categories',
       route: '/categories',
       icon: 'label',
       roles: ['ADMIN', 'STOREKEEPER']
     },
     {
-      label: 'Items',
+      label: 'navbar.items',
       route: '/items',
       icon: 'format_list_bulleted',
       roles: ['ADMIN', 'STOREKEEPER']
     },
     {
-      label: 'Proveedores',
+      label: 'navbar.suppliers',
       route: '/inventory/providers',
       icon: 'handshake',
       roles: ['ADMIN', 'STOREKEEPER']
     },
     {
-      label: 'Métricas',
+      label: 'navbar.metrics',
       route: '/admin/audit-metrics',
       icon: 'analytics',
       roles: ['ADMIN']
@@ -77,7 +78,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    public i18n: I18nService
   ) {}
 
   ngOnInit(): void {

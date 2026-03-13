@@ -4,8 +4,8 @@
     <!-- Header -->
     <div class="items-header">
       <div class="header-content">
-        <h1>Gestión de Items</h1>
-        <p>Administra todos los items del sistema</p>
+        <h1>{{ i18n.translate('items.title') }}</h1>
+        <p>{{ i18n.translate('items.subtitle') }}</p>
       </div>
       <div class="header-actions">
         <button
@@ -14,7 +14,7 @@
           [disabled]="isLoading"
           title="Refrescar datos">
           <span class="material-icons">refresh</span>
-          Refrescar
+          {{ i18n.translate('items.refresh') }}
         </button>
         <button
           class="btn btn-primary"
@@ -22,7 +22,7 @@
           [disabled]="isLoading"
           *ngIf="canEdit()">
           <span class="material-icons">add_circle</span>
-          Crear Item
+          {{ i18n.translate('items.create') }}
         </button>
       </div>
     </div>
@@ -44,14 +44,14 @@
       <div class="filter-group">
         <label for="categoryFilter" class="filter-label">
           <span class="material-icons">filter_list</span>
-          Filtrar por categoría:
+          {{ i18n.translate('items.filter.category') }}
         </label>
         <select
           id="categoryFilter"
           class="filter-select"
           [value]="selectedCategoryId || 'all'"
           (change)="filterByCategory($any($event.target).value)">
-          <option value="all">Todas las categorías</option>
+          <option value="all">{{ i18n.translate('items.filter.allCategories') }}</option>
           <option *ngFor="let category of categories" [value]="category.id">
             {{ category.name }}
           </option>
@@ -66,21 +66,21 @@
       </div>
       <div class="filter-info" *ngIf="selectedCategoryId">
         <span class="material-icons">info</span>
-        Mostrando items de: <strong>{{ getSelectedCategoryName() }}</strong>
+        {{ i18n.translate('items.filter.showing') }} <strong>{{ getSelectedCategoryName() }}</strong>
       </div>
     </div>
 
     <!-- Loading State -->
     <div class="loading-state" *ngIf="isLoading">
       <div class="spinner"></div>
-      <p>Cargando items...</p>
+      <p>{{ i18n.translate('items.loading') }}</p>
     </div>
 
     <!-- Empty State -->
     <div class="empty-state" *ngIf="!isLoading && items.length === 0">
       <span class="material-icons empty-icon">inventory_2</span>
-      <h3>No hay items</h3>
-      <p>Crea tu primer item para comenzar</p>
+      <h3>{{ i18n.translate('items.empty') }}</h3>
+      <p>{{ i18n.translate('items.emptyMessage') }}</p>
     </div>
 
     <!-- Items Table -->
@@ -88,13 +88,13 @@
       <table class="items-table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Unidad</th>
-            <th>Días Expiración</th>
-            <th>Categoría</th>
-            <th>Acciones</th>
+            <th>{{ i18n.translate('items.table.id') }}</th>
+            <th>{{ i18n.translate('items.table.name') }}</th>
+            <th>{{ i18n.translate('items.table.description') }}</th>
+            <th>{{ i18n.translate('items.table.unit') }}</th>
+            <th>{{ i18n.translate('items.table.expirationDays') }}</th>
+            <th>{{ i18n.translate('items.table.category') }}</th>
+            <th>{{ i18n.translate('items.table.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -103,7 +103,7 @@
             <td class="name-cell">{{ item.name }}</td>
             <td class="description-cell">{{ item.description }}</td>
             <td class="unit-cell">{{ item.unitOfMeasurement }}</td>
-            <td class="expiration-cell">{{ item.expirationDays }} días</td>
+            <td class="expiration-cell">{{ item.expirationDays }} {{ i18n.translate('items.table.days') }}</td>
             <td class="category-cell">
               {{ getCategoryName(item.category) }}
             </td>
@@ -111,14 +111,14 @@
               <button
                 class="btn-icon btn-edit"
                 (click)="openEditForm(item)"
-                title="Editar"
+                [title]="i18n.translate('items.actions.edit')"
                 *ngIf="canEdit()">
                 <span class="material-icons">edit</span>
               </button>
               <button
                 class="btn-icon btn-delete"
                 (click)="deleteItem(item)"
-                title="Eliminar"
+                [title]="i18n.translate('items.actions.delete')"
                 *ngIf="canEdit()">
                 <span class="material-icons">delete</span>
               </button>
@@ -132,20 +132,20 @@
     <div class="pagination-controls" *ngIf="items.length > 0">
       <div class="pagination-info">
         <span class="page-info">
-          Página {{ currentPage + 1 }} de {{ totalPages }}
-          ({{ totalElements }} items totales)
+          {{ i18n.translate('items.page') }} {{ currentPage + 1 }} {{ i18n.translate('items.of') }} {{ totalPages }}
+          ({{ totalElements }} {{ i18n.translate('items.totalItems') }})
         </span>
         <div class="page-size-selector">
-          <label for="pageSize">Mostrar:</label>
+          <label for="pageSize">{{ i18n.translate('items.showPerPage') }}</label>
           <select
             id="pageSize"
             [value]="pageSize"
             (change)="changePageSize($any($event.target).value)"
             class="page-size-select">
-            <option value="5">5 por página</option>
-            <option value="10">10 por página</option>
-            <option value="20">20 por página</option>
-            <option value="50">50 por página</option>
+            <option value="5">5 {{ i18n.translate('items.perPage') }}</option>
+            <option value="10">10 {{ i18n.translate('items.perPage') }}</option>
+            <option value="20">20 {{ i18n.translate('items.perPage') }}</option>
+            <option value="50">50 {{ i18n.translate('items.perPage') }}</option>
           </select>
         </div>
       </div>
@@ -155,7 +155,7 @@
           class="btn btn-pagination"
           (click)="previousPage()"
           [disabled]="currentPage === 0">
-          ← Anterior
+          ← {{ i18n.translate('items.previous') }}
         </button>
 
         <div class="page-numbers">
@@ -176,7 +176,7 @@
           class="btn btn-pagination"
           (click)="nextPage()"
           [disabled]="isLastPage">
-          Siguiente →
+          {{ i18n.translate('items.next') }} →
         </button>
       </div>
     </div>
@@ -185,7 +185,7 @@
     <div class="modal-overlay" *ngIf="isFormVisible" (click)="closeForm()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h2>{{ isEditMode ? 'Editar Item' : 'Nuevo Item' }}</h2>
+          <h2>{{ isEditMode ? i18n.translate('items.modal.editTitle') : i18n.translate('items.modal.newTitle') }}</h2>
           <button class="btn-close" (click)="closeForm()">
             <span class="material-icons">close</span>
           </button>
@@ -193,107 +193,107 @@
 
         <form [formGroup]="itemForm" (ngSubmit)="submitForm()" class="modal-body">
           <div class="form-group">
-            <label for="name">Nombre *</label>
+            <label for="name">{{ i18n.translate('items.modal.nameLabel') }} *</label>
             <input
               type="text"
               id="name"
               formControlName="name"
               class="form-input"
               [class.error]="itemForm.get('name')?.invalid && itemForm.get('name')?.touched"
-              placeholder="Nombre del item">
+              [placeholder]="i18n.translate('items.modal.namePlaceholder')">
             <span
               class="error-text"
               *ngIf="itemForm.get('name')?.invalid && itemForm.get('name')?.touched">
-              El nombre es requerido (mínimo 2 caracteres)
+              {{ i18n.translate('items.modal.nameRequired') }}
             </span>
           </div>
 
           <div class="form-group">
-            <label for="description">Descripción *</label>
+            <label for="description">{{ i18n.translate('items.modal.descriptionLabel') }} *</label>
             <textarea
               id="description"
               formControlName="description"
               class="form-input form-textarea"
               [class.error]="itemForm.get('description')?.invalid && itemForm.get('description')?.touched"
-              placeholder="Descripción del item"
+              [placeholder]="i18n.translate('items.modal.descriptionPlaceholder')"
               rows="3">
             </textarea>
             <span
               class="error-text"
               *ngIf="itemForm.get('description')?.invalid && itemForm.get('description')?.touched">
-              La descripción es requerida (mínimo 5 caracteres)
+              {{ i18n.translate('items.modal.descriptionRequired') }}
             </span>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="unitOfMeasurement">Unidad de Medida *</label>
+              <label for="unitOfMeasurement">{{ i18n.translate('items.modal.unitLabel') }} *</label>
               <select
                 id="unitOfMeasurement"
                 formControlName="unitOfMeasurement"
                 class="form-input"
                 [class.error]="itemForm.get('unitOfMeasurement')?.invalid && itemForm.get('unitOfMeasurement')?.touched">
-                <option value="">Seleccionar unidad</option>
-                <option value="kg">Kilogramo (kg)</option>
-                <option value="g">Gramo (g)</option>
-                <option value="l">Litro (l)</option>
-                <option value="ml">Mililitro (ml)</option>
-                <option value="unidad">Unidad</option>
-                <option value="paquete">Paquete</option>
-                <option value="caja">Caja</option>
-                <option value="botella">Botella</option>
+                <option value="">{{ i18n.translate('items.modal.unitSelect') }}</option>
+                <option value="kg">{{ i18n.translate('items.units.kg') }}</option>
+                <option value="g">{{ i18n.translate('items.units.g') }}</option>
+                <option value="l">{{ i18n.translate('items.units.l') }}</option>
+                <option value="ml">{{ i18n.translate('items.units.ml') }}</option>
+                <option value="unidad">{{ i18n.translate('items.units.unidad') }}</option>
+                <option value="paquete">{{ i18n.translate('items.units.paquete') }}</option>
+                <option value="caja">{{ i18n.translate('items.units.caja') }}</option>
+                <option value="botella">{{ i18n.translate('items.units.botella') }}</option>
               </select>
               <span
                 class="error-text"
                 *ngIf="itemForm.get('unitOfMeasurement')?.invalid && itemForm.get('unitOfMeasurement')?.touched">
-                La unidad de medida es requerida
+                {{ i18n.translate('items.modal.unitRequired') }}
               </span>
             </div>
 
             <div class="form-group">
-              <label for="expirationDays">Días de Expiración *</label>
+              <label for="expirationDays">{{ i18n.translate('items.modal.expirationDaysLabel') }} *</label>
               <input
                 type="number"
                 id="expirationDays"
                 formControlName="expirationDays"
                 class="form-input"
                 [class.error]="itemForm.get('expirationDays')?.invalid && itemForm.get('expirationDays')?.touched"
-                placeholder="365"
+                [placeholder]="i18n.translate('items.modal.expirationDaysPlaceholder')"
                 min="1">
               <span
                 class="error-text"
                 *ngIf="itemForm.get('expirationDays')?.invalid && itemForm.get('expirationDays')?.touched">
-                Los días de expiración son requeridos (mínimo 1)
+                {{ i18n.translate('items.modal.expirationDaysRequired') }}
               </span>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="idealStock">Stock Ideal *</label>
+              <label for="idealStock">{{ i18n.translate('items.modal.idealStockLabel') }} *</label>
               <input
                 type="number"
                 id="idealStock"
                 formControlName="idealStock"
                 class="form-input"
                 [class.error]="itemForm.get('idealStock')?.invalid && itemForm.get('idealStock')?.touched"
-                placeholder="100"
+                [placeholder]="i18n.translate('items.modal.idealStockPlaceholder')"
                 min="1">
               <span
                 class="error-text"
                 *ngIf="itemForm.get('idealStock')?.invalid && itemForm.get('idealStock')?.touched">
-                El stock ideal es requerido (mínimo 1)
+                {{ i18n.translate('items.modal.idealStockRequired') }}
               </span>
             </div>
 
             <div class="form-group">
-              <label for="category">Categoría *</label>
+              <label for="category">{{ i18n.translate('items.modal.categoryLabel') }} *</label>
               <select
                 id="category"
                 formControlName="category"
                 class="form-input"
                 [class.error]="itemForm.get('category')?.invalid && itemForm.get('category')?.touched">
-                <option value="">Seleccionar categoría</option>
+                <option value="">{{ i18n.translate('items.modal.categorySelect') }}</option>
                 <option *ngFor="let category of categories" [value]="category.id">
                   {{ category.name }}
                 </option>
@@ -301,20 +301,21 @@
               <span
                 class="error-text"
                 *ngIf="itemForm.get('category')?.invalid && itemForm.get('category')?.touched">
-                La categoría es requerida
+                {{ i18n.translate('items.modal.categoryRequired') }}
               </span>
             </div>
           </div>
 
           <div class="modal-buttons">
             <button type="button" class="btn btn-secondary" (click)="closeForm()">
-              Cancelar
+              {{ i18n.translate('items.modal.cancel') }}
             </button>
             <button
               type="submit"
               class="btn btn-primary"
               [disabled]="itemForm.invalid || isLoading">
-              {{ isEditMode ? 'Actualizar' : 'Crear' }}
+              <span *ngIf="isLoading">{{ isEditMode ? i18n.translate('items.modal.updating') : i18n.translate('items.modal.creating') }}</span>
+              <span *ngIf="!isLoading">{{ isEditMode ? i18n.translate('items.modal.update') : i18n.translate('items.modal.create') }}</span>
             </button>
           </div>
         </form>

@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SupplierService, SupplierDTO, SupplierCreateRequest, MessageResponse, PaginatedSupplierResponse } from '../../core/services/supplier.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { I18nService } from '../../core/services/i18n.service';
 
 @Component({
   selector: 'app-suppliers',
@@ -39,7 +40,8 @@ export class SuppliersComponent implements OnInit {
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
     private supplierService: SupplierService,
-    private http: HttpClient
+    private http: HttpClient,
+    public i18n: I18nService
   ) {
     this.initializeForm();
   }
@@ -94,7 +96,7 @@ export class SuppliersComponent implements OnInit {
           this.cdr.detectChanges();
         },
         error: (error) => {
-          console.error('Error al cargar proveedores:', error);
+          console.error(this.i18n.translate('suppliers.form.errorLoad'), error);
           this.suppliers = [];
           this.isLoading = false;
           this.cdr.detectChanges();
@@ -142,13 +144,13 @@ export class SuppliersComponent implements OnInit {
    */
   getNameError(): string {
     if (this.nameControl.hasError('required')) {
-      return 'El nombre es requerido';
+      return this.i18n.translate('suppliers.form.nameRequired');
     }
     if (this.nameControl.hasError('minlength')) {
-      return 'Mínimo 2 caracteres';
+      return this.i18n.translate('suppliers.form.nameMinlength');
     }
     if (this.nameControl.hasError('maxlength')) {
-      return 'Máximo 200 caracteres';
+      return this.i18n.translate('suppliers.form.nameMaxlength');
     }
     return '';
   }
@@ -158,7 +160,7 @@ export class SuppliersComponent implements OnInit {
    */
   getEmailError(): string {
     if (this.emailControl.hasError('email')) {
-      return 'Email inválido';
+      return this.i18n.translate('suppliers.form.emailInvalid');
     }
     return '';
   }
@@ -226,18 +228,19 @@ export class SuppliersComponent implements OnInit {
    * Elimina un proveedor
    */
   deleteSupplier(supplier: SupplierDTO): void {
-    if (confirm(`¿Estás seguro de eliminar "${supplier.name}"?`)) {
-      this.supplierService.delete(supplier.id)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.suppliers = this.suppliers.filter(s => s.id !== supplier.id);
-          },
-          error: (error) => {
-            console.error('Error al eliminar proveedor:', error);
-          }
-        });
-    }
+    const confirmed = confirm(this.i18n.translate('suppliers.confirm.delete', { name: supplier.name }));
+    if (!confirmed) return;
+
+    this.supplierService.delete(supplier.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.suppliers = this.suppliers.filter(s => s.id !== supplier.id);
+        },
+        error: (error) => {
+          console.error(this.i18n.translate('suppliers.form.errorDelete'), error);
+        }
+      });
   }
 
   /**
@@ -250,13 +253,13 @@ export class SuppliersComponent implements OnInit {
 
       // Validar tipo de archivo
       if (!file.type.startsWith('image/')) {
-        this.formError = 'El archivo debe ser una imagen';
+        this.formError = this.i18n.translate('suppliers.form.error');
         return;
       }
 
       // Validar tamaño original (máx 10MB)
       if (file.size > 10 * 1024 * 1024) {
-        this.formError = 'La imagen no debe superar 10MB';
+        this.formError = this.i18n.translate('suppliers.form.errorSize');
         return;
       }
 
@@ -273,7 +276,7 @@ export class SuppliersComponent implements OnInit {
         this.logoPreviewUrl = URL.createObjectURL(compressedFile);
         this.cdr.detectChanges();
       }).catch((error) => {
-        this.formError = 'Error al comprimir la imagen: ' + error.message;
+        this.formError = this.i18n.translate('suppliers.form.errorCompression') + ' ' + error.message;
         console.error('Compression error:', error);
       });
     }
@@ -426,7 +429,7 @@ export class SuppliersComponent implements OnInit {
             },
             error: (error) => {
               this.isSubmitting = false;
-              this.formError = error.message || 'Error al actualizar el proveedor';
+              this.formError = error.message || this.i18n.translate('suppliers.form.errorUpdate');
               console.error('Error:', error);
             }
           });
@@ -443,14 +446,14 @@ export class SuppliersComponent implements OnInit {
             },
             error: (error) => {
               this.isSubmitting = false;
-              this.formError = error.message || 'Error al crear el proveedor';
+              this.formError = error.message || this.i18n.translate('suppliers.form.errorCreate');
               console.error('Error:', error);
             }
           });
       }
     } catch (error: any) {
       this.isSubmitting = false;
-      this.formError = error.message || 'Error al procesar la solicitud';
+      this.formError = error.message || this.i18n.translate('suppliers.form.errorGeneric');
       console.error('Error:', error);
     }
   }

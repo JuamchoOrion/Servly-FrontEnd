@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../enviroments/enviroment';
+import { I18nService } from './i18n.service';
 
 /**
  * Estado del lote de stock
@@ -45,7 +46,7 @@ export interface CreateBatchRequest {
 export class StockBatchService {
   private readonly API_URL = `${environment.apiUrl}/api/stock-batch`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private i18n: I18nService) {}
 
   /**
    * Obtiene lotes próximos a expirar (menos de 7 días)
@@ -153,10 +154,10 @@ export class StockBatchService {
    */
   getStatusText(status: StockBatchStatus): string {
     switch (status) {
-      case 'VIGENTE': return 'Vigente';
-      case 'PROXIMO_A_EXPIRAR': return 'Próximo a Expirar';
-      case 'EXPIRADO': return 'Expirado';
-      case 'AGOTADO': return 'Agotado';
+      case 'VIGENTE': return this.i18n.translate('inventory.batchStatus.vigente');
+      case 'PROXIMO_A_EXPIRAR': return this.i18n.translate('inventory.batchStatus.proximoExpirar');
+      case 'EXPIRADO': return this.i18n.translate('inventory.batchStatus.expirado');
+      case 'AGOTADO': return this.i18n.translate('inventory.batchStatus.agotado');
       default: return status;
     }
   }

@@ -5,13 +5,13 @@
   <!-- Header -->
   <header class="suppliers-header">
     <div class="header-content">
-      <h1>Gestión de Proveedores</h1>
-      <p>Administra los proveedores y contactos del sistema</p>
+      <h1>{{ i18n.translate('suppliers.title') }}</h1>
+      <p>{{ i18n.translate('suppliers.subtitle') }}</p>
     </div>
     <div class="header-actions">
       <button class="btn btn-add" (click)="openCreateModal()" [disabled]="isLoading" aria-label="Crear nuevo proveedor">
         <span class="material-icons">add_circle</span>
-        <span>Nuevo Proveedor</span>
+        <span>{{ i18n.translate('suppliers.new') }}</span>
       </button>
     </div>
   </header>
@@ -21,16 +21,16 @@
     <!-- Loading State -->
     <div class="loading-state" *ngIf="isLoading" role="status" aria-live="polite" aria-busy="true">
       <div class="loading-spinner" aria-hidden="true"></div>
-      <p>Cargando proveedores...</p>
+      <p>{{ i18n.translate('suppliers.loading') }}</p>
     </div>
 
     <!-- Empty State -->
     <div class="empty-state" *ngIf="!isLoading && suppliers.length === 0" role="status" aria-live="polite">
       <div class="empty-icon" aria-hidden="true">📋</div>
-      <h3>No hay proveedores registrados</h3>
-      <p>Comienza agregando tu primer proveedor</p>
+      <h3>{{ i18n.translate('suppliers.empty') }}</h3>
+      <p>{{ i18n.translate('suppliers.emptyMessage') }}</p>
       <button class="btn btn-primary" (click)="openCreateModal()" aria-label="Agregar primer proveedor">
-        <span class="btn-text">Agregar primer proveedor</span>
+        <span class="btn-text">{{ i18n.translate('suppliers.addFirst') }}</span>
       </button>
     </div>
 
@@ -80,14 +80,14 @@
 
           <div class="supplier-card-body">
             <div class="supplier-details">
-              <p class="supplier-description">{{ supplier.description || 'Sin descripción' }}</p>
+              <p class="supplier-description">{{ supplier.description || i18n.translate('suppliers.noDescription') }}</p>
               <div class="detail-row">
                 <svg class="detail-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
                 </svg>
                 <span class="detail-text">
-                  <span class="visually-hidden">Teléfono: </span>
-                  {{ supplier.contactNumber || 'Sin teléfono' }}
+                  <span class="visually-hidden">{{ i18n.translate('suppliers.phone') }}: </span>
+                  {{ supplier.contactNumber || i18n.translate('suppliers.noPhone') }}
                 </span>
               </div>
               <div class="detail-row">
@@ -95,8 +95,8 @@
                   <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
                 </svg>
                 <span class="detail-text">
-                  <span class="visually-hidden">Email: </span>
-                  {{ supplier.email || 'Sin email' }}
+                  <span class="visually-hidden">{{ i18n.translate('suppliers.email') }}: </span>
+                  {{ supplier.email || i18n.translate('suppliers.noEmail') }}
                 </span>
               </div>
             </div>
@@ -108,20 +108,20 @@
       <div class="pagination-controls" *ngIf="suppliers.length > 0">
         <div class="pagination-info">
           <span class="page-info">
-            Página {{ currentPage + 1 }} de {{ totalPages }}
-            ({{ totalElements }} proveedores totales)
+            {{ i18n.translate('suppliers.page') }} {{ currentPage + 1 }} {{ i18n.translate('suppliers.of') }} {{ totalPages }}
+            ({{ totalElements }} {{ i18n.translate('suppliers.total') }})
           </span>
           <div class="page-size-selector">
-            <label for="pageSize">Mostrar:</label>
+            <label for="pageSize">{{ i18n.translate('suppliers.showPerPage') }}</label>
             <select
               id="pageSize"
               [value]="pageSize"
               (change)="changePageSize($any($event.target).value)"
               class="page-size-select">
-              <option value="5">5 por página</option>
-              <option value="10">10 por página</option>
-              <option value="20">20 por página</option>
-              <option value="50">50 por página</option>
+              <option value="5">5 {{ i18n.translate('suppliers.perPage') }}</option>
+              <option value="10">10 {{ i18n.translate('suppliers.perPage') }}</option>
+              <option value="20">20 {{ i18n.translate('suppliers.perPage') }}</option>
+              <option value="50">50 {{ i18n.translate('suppliers.perPage') }}</option>
             </select>
           </div>
         </div>
@@ -131,7 +131,7 @@
             class="btn btn-pagination"
             (click)="previousPage()"
             [disabled]="currentPage === 0">
-            ← Anterior
+            ← {{ i18n.translate('suppliers.previous') }}
           </button>
 
           <div class="page-numbers">
@@ -151,7 +151,7 @@
             class="btn btn-pagination"
             (click)="nextPage()"
             [disabled]="isLastPage">
-            Siguiente →
+            {{ i18n.translate('suppliers.next') }} →
           </button>
         </div>
       </div>
@@ -168,7 +168,7 @@
     [attr.aria-labelledby]="isEditing ? 'edit-modal-title' : 'create-modal-title'">
     <div class="modal-container" (click)="$event.stopPropagation()" role="document">
       <div class="modal-header">
-        <h2 id="{{ isEditing ? 'edit-modal-title' : 'create-modal-title' }}">{{ isEditing ? 'Editar Proveedor' : 'Nuevo Proveedor' }}</h2>
+        <h2 id="{{ isEditing ? 'edit-modal-title' : 'create-modal-title' }}">{{ isEditing ? i18n.translate('suppliers.edit') : i18n.translate('suppliers.new') }}</h2>
         <button class="btn-close" (click)="closeModal()" aria-label="Cerrar modal">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -179,13 +179,13 @@
       <form [formGroup]="supplierForm" (ngSubmit)="onSubmit()" class="modal-body" aria-label="Formulario de proveedor">
         <!-- Nombre -->
         <div class="form-group">
-          <label for="name" class="form-label">Nombre *</label>
+          <label for="name" class="form-label">{{ i18n.translate('suppliers.form.name') }} *</label>
           <input
             id="name"
             type="text"
             class="form-input"
             [class.error]="nameControl?.invalid && nameControl?.touched"
-            placeholder="Ej: Distribuidora Central"
+            [placeholder]="i18n.translate('suppliers.form.namePlaceholder')"
             formControlName="name"
             (blur)="nameControl?.markAsTouched()"
             aria-required="true"
@@ -198,11 +198,11 @@
 
         <!-- Descripción -->
         <div class="form-group">
-          <label for="description" class="form-label">Descripción</label>
+          <label for="description" class="form-label">{{ i18n.translate('suppliers.form.description') }}</label>
           <textarea
             id="description"
             class="form-input form-textarea"
-            placeholder="Descripción del proveedor"
+            [placeholder]="i18n.translate('suppliers.form.descriptionPlaceholder')"
             rows="3"
             formControlName="description"
             aria-describedby="description-hint">
@@ -212,13 +212,13 @@
 
         <!-- Número de Contacto -->
         <div class="form-group">
-          <label for="contactNumber" class="form-label">Número de Contacto</label>
+          <label for="contactNumber" class="form-label">{{ i18n.translate('suppliers.form.contactNumber') }}</label>
           <input
             id="contactNumber"
             type="tel"
             class="form-input"
             [class.error]="contactNumberControl?.invalid && contactNumberControl?.touched"
-            placeholder="Ej: +1234567890"
+            [placeholder]="i18n.translate('suppliers.form.contactNumberPlaceholder')"
             formControlName="contactNumber"
             (blur)="contactNumberControl?.markAsTouched()"
             aria-invalid="contactNumberControl?.invalid && contactNumberControl?.touched">
@@ -226,13 +226,13 @@
 
         <!-- Email -->
         <div class="form-group">
-          <label for="email" class="form-label">Email</label>
+          <label for="email" class="form-label">{{ i18n.translate('suppliers.form.email') }}</label>
           <input
             id="email"
             type="email"
             class="form-input"
             [class.error]="emailControl?.invalid && emailControl?.touched"
-            placeholder="ejemplo@correo.com"
+            [placeholder]="i18n.translate('suppliers.form.emailPlaceholder')"
             formControlName="email"
             (blur)="emailControl?.markAsTouched()"
             aria-invalid="emailControl?.invalid && emailControl?.touched"
@@ -244,15 +244,15 @@
 
         <!-- Logo Upload -->
         <div class="form-group">
-          <label class="form-label" id="logo-label">Logo del Proveedor</label>
+          <label class="form-label" id="logo-label">{{ i18n.translate('suppliers.logo') }}</label>
 
           <!-- Vista previa del logo -->
           <div class="logo-preview-container" *ngIf="logoPreviewUrl" role="img" aria-labelledby="logo-preview-label">
-            <span id="logo-preview-label" class="visually-hidden">Vista previa del logo</span>
+            <span id="logo-preview-label" class="visually-hidden">{{ i18n.translate('suppliers.logoPreview') }}</span>
             <div class="logo-preview">
-              <img [src]="logoPreviewUrl" alt="Vista previa del logo seleccionado" class="logo-preview-image">
+              <img [src]="logoPreviewUrl" [alt]="i18n.translate('suppliers.logoPreview')" class="logo-preview-image">
             </div>
-            <button type="button" class="btn-remove-logo" (click)="removeLogo()" title="Eliminar logo" aria-label="Eliminar logo seleccionado">
+            <button type="button" class="btn-remove-logo" (click)="removeLogo()" [title]="i18n.translate('suppliers.logoRemove')" aria-label="Eliminar logo seleccionado">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
               </svg>
@@ -266,8 +266,8 @@
                 <svg class="file-upload-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
                 </svg>
-                <span class="file-upload-text">Haz clic para subir el logo</span>
-                <span class="file-upload-hint">PNG, JPG, GIF - Máx 5MB</span>
+                <span class="file-upload-text">{{ i18n.translate('suppliers.logoUpload') }}</span>
+                <span class="file-upload-hint">{{ i18n.translate('suppliers.logoHint') }}</span>
               </div>
               <input
                 id="logo"
@@ -278,7 +278,7 @@
                 formControlName="logo"
                 aria-describedby="logo-hint">
             </label>
-            <span id="logo-hint" class="visually-hidden">Sube una imagen en formato PNG, JPG o GIF. Tamaño máximo 5 megabytes.</span>
+            <span id="logo-hint" class="visually-hidden">{{ i18n.translate('suppliers.logoHintFull') }}</span>
           </div>
         </div>
 
@@ -293,11 +293,11 @@
         <!-- Botones -->
         <div class="modal-buttons" role="group" aria-label="Acciones del formulario">
           <button type="button" class="btn btn-secondary" (click)="closeModal()" [disabled]="isSubmitting" aria-label="Cancelar y cerrar">
-            Cancelar
+            {{ i18n.translate('suppliers.form.cancel') }}
           </button>
           <button type="submit" class="btn btn-primary" [disabled]="isSubmitting || supplierForm.invalid" aria-busy="isSubmitting">
-            <span *ngIf="!isSubmitting">{{ isEditing ? 'Actualizar' : 'Crear' }}</span>
-            <span *ngIf="isSubmitting">Guardando...</span>
+            <span *ngIf="!isSubmitting">{{ isEditing ? i18n.translate('suppliers.form.update') : i18n.translate('suppliers.form.create') }}</span>
+            <span *ngIf="isSubmitting">{{ i18n.translate('suppliers.form.saving') }}</span>
           </button>
         </div>
       </form>

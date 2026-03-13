@@ -131,7 +131,7 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
         error: (error: any) => {
           this.ngZone.run(() => {
             this.categories = [];
-            this.errorMessage = 'Error al cargar categorías. Por favor, intenta nuevamente.';
+            this.errorMessage = this.i18n.translate('categories.error.loading');
             console.error('Error loading categories:', error);
             this.isLoading = false;
             this.cdr.markForCheck();
@@ -185,7 +185,7 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
    */
   submitForm(): void {
     if (this.categoryForm.invalid) {
-      this.errorMessage = 'Por favor completa todos los campos requeridos';
+      this.errorMessage = this.i18n.translate('categories.error.form');
       this.cdr.markForCheck();
       return;
     }
@@ -211,7 +211,7 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
         next: (newCategory: ItemCategoryResponse) => {
           this.ngZone.run(() => {
             this.categories = [...this.categories, newCategory];
-            this.successMessage = 'Categoría creada exitosamente';
+            this.successMessage = this.i18n.translate('categories.success.created');
             this.closeForm();
             this.isLoading = false;
             this.cdr.markForCheck();
@@ -223,7 +223,7 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
         },
         error: (error: any) => {
           this.ngZone.run(() => {
-            this.errorMessage = error.error?.message || 'Error al crear categoría';
+            this.errorMessage = error.error?.message || this.i18n.translate('categories.error.creating');
             console.error('Error creating category:', error);
             this.isLoading = false;
             this.cdr.markForCheck();
@@ -248,7 +248,7 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
         next: (updatedCategory: ItemCategoryResponse) => {
           this.ngZone.run(() => {
             this.categories = this.categories.map(c => c.id === this.selectedCategoryId ? updatedCategory : c);
-            this.successMessage = 'Categoría actualizada exitosamente';
+            this.successMessage = this.i18n.translate('categories.success.updated');
             this.closeForm();
             this.isLoading = false;
             this.cdr.markForCheck();
@@ -260,7 +260,7 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
         },
         error: (error: any) => {
           this.ngZone.run(() => {
-            this.errorMessage = error.error?.message || 'Error al actualizar categoría';
+            this.errorMessage = error.error?.message || this.i18n.translate('categories.error.updating');
             console.error('Error updating category:', error);
             this.isLoading = false;
             this.cdr.markForCheck();
@@ -281,7 +281,10 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
         next: (updatedCategory: ItemCategoryResponse) => {
           this.ngZone.run(() => {
             this.categories = this.categories.map(c => c.id === category.id ? updatedCategory : c);
-            this.successMessage = `Categoría ${updatedCategory.active ? 'activada' : 'desactivada'}`;
+            const status = updatedCategory.active ? 'categories.status.active' : 'categories.status.inactive';
+            this.successMessage = this.i18n.translate('categories.success.toggled', {
+              status: this.i18n.translate(status)
+            });
             this.cdr.markForCheck();
             setTimeout(() => {
               this.successMessage = null;
@@ -291,7 +294,7 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
         },
         error: (error: any) => {
           this.ngZone.run(() => {
-            this.errorMessage = error.error?.message || 'Error al cambiar estado de categoría';
+            this.errorMessage = error.error?.message || this.i18n.translate('categories.error.toggling');
             console.error('Error toggling category:', error);
             this.cdr.markForCheck();
           });
@@ -305,7 +308,7 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
   deleteCategory(category: ItemCategoryResponse): void {
     if (!this.canModify()) return;
 
-    const confirmed = confirm(`¿Estás seguro de que deseas eliminar la categoría "${category.name}"?`);
+    const confirmed = confirm(this.i18n.translate('categories.confirm.delete', { name: category.name }));
     if (!confirmed) return;
 
     this.itemCategoryService.deleteCategory(category.id)
@@ -314,7 +317,7 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
         next: () => {
           this.ngZone.run(() => {
             this.categories = this.categories.filter(c => c.id !== category.id);
-            this.successMessage = 'Categoría eliminada exitosamente';
+            this.successMessage = this.i18n.translate('categories.success.deleted');
             this.cdr.markForCheck();
             setTimeout(() => {
               this.successMessage = null;
@@ -324,7 +327,7 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
         },
         error: (error: any) => {
           this.ngZone.run(() => {
-            this.errorMessage = error.error?.message || 'Error al eliminar categoría';
+            this.errorMessage = error.error?.message || this.i18n.translate('categories.error.deleting');
             console.error('Error deleting category:', error);
             this.cdr.markForCheck();
           });

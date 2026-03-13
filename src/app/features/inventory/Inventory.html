@@ -7,8 +7,8 @@
     <!-- Header -->
     <header class="inventory-header">
       <div class="header-content">
-        <h1>Gestión de Inventario</h1>
-        <p>Administra el stock de todos los items del sistema</p>
+        <h1>{{ i18n.translate('inventory.title') }}</h1>
+        <p>{{ i18n.translate('inventory.subtitle') }}</p>
       </div>
     </header>
 
@@ -19,15 +19,15 @@
           <span class="material-icons">{{ expiredBatches.length > 0 ? 'error' : 'schedule' }}</span>
         </div>
         <div class="alert-text">
-          <strong *ngIf="expiredBatches.length > 0">{{ expiredBatches.length }} lote(s) expirado(s)</strong>
-          <strong *ngIf="expiredBatches.length === 0 && closeToExpireBatches.length > 0">{{ closeToExpireBatches.length }} lote(s) próximo(s) a expirar</strong>
+          <strong *ngIf="expiredBatches.length > 0">{{ expiredBatches.length }} {{ i18n.translate('inventory.batchAlertExpired') }}</strong>
+          <strong *ngIf="expiredBatches.length === 0 && closeToExpireBatches.length > 0">{{ closeToExpireBatches.length }} {{ i18n.translate('inventory.batchAlertExpiringSoon') }}</strong>
           <span class="alert-detail" *ngIf="closeToExpireBatches.length > 0 && expiredBatches.length > 0">
-            + {{ closeToExpireBatches.length }} próximos a expirar
+            {{ i18n.translate('inventory.batchAlertDetail') }}
           </span>
         </div>
         <button class="btn-view-expired" *ngIf="expiredBatches.length > 0" (click)="toggleExpiredSection()" title="Ver lotes expirados">
           <span class="material-icons">{{ showExpiredSection ? 'expand_less' : 'visibility' }}</span>
-          <span>{{ showExpiredSection ? 'Ocultar' : 'Ver' }}</span>
+          <span>{{ showExpiredSection ? i18n.translate('inventory.hide') : i18n.translate('inventory.viewExpired') }}</span>
         </button>
         <button class="btn-dismiss-alert" (click)="closeBatchAlerts()" title="Cerrar alerta">
           <span class="material-icons">close</span>
@@ -40,8 +40,8 @@
       <div class="expired-section-header">
         <div class="expired-title">
           <span class="material-icons">error_outline</span>
-          <h3>Lotes Expirados</h3>
-          <span class="expired-count">{{ expiredBatches.length }} lote(s)</span>
+          <h3>{{ i18n.translate('inventory.expiredBatchesTitle') }}</h3>
+          <span class="expired-count">{{ expiredBatches.length }} {{ i18n.translate('inventory.expiredBatchCount') }}</span>
         </div>
         <button class="btn-refresh" (click)="refreshExpiredBatches()" title="Actualizar">
           <span class="material-icons">refresh</span>
@@ -55,13 +55,13 @@
               <span class="batch-number">{{ batch.batchNumber }}</span>
               <span class="expired-badge">
                 <span class="material-icons">warning</span>
-                Expirado
+                {{ i18n.translate('inventory.expired') }}
               </span>
             </div>
             <div class="batch-details-row">
               <span class="detail-item">
                 <span class="material-icons">inventory_2</span>
-                {{ batch.quantity }} unidades
+                {{ batch.quantity }} {{ i18n.translate('inventory.units') }}
               </span>
               <span class="detail-item" *ngIf="batch.supplierName">
                 <span class="material-icons">local_shipping</span>
@@ -71,10 +71,10 @@
             <div class="batch-dates-row">
               <span class="date-item expiry">
                 <span class="material-icons">event_busy</span>
-                Venció: {{ formatDate(batch.expiryDate) }}
+                {{ i18n.translate('inventory.vencio') }} {{ formatDate(batch.expiryDate) }}
               </span>
               <span class="days-expired">
-                {{ batch.daysUntilExpiry * -1 }} días vencido
+                {{ batch.daysUntilExpiry * -1 }} {{ i18n.translate('inventory.daysExpired') }}
               </span>
             </div>
           </div>
@@ -84,7 +84,7 @@
       <div class="expired-section-footer">
         <p class="expired-warning">
           <span class="material-icons">info</span>
-          Los lotes expirados deben ser revisados y dados de baja del inventario.
+          {{ i18n.translate('inventory.expiredWarning') }}
         </p>
       </div>
     </div>
@@ -94,8 +94,8 @@
       <div class="expire-section-header">
         <div class="expire-title">
           <span class="material-icons">schedule</span>
-          <h3>Próximos a Expirar</h3>
-          <span class="expire-count">{{ closeToExpireBatches.length }} lote(s)</span>
+          <h3>{{ i18n.translate('inventory.closeToExpireTitle') }}</h3>
+          <span class="expire-count">{{ closeToExpireBatches.length }} {{ i18n.translate('inventory.closeToExpireCount') }}</span>
         </div>
       </div>
 
@@ -106,13 +106,13 @@
               <span class="batch-number">{{ batch.batchNumber }}</span>
               <span class="warning-badge">
                 <span class="material-icons">schedule</span>
-                {{ batch.daysUntilExpiry }} días
+                {{ batch.daysUntilExpiry }} {{ i18n.translate('inventory.expiresIn') }}
               </span>
             </div>
             <div class="batch-details-row">
               <span class="detail-item">
                 <span class="material-icons">inventory_2</span>
-                {{ batch.quantity }} unidades
+                {{ batch.quantity }} {{ i18n.translate('inventory.units') }}
               </span>
               <span class="detail-item" *ngIf="batch.supplierName">
                 <span class="material-icons">local_shipping</span>
@@ -122,7 +122,7 @@
             <div class="batch-dates-row">
               <span class="date-item warning">
                 <span class="material-icons">event</span>
-                Vence: {{ formatDate(batch.expiryDate) }}
+                {{ i18n.translate('inventory.vence') }} {{ formatDate(batch.expiryDate) }}
               </span>
             </div>
           </div>
@@ -133,7 +133,7 @@
     <!-- Low Stock Alert Banner -->
     <div class="low-stock-alert" *ngIf="showLowStockOnly && lowStockItems.length > 0">
       <span class="material-icons">warning</span>
-      <span><strong>{{ lowStockItems.length }}</strong> producto(s) con stock bajo</span>
+      <span><strong>{{ lowStockItems.length }}</strong> {{ i18n.translate('inventory.lowStockCount') }}</span>
       <button class="btn-close-alert" (click)="toggleLowStockFilter()">
         <span class="material-icons">close</span>
       </button>
@@ -143,7 +143,7 @@
     <div class="filter-bar" *ngIf="!showLowStockOnly">
       <button class="btn-filter-stock-inline" (click)="toggleLowStockFilter()" [class.active]="showLowStockOnly" title="Filtrar por stock bajo">
         <span class="material-icons">filter_list</span>
-        <span class="filter-text">Filtrar por Stock Bajo</span>
+        <span class="filter-text">{{ i18n.translate('inventory.filterLowStock') }}</span>
         <span class="badge" *ngIf="lowStockCount > 0">{{ lowStockCount }}</span>
       </button>
     </div>
@@ -151,23 +151,23 @@
     <!-- Loading State -->
     <div class="loading-state" *ngIf="isLoading">
       <div class="loading-spinner"></div>
-      <p>Cargando inventario...</p>
+      <p>{{ i18n.translate('inventory.loading') }}</p>
     </div>
 
     <!-- Empty State -->
     <div class="empty-state" *ngIf="!isLoading && (!inventoryItems || inventoryItems.length === 0)">
       <span class="material-icons empty-icon">inventory_2</span>
-      <h3>Inventario vacío</h3>
-      <p>No hay productos registrados en el inventario</p>
+      <h3>{{ i18n.translate('inventory.empty') }}</h3>
+      <p>{{ i18n.translate('inventory.emptyMessage') }}</p>
     </div>
 
     <!-- Low Stock Filter Empty -->
     <div class="empty-state" *ngIf="!isLoading && showLowStockOnly && lowStockItems.length === 0">
       <span class="material-icons empty-icon">check_circle</span>
-      <h3>¡Todo en orden!</h3>
-      <p>No hay productos con stock bajo en este momento</p>
+      <h3>{{ i18n.translate('inventory.lowStockEmpty') }}</h3>
+      <p>{{ i18n.translate('inventory.lowStockEmptyMessage') }}</p>
       <button class="btn btn-secondary" (click)="toggleLowStockFilter()">
-        <span class="btn-text">Ver todo el inventario</span>
+        <span class="btn-text">{{ i18n.translate('inventory.viewAll') }}</span>
       </button>
     </div>
 
@@ -187,17 +187,17 @@
           <div class="item-card-body">
             <div class="stock-info">
               <div class="stock-row">
-                <span class="stock-label">Cantidad Total:</span>
+                <span class="stock-label">{{ i18n.translate('inventory.totalQuantity') }}</span>
                 <span class="stock-value" [class.low-stock]="getStockLevel(itemStock.quantity, itemStock.idealStock) === 'low'">
                   {{ itemStock.quantity }} {{ itemStock.unitOfMeasurement }}
                 </span>
               </div>
               <div class="stock-row">
-                <span class="stock-label">Stock Ideal:</span>
+                <span class="stock-label">{{ i18n.translate('inventory.idealStock') }}</span>
                 <span class="stock-value">{{ itemStock.idealStock }} {{ itemStock.unitOfMeasurement }}</span>
               </div>
               <div class="stock-row" *ngIf="itemStock.supplierName">
-                <span class="stock-label">Proveedor:</span>
+                <span class="stock-label">{{ i18n.translate('inventory.supplier') }}</span>
                 <span class="stock-value">{{ itemStock.supplierName }}</span>
               </div>
             </div>
@@ -213,19 +213,19 @@
             <!-- Toggle Batches Button -->
             <button class="btn-view-batches" (click)="toggleItemBatches(itemStock.itemStockId)">
               <span class="material-icons">{{ isExpanded(itemStock.itemStockId) ? 'expand_less' : 'expand_more' }}</span>
-              <span>{{ isExpanded(itemStock.itemStockId) ? 'Ocultar Lotes' : 'Ver Lotes' }}</span>
+              <span>{{ isExpanded(itemStock.itemStockId) ? i18n.translate('inventory.hideBatches') : i18n.translate('inventory.viewBatches') }}</span>
             </button>
           </div>
 
           <!-- Batches Section (Expandible) -->
           <div class="batches-section" *ngIf="isExpanded(itemStock.itemStockId)">
             <div class="batches-header">
-              <h4><span class="material-icons">layers</span> Lotes del Item</h4>
+              <h4><span class="material-icons">layers</span> {{ i18n.translate('inventory.batchesTitle') }}</h4>
               <div class="batches-header-actions">
-                <span class="batch-count">{{ getBatches(itemStock.itemStockId).length }} lote(s)</span>
+                <span class="batch-count">{{ getBatches(itemStock.itemStockId).length }} {{ i18n.translate('inventory.batchesCount') }}</span>
                 <button class="btn-add-batch" (click)="openCreateBatchModal(itemStock)" title="Agregar nuevo lote">
                   <span class="material-icons">add</span>
-                  <span>Nuevo Lote</span>
+                  <span>{{ i18n.translate('inventory.addBatch') }}</span>
                 </button>
               </div>
             </div>
@@ -233,16 +233,16 @@
             <!-- Loading batches -->
             <div class="batches-loading" *ngIf="isBatchesLoading(itemStock.itemStockId)">
               <div class="mini-spinner"></div>
-              <span>Cargando lotes...</span>
+              <span>{{ i18n.translate('inventory.loadingBatches') }}</span>
             </div>
 
             <!-- No batches -->
             <div class="no-batches" *ngIf="!isBatchesLoading(itemStock.itemStockId) && getBatches(itemStock.itemStockId).length === 0">
               <span class="material-icons">inbox</span>
-              <span>No hay lotes registrados</span>
+              <span>{{ i18n.translate('inventory.noBatches') }}</span>
               <button class="btn-add-batch-empty" (click)="openCreateBatchModal(itemStock)">
                 <span class="material-icons">add_circle</span>
-                <span>Agregar primer lote</span>
+                <span>{{ i18n.translate('inventory.addFirstBatch') }}</span>
               </button>
             </div>
 
@@ -252,12 +252,12 @@
                 <div class="batch-info">
                   <div class="batch-number">{{ batch.batchNumber }}</div>
                   <div class="batch-details">
-                    <span class="batch-quantity">{{ batch.quantity }} unidades</span>
+                    <span class="batch-quantity">{{ batch.quantity }} {{ i18n.translate('inventory.units') }}</span>
                     <span class="batch-supplier" *ngIf="batch.supplierName">• {{ batch.supplierName }}</span>
                   </div>
                   <div class="batch-dates">
-                    <span>Ingreso: {{ formatDate(batch.createdDate) }}</span>
-                    <span>Vence: {{ formatDate(batch.expiryDate) }}</span>
+                    <span>{{ i18n.translate('inventory.ingreso') }} {{ formatDate(batch.createdDate) }}</span>
+                    <span>{{ i18n.translate('inventory.vencimiento') }} {{ formatDate(batch.expiryDate) }}</span>
                   </div>
                 </div>
                 <div class="batch-status">
@@ -265,10 +265,10 @@
                     {{ getBatchStatusText(batch) }}
                   </span>
                   <span class="days-until" *ngIf="batch.daysUntilExpiry > 0 && batch.status !== 'EXPIRADO'">
-                    {{ batch.daysUntilExpiry }} días
+                    {{ batch.daysUntilExpiry }} {{ i18n.translate('inventory.expiresIn') }}
                   </span>
                   <span class="days-until expired" *ngIf="batch.status === 'EXPIRADO'">
-                    Vencido
+                    {{ i18n.translate('inventory.vencido') }}
                   </span>
                 </div>
               </div>
@@ -282,20 +282,20 @@
     <div class="pagination-controls" *ngIf="inventoryItems.length > 0">
       <div class="pagination-info">
         <span class="page-info">
-          Página {{ currentPage + 1 }} de {{ totalPages }}
-          ({{ totalElements }} items totales)
+          {{ i18n.translate('inventory.page') }} {{ currentPage + 1 }} {{ i18n.translate('inventory.of') }} {{ totalPages }}
+          ({{ totalElements }} {{ i18n.translate('inventory.totalItems') }})
         </span>
         <div class="page-size-selector">
-          <label for="pageSize">Mostrar:</label>
+          <label for="pageSize">{{ i18n.translate('inventory.showPerPage') }}</label>
           <select
             id="pageSize"
             [value]="pageSize"
             (change)="changePageSize($any($event.target).value)"
             class="page-size-select">
-            <option value="5">5 por página</option>
-            <option value="10">10 por página</option>
-            <option value="20">20 por página</option>
-            <option value="50">50 por página</option>
+            <option value="5">5 {{ i18n.translate('inventory.perPage') }}</option>
+            <option value="10">10 {{ i18n.translate('inventory.perPage') }}</option>
+            <option value="20">20 {{ i18n.translate('inventory.perPage') }}</option>
+            <option value="50">50 {{ i18n.translate('inventory.perPage') }}</option>
           </select>
         </div>
       </div>
@@ -305,7 +305,7 @@
           class="btn btn-pagination"
           (click)="previousPage()"
           [disabled]="currentPage === 0">
-          ← Anterior
+          ← {{ i18n.translate('inventory.previous') }}
         </button>
 
         <div class="page-numbers">
@@ -325,7 +325,7 @@
           class="btn btn-pagination"
           (click)="nextPage()"
           [disabled]="isLastPage">
-          Siguiente →
+          {{ i18n.translate('inventory.next') }} →
         </button>
       </div>
     </div>
@@ -336,7 +336,7 @@
   <div class="modal-overlay" *ngIf="showCreateBatchModal" (click)="closeCreateBatchModal()">
     <div class="modal-container modal-batch" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2><span class="material-icons">add_box</span> Nuevo Lote</h2>
+        <h2><span class="material-icons">add_box</span> {{ i18n.translate('inventory.createBatch') }}</h2>
         <button class="btn-close" (click)="closeCreateBatchModal()" aria-label="Cerrar modal">
           <span class="material-icons">close</span>
         </button>
@@ -346,18 +346,18 @@
         <!-- Información del item -->
         <div class="stock-item-info">
           <div class="info-row">
-            <span class="info-label">Item:</span>
+            <span class="info-label">{{ i18n.translate('inventory.item') }}</span>
             <span class="info-value">{{ getCreatingBatchItemStock()?.name }}</span>
           </div>
           <div class="info-row">
-            <span class="info-label">Stock actual:</span>
+            <span class="info-label">{{ i18n.translate('inventory.currentStock') }}</span>
             <span class="info-value">{{ getCreatingBatchItemStock()?.quantity }} {{ getCreatingBatchItemStock()?.unitOfMeasurement }}</span>
           </div>
         </div>
 
         <!-- Número de Lote -->
         <div class="form-group">
-          <label for="batch-number" class="form-label">Número de Lote *</label>
+          <label for="batch-number" class="form-label">{{ i18n.translate('inventory.batchNumber') }} *</label>
           <input
             id="batch-number"
             type="text"
@@ -373,7 +373,7 @@
 
         <!-- Cantidad -->
         <div class="form-group">
-          <label for="batch-quantity" class="form-label">Cantidad *</label>
+          <label for="batch-quantity" class="form-label">{{ i18n.translate('inventory.batchQuantity') }} *</label>
           <input
             id="batch-quantity"
             type="number"
@@ -390,7 +390,7 @@
 
         <!-- Proveedor -->
         <div class="form-group">
-          <label for="batch-supplier" class="form-label">Proveedor *</label>
+          <label for="batch-supplier" class="form-label">{{ i18n.translate('inventory.batchSupplier') }} *</label>
           <select
             id="batch-supplier"
             class="form-input"
@@ -410,8 +410,8 @@
         <!-- Fecha de Vencimiento (Opcional) -->
         <div class="form-group">
           <label for="batch-expiry" class="form-label">
-            Fecha de Vencimiento
-            <span class="optional-badge">Opcional</span>
+            {{ i18n.translate('inventory.batchExpiryDate') }}
+            <span class="optional-badge">{{ i18n.translate('inventory.optional') }}</span>
           </label>
           <input
             id="batch-expiry"
@@ -420,22 +420,22 @@
             [min]="getMinExpiryDate()"
             formControlName="expiryDate">
           <span class="form-hint">
-            Si no la proporcionas, se calculará automáticamente según los días de expiración del item.
+            {{ i18n.translate('inventory.expiryDateHint') }}
           </span>
         </div>
 
         <!-- Botones -->
         <div class="modal-buttons">
           <button type="button" class="btn btn-secondary" (click)="closeCreateBatchModal()" [disabled]="isSubmitting">
-            Cancelar
+            {{ i18n.translate('inventory.cancel') }}
           </button>
           <button
             type="submit"
             class="btn btn-primary"
             [disabled]="isSubmitting || batchForm.invalid">
             <span class="material-icons" *ngIf="!isSubmitting">add_circle</span>
-            <span *ngIf="!isSubmitting">Crear Lote</span>
-            <span *ngIf="isSubmitting">Creando...</span>
+            <span *ngIf="!isSubmitting">{{ i18n.translate('inventory.createBatch') }}</span>
+            <span *ngIf="isSubmitting">{{ i18n.translate('inventory.creating') }}</span>
           </button>
         </div>
       </form>

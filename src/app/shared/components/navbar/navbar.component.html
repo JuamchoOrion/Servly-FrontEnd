@@ -16,7 +16,7 @@
         class="nav-item"
         (click)="closeDropdown()">
         <span class="material-icons nav-icon">{{ item.icon }}</span>
-        <span class="nav-label">{{ item.label }}</span>
+        <span class="nav-label">{{ i18n.translate(item.label) }}</span>
       </a>
     </div>
   </div>
@@ -25,7 +25,7 @@
   <div class="navbar-right">
     <!-- Brand -->
     <div class="navbar-brand">
-      <span class="brand-text">SERVLY - Gestión</span>
+      <span class="brand-text">{{ i18n.translate('navbar.brand') }}</span>
     </div>
 
     <!-- User Section -->
@@ -43,15 +43,15 @@
         </div>
         <a routerLink="/profile" class="dropdown-item" (click)="closeDropdown()">
           <span class="material-icons">account_circle</span>
-          <span>Mi Perfil</span>
+          <span>{{ i18n.translate('navbar.profile') }}</span>
         </a>
         <a routerLink="/dashboard" class="dropdown-item" (click)="closeDropdown()">
           <span class="material-icons">dashboard</span>
-          <span>Dashboard</span>
+          <span>{{ i18n.translate('navbar.dashboard') }}</span>
         </a>
         <button class="dropdown-item logout-btn" (click)="logout()">
           <span class="material-icons">logout</span>
-          <span>Cerrar Sesión</span>
+          <span>{{ i18n.translate('navbar.logout') }}</span>
         </button>
       </div>
     </div>
@@ -61,7 +61,7 @@
       *ngIf="!isAuthenticated"
       routerLink="/login"
       class="login-btn">
-      <span>Iniciar Sesión</span>
+      <span>{{ i18n.translate('navbar.login') }}</span>
     </a>
   </div>
 
