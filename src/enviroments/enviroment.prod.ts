@@ -5,8 +5,12 @@
 export const environment = {
   production: true,
 
-  // API Configuration - URL completa del backend en producción
-  apiUrl: 'http://18.228.157.112:8081',
+  // API Configuration
+  // IMPORTANTE: Debe quedar vacío ('') para que el navegador use rutas relativas /api/...
+  // El servidor Nginx en producción debe tener configurado el reverse proxy:
+  //   location /api/ { proxy_pass http://54.94.195.36:8081/api/; }
+  // Así el navegador NUNCA llama directamente al backend → evita bloqueos de FireWall (FortiGate)
+  apiUrl: '',
   apiVersion: 'v1',
 
   // Authentication
@@ -44,4 +48,3 @@ export const environment = {
     description: 'Sistema de gestión para restaurantes'
   }
 };
-
