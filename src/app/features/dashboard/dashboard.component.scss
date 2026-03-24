@@ -225,24 +225,28 @@ $border-light:    #EFEFEF;
 
   &.stat-primary::before  { background: #F5E6C8; }
   &.stat-secondary::before { background: #F5E6C8; }
-  &.stat-warning::before  { background: $warning-orange; }
-  &.stat-danger::before   { background: $error-red; }
-  &.stat-success::before  { background: $success-green; }
+  &.stat-warning::before  { background: #F5E6C8; }
+  &.stat-danger::before   { background: #F5E6C8; }
+  &.stat-success::before  { background: #F5E6C8; }
 
   &.stat-danger {
     .stat-icon {
-      background: rgba($error-red, 0.1);
-      color: $error-red;
-    }
-    .stat-content .stat-number {
-      color: $error-red;
+      background: rgba($accent-gold, 0.1);
+      color: $accent-gold;
     }
   }
 
   &.stat-warning {
     .stat-icon {
-      background: rgba($warning-orange, 0.1);
-      color: $warning-orange;
+      background: rgba($accent-gold, 0.1);
+      color: $accent-gold;
+    }
+  }
+
+  &.stat-success {
+    .stat-icon {
+      background: rgba($accent-gold, 0.1);
+      color: $accent-gold;
     }
   }
 

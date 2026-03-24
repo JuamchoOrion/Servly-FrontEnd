@@ -4,15 +4,15 @@
     <!-- Header -->
     <div class="categories-header">
       <div class="header-content">
-        <h1>Gestión de Categorías</h1>
-        <p>Administra todas las categorías de items del inventario</p>
+        <h1>{{ i18n.translate('categories.title') }}</h1>
+        <p>{{ i18n.translate('categories.subtitle') }}</p>
       </div>
       <button
         class="btn btn-primary"
         (click)="openCreateForm()"
         [disabled]="isLoading"
         *ngIf="canEdit()">
-        + Crear Categoría
+        + {{ i18n.translate('categories.create') }}
       </button>
     </div>
 
@@ -31,14 +31,14 @@
     <!-- Loading State -->
     <div class="loading-state" *ngIf="isLoading && categories.length === 0">
       <div class="spinner"></div>
-      <p>Cargando categorías...</p>
+      <p>{{ i18n.translate('categories.loading') }}</p>
     </div>
 
     <!-- Empty State -->
     <div class="empty-state" *ngIf="!isLoading && categories.length === 0">
       <span class="material-icons empty-icon">folder</span>
-      <h3>No hay categorías</h3>
-      <p>Crea tu primera categoría para comenzar</p>
+      <h3>{{ i18n.translate('categories.empty') }}</h3>
+      <p>{{ i18n.translate('categories.emptyMessage') }}</p>
     </div>
 
     <!-- Categories Table -->
@@ -46,11 +46,11 @@
       <table class="categories-table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Estado</th>
-            <th>Acciones</th>
+            <th>{{ i18n.translate('categories.table.id') }}</th>
+            <th>{{ i18n.translate('categories.table.name') }}</th>
+            <th>{{ i18n.translate('categories.table.description') }}</th>
+            <th>{{ i18n.translate('categories.table.status') }}</th>
+            <th>{{ i18n.translate('categories.table.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -60,28 +60,28 @@
             <td class="description-cell">{{ category.description }}</td>
             <td class="status-cell">
               <span class="badge" [class.active]="category.active" [class.inactive]="!category.active">
-                {{ category.active ? 'Activa' : 'Inactiva' }}
+                {{ category.active ? i18n.translate('categories.status.active') : i18n.translate('categories.status.inactive') }}
               </span>
             </td>
             <td class="actions-cell">
               <button
                 class="btn-icon btn-toggle"
                 (click)="toggleCategory(category)"
-                [title]="category.active ? 'Desactivar' : 'Activar'"
+                [title]="category.active ? i18n.translate('categories.actions.deactivate') : i18n.translate('categories.actions.activate')"
                 *ngIf="canEdit()">
                 <span class="material-icons">{{ category.active ? 'check_circle' : 'cancel' }}</span>
               </button>
               <button
                 class="btn-icon btn-edit"
                 (click)="openEditForm(category)"
-                title="Editar"
+                [title]="i18n.translate('categories.actions.edit')"
                 *ngIf="canEdit()">
                 <span class="material-icons">edit</span>
               </button>
               <button
                 class="btn-icon btn-delete"
                 (click)="deleteCategory(category)"
-                title="Eliminar"
+                [title]="i18n.translate('categories.actions.delete')"
                 *ngIf="canEdit()">
                 <span class="material-icons">delete</span>
               </button>
@@ -95,20 +95,20 @@
     <div class="pagination-controls" *ngIf="categories.length > 0">
       <div class="pagination-info">
         <span class="page-info">
-          Página {{ currentPage + 1 }} de {{ totalPages }}
-          ({{ totalElements }} categorías totales)
+          {{ i18n.translate('categories.page') }} {{ currentPage + 1 }} {{ i18n.translate('categories.of') }} {{ totalPages }}
+          ({{ totalElements }} {{ i18n.translate('categories.totalCategories') }})
         </span>
         <div class="page-size-selector">
-          <label for="pageSizeCategories">Mostrar:</label>
+          <label for="pageSizeCategories">{{ i18n.translate('categories.showPerPage') }}</label>
           <select
             id="pageSizeCategories"
             [value]="pageSize"
             (change)="changePageSize($any($event.target).value)"
             class="page-size-select">
-            <option value="5">5 por página</option>
-            <option value="10">10 por página</option>
-            <option value="20">20 por página</option>
-            <option value="50">50 por página</option>
+            <option value="5">5 {{ i18n.translate('categories.perPage') }}</option>
+            <option value="10">10 {{ i18n.translate('categories.perPage') }}</option>
+            <option value="20">20 {{ i18n.translate('categories.perPage') }}</option>
+            <option value="50">50 {{ i18n.translate('categories.perPage') }}</option>
           </select>
         </div>
       </div>
@@ -118,7 +118,7 @@
           class="btn btn-pagination"
           (click)="previousPage()"
           [disabled]="currentPage === 0">
-          ← Anterior
+          ← {{ i18n.translate('categories.previous') }}
         </button>
 
         <div class="page-numbers">
@@ -139,7 +139,7 @@
           class="btn btn-pagination"
           (click)="nextPage()"
           [disabled]="isLastPage">
-          Siguiente →
+          {{ i18n.translate('categories.next') }} →
         </button>
       </div>
     </div>
@@ -148,7 +148,7 @@
     <div class="modal-overlay" *ngIf="isFormVisible" (click)="closeForm()">
       <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h2>{{ isEditMode ? 'Editar Categoría' : 'Nueva Categoría' }}</h2>
+          <h2>{{ isEditMode ? i18n.translate('categories.modal.editTitle') : i18n.translate('categories.modal.newTitle') }}</h2>
           <button class="btn-close" (click)="closeForm()">
             <span class="material-icons">close</span>
           </button>
@@ -157,44 +157,45 @@
       <form [formGroup]="categoryForm" (ngSubmit)="submitForm()" class="modal-body">
         <!-- Name Field -->
         <div class="form-group">
-          <label for="name">Nombre *</label>
+          <label for="name">{{ i18n.translate('categories.modal.nameLabel') }} *</label>
           <input
             id="name"
             type="text"
             class="form-input"
             formControlName="name"
-            placeholder="Ej: Alimentos, Bebidas, etc."
+            [placeholder]="i18n.translate('categories.modal.namePlaceholder')"
             [class.error]="nameControl?.invalid && nameControl?.touched">
           <span class="error-text" *ngIf="nameControl?.invalid && nameControl?.touched">
-            El nombre es requerido
+            {{ i18n.translate('categories.modal.nameRequired') }}
           </span>
         </div>
 
         <!-- Description Field -->
         <div class="form-group">
-          <label for="description">Descripción *</label>
+          <label for="description">{{ i18n.translate('categories.modal.descriptionLabel') }} *</label>
           <textarea
             id="description"
             class="form-input form-textarea"
             formControlName="description"
-            placeholder="Describe brevemente esta categoría..."
+            [placeholder]="i18n.translate('categories.modal.descriptionPlaceholder')"
             [class.error]="descriptionControl?.invalid && descriptionControl?.touched">
           </textarea>
           <span class="error-text" *ngIf="descriptionControl?.invalid && descriptionControl?.touched">
-            La descripción es requerida
+            {{ i18n.translate('categories.modal.descriptionRequired') }}
           </span>
         </div>
 
         <!-- Action Buttons -->
         <div class="modal-buttons">
           <button type="button" class="btn btn-secondary" (click)="closeForm()">
-            Cancelar
+            {{ i18n.translate('categories.modal.cancel') }}
           </button>
           <button
             type="submit"
             class="btn btn-primary"
             [disabled]="categoryForm.invalid || isLoading">
-            {{ isLoading ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear') }}
+            <span *ngIf="isLoading">{{ i18n.translate('categories.modal.saving') }}</span>
+            <span *ngIf="!isLoading">{{ isEditMode ? i18n.translate('categories.modal.update') : i18n.translate('categories.modal.create') }}</span>
           </button>
         </div>
       </form>

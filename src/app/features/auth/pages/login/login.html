@@ -1,13 +1,11 @@
-<!-- Language Selector (DESHABILITADO - Para implementación futura) -->
-<!--
+<!-- Language Selector -->
 <div class="language-selector">
-  <select [value]="i18n.getCurrentLanguage()" (change)="onLanguageChange($any($event).target.value)" class="language-select" disabled>
+  <select [value]="i18n.getCurrentLanguage()" (change)="onLanguageChange($any($event).target.value)" class="language-select">
     <option *ngFor="let lang of availableLanguages" [value]="lang.code">
       {{ lang.name }}
     </option>
   </select>
 </div>
--->
 
 <div class="login-wrapper">
   <div class="login-container">

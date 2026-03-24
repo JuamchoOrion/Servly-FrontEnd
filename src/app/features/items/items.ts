@@ -138,7 +138,7 @@ export class ItemsComponent implements OnInit, OnDestroy {
         error: (error: any) => {
           this.ngZone.run(() => {
             this.items = [];
-            this.errorMessage = 'Error al cargar items. Por favor, intenta nuevamente.';
+            this.errorMessage = this.i18n.translate('items.error.loading');
             console.error('Error loading items:', error);
             this.isLoading = false;
             this.cdr.markForCheck();
@@ -205,7 +205,7 @@ export class ItemsComponent implements OnInit, OnDestroy {
 
   submitForm(): void {
     if (this.itemForm.invalid) {
-      this.errorMessage = 'Por favor completa todos los campos requeridos';
+      this.errorMessage = this.i18n.translate('items.error.form');
       this.cdr.markForCheck();
       return;
     }
@@ -228,7 +228,7 @@ export class ItemsComponent implements OnInit, OnDestroy {
         next: (newItem: ItemResponse) => {
           this.ngZone.run(() => {
             this.items = [...this.items, newItem];
-            this.successMessage = 'Item creado exitosamente';
+            this.successMessage = this.i18n.translate('items.success.created');
             this.closeForm();
             this.isLoading = false;
             this.cdr.markForCheck();
@@ -240,7 +240,7 @@ export class ItemsComponent implements OnInit, OnDestroy {
         },
         error: (error: any) => {
           this.ngZone.run(() => {
-            this.errorMessage = error.error?.message || 'Error al crear item';
+            this.errorMessage = error.error?.message || this.i18n.translate('items.error.creating');
             console.error('Error creating item:', error);
             this.isLoading = false;
             this.cdr.markForCheck();
@@ -262,7 +262,7 @@ export class ItemsComponent implements OnInit, OnDestroy {
         next: (updatedItem: ItemResponse) => {
           this.ngZone.run(() => {
             this.items = this.items.map(i => i.id === this.selectedItemId ? updatedItem : i);
-            this.successMessage = 'Item actualizado exitosamente';
+            this.successMessage = this.i18n.translate('items.success.updated');
             this.closeForm();
             this.isLoading = false;
             this.cdr.markForCheck();
@@ -274,7 +274,7 @@ export class ItemsComponent implements OnInit, OnDestroy {
         },
         error: (error: any) => {
           this.ngZone.run(() => {
-            this.errorMessage = error.error?.message || 'Error al actualizar item';
+            this.errorMessage = error.error?.message || this.i18n.translate('items.error.updating');
             console.error('Error updating item:', error);
             this.isLoading = false;
             this.cdr.markForCheck();
@@ -286,7 +286,7 @@ export class ItemsComponent implements OnInit, OnDestroy {
   deleteItem(item: ItemResponse): void {
     if (!this.canModify()) return;
 
-    const confirmed = confirm(`¿Estás seguro de que deseas eliminar el item "${item.name}"?`);
+    const confirmed = confirm(this.i18n.translate('items.confirm.delete', { name: item.name }));
     if (!confirmed) return;
 
     this.itemService.deleteItem(item.id)
@@ -295,7 +295,7 @@ export class ItemsComponent implements OnInit, OnDestroy {
         next: () => {
           this.ngZone.run(() => {
             this.items = this.items.filter(i => i.id !== item.id);
-            this.successMessage = 'Item eliminado exitosamente';
+            this.successMessage = this.i18n.translate('items.success.deleted');
             this.cdr.markForCheck();
             setTimeout(() => {
               this.successMessage = null;
@@ -305,7 +305,7 @@ export class ItemsComponent implements OnInit, OnDestroy {
         },
         error: (error: any) => {
           this.ngZone.run(() => {
-            this.errorMessage = error.error?.message || 'Error al eliminar item';
+            this.errorMessage = error.error?.message || this.i18n.translate('items.error.deleting');
             console.error('Error deleting item:', error);
             this.cdr.markForCheck();
           });
@@ -322,7 +322,7 @@ export class ItemsComponent implements OnInit, OnDestroy {
   }
 
   getCategoryName(categoryId: string): string {
-    if (!categoryId) return 'Sin categoría';
+    if (!categoryId) return this.i18n.translate('items.table.noCategory');
 
     // Intentar encontrar por ID como string o número
     const category = this.categories.find(cat =>
@@ -330,7 +330,7 @@ export class ItemsComponent implements OnInit, OnDestroy {
       cat.id === parseInt(categoryId, 10)
     );
 
-    return category ? category.name : `Categoría ID: ${categoryId}`;
+    return category ? category.name : `${this.i18n.translate('items.table.categoryId')} ${categoryId}`;
   }
 
 
@@ -445,9 +445,9 @@ export class ItemsComponent implements OnInit, OnDestroy {
    * Obtiene el nombre de la categoría seleccionada
    */
   getSelectedCategoryName(): string {
-    if (!this.selectedCategoryId) return 'Todas las categorías';
+    if (!this.selectedCategoryId) return this.i18n.translate('items.filter.allCategories');
     const category = this.categories.find(c => c.id === this.selectedCategoryId);
-    return category ? category.name : 'Categoría no encontrada';
+    return category ? category.name : this.i18n.translate('categories.table.name') + ' ' + this.i18n.translate('items.table.notFound');
   }
 }
 

@@ -6,6 +6,7 @@ import { takeUntil } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { StockBatch, StockBatchStatus, StockBatchService, CreateBatchRequest } from '../../core/services/stock-batch.service';
 import { SupplierService, SupplierDTO } from '../../core/services/supplier.service';
+import { I18nService } from '../../core/services/i18n.service';
 import { environment } from '../../../enviroments/enviroment';
 
 // DTOs - Coincidiendo con el backend
@@ -78,7 +79,8 @@ export class InventoryComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private http: HttpClient,
     private stockBatchService: StockBatchService,
-    private supplierService: SupplierService
+    private supplierService: SupplierService,
+    public i18n: I18nService
   ) {
     this.initializeBatchForm();
   }
@@ -388,10 +390,10 @@ export class InventoryComponent implements OnInit {
    */
   getBatchQuantityError(): string {
     if (this.batchQuantityControl.hasError('required')) {
-      return 'La cantidad es requerida';
+      return this.i18n.translate('validation.quantity.required');
     }
     if (this.batchQuantityControl.hasError('min')) {
-      return 'La cantidad mínima es 1';
+      return this.i18n.translate('validation.quantity.min');
     }
     return '';
   }
@@ -401,7 +403,7 @@ export class InventoryComponent implements OnInit {
    */
   getBatchSupplierError(): string {
     if (this.batchSupplierControl.hasError('required')) {
-      return 'El proveedor es requerido';
+      return this.i18n.translate('validation.supplier.required');
     }
     return '';
   }
@@ -411,10 +413,10 @@ export class InventoryComponent implements OnInit {
    */
   getBatchNumberError(): string {
     if (this.batchNumberControl.hasError('required')) {
-      return 'El número de lote es requerido';
+      return this.i18n.translate('validation.batchNumber.required');
     }
     if (this.batchNumberControl.hasError('minlength')) {
-      return 'Mínimo 3 caracteres';
+      return this.i18n.translate('validation.batchNumber.minLength');
     }
     return '';
   }
@@ -424,7 +426,7 @@ export class InventoryComponent implements OnInit {
    */
   getBatchExpiryError(): string {
     if (this.batchExpiryDateControl.hasError('required')) {
-      return 'La fecha de vencimiento es requerida';
+      return this.i18n.translate('validation.expiryDate.required');
     }
     return '';
   }
@@ -551,9 +553,9 @@ export class InventoryComponent implements OnInit {
   getStockLevelText(quantity: number, idealStock: number): string {
     const level = this.getStockLevel(quantity, idealStock);
 
-    if (level === 'low') return 'Stock Bajo';
-    if (level === 'medium') return 'Stock Suficiente';
-    return 'Stock Óptimo';
+    if (level === 'low') return this.i18n.translate('inventory.stockLow');
+    if (level === 'medium') return this.i18n.translate('inventory.stockSufficient');
+    return this.i18n.translate('inventory.stockOptimal');
   }
 
   /**
