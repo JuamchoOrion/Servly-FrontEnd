@@ -75,6 +75,24 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard(['ADMIN', 'STOREKEEPER'])]
   },
   {
+    path: 'products',
+    loadChildren: () =>
+      import('./features/products/products.routes').then(m => m.productsRoutes),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'product-categories',
+    loadChildren: () =>
+      import('./features/product-categories/product-categories.routes').then(m => m.PRODUCT_CATEGORIES_ROUTES),
+    canActivate: [authGuard, roleGuard(['ADMIN'])]
+  },
+  {
+    path: 'recipes',
+    loadChildren: () =>
+      import('./features/recipes/recipes.routes').then(m => m.RECIPES_ROUTES),
+    canActivate: [authGuard, roleGuard(['ADMIN'])]
+  },
+  {
     path: 'employees/create',
     loadComponent: () =>
       import('./features/employees/pages/create-employee/create-employee.component').then(m => m.CreateEmployeeComponent),
@@ -96,6 +114,12 @@ export const routes: Routes = [
     path: 'profile',
     loadComponent: () =>
       import('./features/profile/profile.component').then(m => m.ProfileComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'qr',
+    loadChildren: () =>
+      import('./features/qr/qr.routes').then(m => m.qrRoutes),
     canActivate: [authGuard]
   },
 

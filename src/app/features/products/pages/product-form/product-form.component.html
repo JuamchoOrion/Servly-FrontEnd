@@ -1,0 +1,186 @@
+<div class="product-form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <h1>
+      {{ isEditMode ? i18n.translate('products.editTitle') : i18n.translate('products.createTitle') }}
+    </h1>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>{{ i18n.translate('products.loading') }}</p>
+  </div>
+
+  <!-- Error Alert -->
+  <div class="alert alert-error" *ngIf="errorMessage && !isLoading">
+    <span class="material-icons">error</span>
+    <div class="alert-content">
+      <strong>{{ i18n.translate('common.error') }}</strong>
+      <p>{{ errorMessage }}</p>
+    </div>
+    <button type="button" class="alert-close" (click)="closeMessage('error')">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+
+  <!-- Success Alert -->
+  <div class="alert alert-success" *ngIf="successMessage && !isLoading">
+    <span class="material-icons">check_circle</span>
+    <div class="alert-content">
+      <p>{{ successMessage }}</p>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="productForm" (ngSubmit)="saveProduct()" *ngIf="!isLoading" class="product-form">
+    <!-- Name -->
+    <div class="form-group">
+      <label for="name" class="form-label">
+        {{ i18n.translate('products.name') }}
+        <span class="required">*</span>
+      </label>
+      <input
+        id="name"
+        type="text"
+        formControlName="name"
+        class="form-input"
+        [class.is-invalid]="isFieldInvalid('name')"
+        placeholder="{{ i18n.translate('products.namePlaceholder') }}"
+        (blur)="trimField('name')"
+        [disabled]="isSaving">
+      <small class="form-error" *ngIf="getFieldError('name')">
+        {{ getFieldError('name') }}
+      </small>
+    </div>
+
+    <!-- Description -->
+    <div class="form-group">
+      <label for="description" class="form-label">
+        {{ i18n.translate('products.description') }}
+        <span class="required">*</span>
+      </label>
+      <textarea
+        id="description"
+        formControlName="description"
+        class="form-textarea"
+        [class.is-invalid]="isFieldInvalid('description')"
+        placeholder="{{ i18n.translate('products.descriptionPlaceholder') }}"
+        rows="4"
+        (blur)="trimField('description')"
+        [disabled]="isSaving"></textarea>
+      <small class="form-error" *ngIf="getFieldError('description')">
+        {{ getFieldError('description') }}
+      </small>
+    </div>
+
+    <!-- Price -->
+    <div class="form-group">
+      <label for="price" class="form-label">
+        {{ i18n.translate('products.price') }}
+        <span class="required">*</span>
+      </label>
+      <input
+        id="price"
+        type="number"
+        step="0.01"
+        min="0"
+        formControlName="price"
+        class="form-input"
+        [class.is-invalid]="isFieldInvalid('price')"
+        placeholder="0.00"
+        [disabled]="isSaving">
+      <small class="form-error" *ngIf="getFieldError('price')">
+        {{ getFieldError('price') }}
+      </small>
+    </div>
+
+    <!-- Category -->
+    <div class="form-group">
+      <label for="categoryId" class="form-label">
+        {{ i18n.translate('products.category') }}
+        <span class="required">*</span>
+      </label>
+      <select
+        id="categoryId"
+        formControlName="categoryId"
+        class="form-select"
+        [class.is-invalid]="isFieldInvalid('categoryId')"
+        [disabled]="isSaving">
+        <option value="">{{ i18n.translate('common.selectOne') }}</option>
+        <option *ngFor="let category of categories" [value]="category.id">
+          {{ category.name }}
+        </option>
+      </select>
+      <small class="form-error" *ngIf="getFieldError('categoryId')">
+        {{ getFieldError('categoryId') }}
+      </small>
+    </div>
+
+    <!-- Recipe (Optional) -->
+    <div class="form-group">
+      <label for="recipeId" class="form-label">
+        {{ i18n.translate('products.recipe') }}
+      </label>
+      <select
+        id="recipeId"
+        formControlName="recipeId"
+        class="form-select"
+        [disabled]="isSaving">
+        <option value="">{{ i18n.translate('products.noRecipe') }}</option>
+        <option *ngFor="let recipe of recipes" [value]="recipe.id">
+          {{ recipe.name }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Image URL -->
+    <div class="form-group">
+      <label for="image" class="form-label">
+        {{ i18n.translate('products.imageUrl') }}
+      </label>
+      <input
+        id="image"
+        type="text"
+        formControlName="image"
+        class="form-input"
+        placeholder="https://ejemplo.com/producto.jpg"
+        [disabled]="isSaving">
+    </div>
+
+    <!-- Active Toggle -->
+    <div class="form-group form-checkbox">
+      <label class="checkbox-label">
+        <input
+          type="checkbox"
+          formControlName="active"
+          class="form-check"
+          [disabled]="isSaving">
+        <span>{{ i18n.translate('products.active') }}</span>
+      </label>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="cancel()"
+        [disabled]="isSaving">
+        {{ i18n.translate('common.cancel') }}
+      </button>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="productForm.invalid || isSaving">
+        <span class="material-icons" *ngIf="!isSaving">save</span>
+        <span class="spinner" *ngIf="isSaving"></span>
+        {{ isSaving
+          ? i18n.translate('products.saving')
+          : (isEditMode ? i18n.translate('products.update') : i18n.translate('products.create'))
+        }}
+      </button>
+    </div>
+  </form>
+</div>
+

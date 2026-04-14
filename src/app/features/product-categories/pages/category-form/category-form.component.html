@@ -1,0 +1,87 @@
+<div class="category-form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <h1>{{ isEditMode ? 'Editar Categoría' : 'Crear Categoría' }}</h1>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Cargando...</p>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()" *ngIf="!isLoading" class="form">
+    <div class="form-section">
+      <!-- Name -->
+      <div class="form-group">
+        <label for="name" class="form-label">
+          {{ i18n.translate('categories.name') }}
+          <span class="required">*</span>
+        </label>
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          class="form-input"
+          placeholder="Ej: Bebidas"
+          [class.is-invalid]="isFieldInvalid('name')"
+          [disabled]="isSaving">
+        <small class="form-error" *ngIf="getFieldError('name')">
+          {{ getFieldError('name') }}
+        </small>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="description" class="form-label">
+          {{ i18n.translate('categories.description') }}
+          <span class="required">*</span>
+        </label>
+        <textarea
+          id="description"
+          formControlName="description"
+          class="form-textarea"
+          placeholder="Describe la categoría"
+          rows="4"
+          [class.is-invalid]="isFieldInvalid('description')"
+          [disabled]="isSaving"></textarea>
+        <small class="form-error" *ngIf="getFieldError('description')">
+          {{ getFieldError('description') }}
+        </small>
+      </div>
+
+      <!-- Active -->
+      <div class="form-group">
+        <label for="active" class="form-checkbox-label">
+          <input
+            id="active"
+            type="checkbox"
+            formControlName="active"
+            class="form-checkbox"
+            [disabled]="isSaving">
+          {{ i18n.translate('common.active') }}
+        </label>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="isSaving || categoryForm.invalid">
+        {{ isSaving ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear') }}
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isSaving">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</div>
+

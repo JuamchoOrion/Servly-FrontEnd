@@ -1,0 +1,23 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+  <!-- Círculo fondo azul -->
+  <circle cx="256" cy="256" r="256" fill="#0078D4"/>
+
+  <!-- Cabeza (círculo blanco) -->
+  <circle cx="256" cy="140" r="50" fill="white"/>
+
+  <!-- Cuerpo (línea vertical blanca) -->
+  <line x1="256" y1="190" x2="256" y2="310" stroke="white" stroke-width="30" stroke-linecap="round"/>
+
+  <!-- Brazo izquierdo -->
+  <line x1="256" y1="220" x2="160" y2="140" stroke="white" stroke-width="30" stroke-linecap="round"/>
+
+  <!-- Brazo derecho -->
+  <line x1="256" y1="220" x2="352" y2="140" stroke="white" stroke-width="30" stroke-linecap="round"/>
+
+  <!-- Pierna izquierda -->
+  <line x1="256" y1="310" x2="180" y2="400" stroke="white" stroke-width="30" stroke-linecap="round"/>
+
+  <!-- Pierna derecha -->
+  <line x1="256" y1="310" x2="332" y2="400" stroke="white" stroke-width="30" stroke-linecap="round"/>
+</svg>
+

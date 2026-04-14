@@ -9,17 +9,21 @@
     [attr.aria-expanded]="isOpen"
     aria-controls="accessibility-panel"
   >
-    <svg class="toggle-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <!-- Ojo principal -->
-      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/>
-      <!-- Iris -->
-      <circle cx="12" cy="12" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
-      <!-- Pupila -->
-      <circle cx="12" cy="12" r="3" fill="currentColor"/>
-      <!-- Destello en la pupila (representa claridad/visibilidad) -->
-      <circle cx="13.5" cy="10.5" r="1" fill="currentColor" opacity="0.6"/>
-      <!-- Línea de accesibilidad - símbolo de inclusión -->
-      <path d="M 7 18 Q 12 20 17 18" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <svg class="toggle-icon" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <!-- Círculo fondo azul -->
+      <circle cx="256" cy="256" r="256" fill="#0078D4"/>
+      <!-- Cabeza (círculo blanco) -->
+      <circle cx="256" cy="140" r="50" fill="white"/>
+      <!-- Cuerpo (línea vertical blanca) -->
+      <line x1="256" y1="190" x2="256" y2="310" stroke="white" stroke-width="30" stroke-linecap="round"/>
+      <!-- Brazo izquierdo -->
+      <line x1="256" y1="220" x2="160" y2="140" stroke="white" stroke-width="30" stroke-linecap="round"/>
+      <!-- Brazo derecho -->
+      <line x1="256" y1="220" x2="352" y2="140" stroke="white" stroke-width="30" stroke-linecap="round"/>
+      <!-- Pierna izquierda -->
+      <line x1="256" y1="310" x2="180" y2="400" stroke="white" stroke-width="30" stroke-linecap="round"/>
+      <!-- Pierna derecha -->
+      <line x1="256" y1="310" x2="332" y2="400" stroke="white" stroke-width="30" stroke-linecap="round"/>
     </svg>
   </button>
 
@@ -34,14 +38,30 @@
   >
     <!-- Header -->
     <div class="menu-header">
-      <h2 class="menu-title">⚙️ Accesibilidad</h2>
+      <svg class="accessibility-logo" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- Círculo fondo azul -->
+        <circle cx="256" cy="256" r="256" fill="#0078D4"/>
+        <!-- Cabeza (círculo blanco) -->
+        <circle cx="256" cy="140" r="50" fill="white"/>
+        <!-- Cuerpo (línea vertical blanca) -->
+        <line x1="256" y1="190" x2="256" y2="310" stroke="white" stroke-width="30" stroke-linecap="round"/>
+        <!-- Brazo izquierdo -->
+        <line x1="256" y1="220" x2="160" y2="140" stroke="white" stroke-width="30" stroke-linecap="round"/>
+        <!-- Brazo derecho -->
+        <line x1="256" y1="220" x2="352" y2="140" stroke="white" stroke-width="30" stroke-linecap="round"/>
+        <!-- Pierna izquierda -->
+        <line x1="256" y1="310" x2="180" y2="400" stroke="white" stroke-width="30" stroke-linecap="round"/>
+        <!-- Pierna derecha -->
+        <line x1="256" y1="310" x2="332" y2="400" stroke="white" stroke-width="30" stroke-linecap="round"/>
+      </svg>
+      <h2 class="menu-title">Accesibilidad</h2>
       <button
         (click)="closeMenu()"
         class="close-btn"
         aria-label="Cerrar menú"
         title="Cerrar (Esc)"
       >
-        ✕
+        <span class="material-icons">close</span>
       </button>
     </div>
 
@@ -54,7 +74,8 @@
       <!-- Modo Oscuro -->
       <div class="setting-group">
         <div class="setting-label-row">
-          <label for="dark-mode" class="setting-label">🌙 Modo Oscuro</label>
+          <span class="material-icons">dark_mode</span>
+          <label for="dark-mode" class="setting-label">Modo Oscuro</label>
         </div>
         <label class="toggle-switch">
           <input
@@ -70,7 +91,10 @@
 
       <!-- Tamaño de Letra -->
       <div class="setting-group">
-        <label for="font-size" class="setting-label">📝 Tamaño de Letra</label>
+        <div class="setting-label-row">
+          <span class="material-icons">text_fields</span>
+          <label for="font-size" class="setting-label">Tamaño de Letra</label>
+        </div>
         <select
           id="font-size"
           [value]="settings.fontSize"
@@ -87,7 +111,8 @@
       <!-- Alto Contraste -->
       <div class="setting-group">
         <div class="setting-label-row">
-          <label for="high-contrast" class="setting-label">👁️ Alto Contraste</label>
+          <span class="material-icons">contrast</span>
+          <label for="high-contrast" class="setting-label">Alto Contraste</label>
         </div>
         <label class="toggle-switch">
           <input
@@ -104,7 +129,8 @@
       <!-- Reducir Movimiento -->
       <div class="setting-group">
         <div class="setting-label-row">
-          <label for="reduce-motion" class="setting-label">⏸️ Reducir Movimiento</label>
+          <span class="material-icons">motion_photos_pause</span>
+          <label for="reduce-motion" class="setting-label">Reducir Movimiento</label>
         </div>
         <label class="toggle-switch">
           <input
@@ -126,7 +152,8 @@
     <!-- Footer con botón reset -->
     <div class="menu-footer">
       <button class="reset-btn" (click)="resetSettings()" title="Restablecer configuración a valores por defecto">
-        ↺ Restablecer
+        <span class="material-icons">refresh</span>
+        Restablecer
       </button>
     </div>
   </div>

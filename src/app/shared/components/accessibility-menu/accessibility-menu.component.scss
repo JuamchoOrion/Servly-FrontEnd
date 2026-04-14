@@ -1,10 +1,10 @@
 // ===============================
-// 🎨 PALETA DE COLORES PREMIUM
+// 🎨 PALETA DE COLORES AZUL
 // ===============================
 
-$olive-green: #556B2F;        // Verde oliva principal
-$light-olive: #6B8E23;        // Verde oliva más claro
-$dark-olive: #3B5314;         // Verde oliva oscuro
+$blue-primary: #0078D4;       // Azul principal
+$blue-light: #1084D7;         // Azul más claro
+$blue-dark: #005BA4;          // Azul oscuro
 $beige: #E8DCC8;              // Beige claro
 $dark-beige: #D4C4B0;         // Beige oscuro
 $gold: #C8A951;               // Dorado
@@ -35,13 +35,13 @@ $white: #FFFFFF;
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, $olive-green 0%, $light-olive 100%);
+  background: linear-gradient(135deg, $blue-primary 0%, $blue-light 100%);
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(85, 107, 47, 0.3), 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 120, 212, 0.3), 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
@@ -58,7 +58,7 @@ $white: #FFFFFF;
 
   &:hover {
     transform: scale(1.15);
-    box-shadow: 0 12px 32px rgba(85, 107, 47, 0.4), 0 6px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 12px 32px rgba(0, 120, 212, 0.4), 0 6px 16px rgba(0, 0, 0, 0.2);
 
     &::before {
       opacity: 1;
@@ -75,10 +75,8 @@ $white: #FFFFFF;
   }
 
   .toggle-icon {
-    width: 32px;
-    height: 32px;
-    color: $cream;
-    fill: $cream;
+    width: 40px;
+    height: 40px;
     position: relative;
     z-index: 1;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
@@ -97,7 +95,7 @@ $white: #FFFFFF;
   background: linear-gradient(135deg, $cream 0%, $beige 100%);
   border-radius: 16px;
   box-shadow:
-    0 20px 60px rgba(85, 107, 47, 0.25),
+    0 20px 60px rgba(0, 120, 212, 0.25),
     0 10px 30px rgba(0, 0, 0, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
   overflow: hidden;
@@ -127,33 +125,52 @@ $white: #FFFFFF;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, $olive-green 0%, $light-olive 100%);
+  padding: 12px 16px;
+  background: linear-gradient(135deg, $blue-primary 0%, $blue-light 100%);
   border-bottom: 3px solid $gold;
+  gap: 10px;
+
+  .accessibility-logo {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+  }
 
   .menu-title {
     margin: 0;
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 700;
     color: $cream;
     letter-spacing: 0.5px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
 .close-btn {
   background: rgba($cream, 0.15);
   border: 2px solid $cream;
-  border-radius: 8px;
-  width: 32px;
-  height: 32px;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   color: $cream;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
   transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  .material-icons {
+    font-size: 18px;
+  }
 
   &:hover {
     background: rgba($cream, 0.25);
@@ -165,6 +182,9 @@ $white: #FFFFFF;
     outline-offset: 2px;
   }
 }
+
+// ...existing code...
+
 
 // =======================================
 // 🎨 CONTENIDO DEL MENÚ
@@ -190,7 +210,7 @@ $white: #FFFFFF;
   }
 
   &::-webkit-scrollbar-track {
-    background: rgba($olive-green, 0.1);
+    background: rgba($blue-primary, 0.1);
     border-radius: 3px;
   }
 
@@ -221,7 +241,7 @@ $white: #FFFFFF;
   &:hover {
     background: rgba($white, 0.8);
     border-color: rgba($gold, 0.4);
-    box-shadow: 0 4px 12px rgba($olive-green, 0.1);
+    box-shadow: 0 4px 12px rgba($blue-primary, 0.1);
   }
 }
 
@@ -229,6 +249,12 @@ $white: #FFFFFF;
   display: flex;
   align-items: center;
   gap: 8px;
+
+  .material-icons {
+    font-size: 20px;
+    color: $blue-primary;
+    flex-shrink: 0;
+  }
 }
 
 .setting-label {
@@ -277,7 +303,7 @@ $white: #FFFFFF;
     }
 
     &:checked {
-      background: linear-gradient(135deg, $olive-green, $light-olive);
+      background: linear-gradient(135deg, $blue-primary, $blue-light);
       box-shadow: inset 0 0 0 2px rgba($gold, 0.3);
 
       &::before {
@@ -288,11 +314,11 @@ $white: #FFFFFF;
 
     &:focus {
       outline: none;
-      box-shadow: 0 0 0 3px rgba($olive-green, 0.2);
+      box-shadow: 0 0 0 3px rgba($blue-primary, 0.2);
     }
 
     &:hover {
-      box-shadow: 0 0 0 2px rgba($olive-green, 0.15);
+      box-shadow: 0 0 0 2px rgba($blue-primary, 0.15);
     }
   }
 }
@@ -321,8 +347,8 @@ $white: #FFFFFF;
 
   &:focus {
     outline: none;
-    border-color: $olive-green;
-    box-shadow: 0 0 0 3px rgba($olive-green, 0.1);
+    border-color: $blue-primary;
+    box-shadow: 0 0 0 3px rgba($blue-primary, 0.1);
   }
 
   option {
@@ -343,7 +369,7 @@ $white: #FFFFFF;
 .reset-btn {
   width: 100%;
   padding: 12px 16px;
-  background: linear-gradient(135deg, $olive-green 0%, $light-olive 100%);
+  background: linear-gradient(135deg, $blue-primary 0%, $blue-light 100%);
   color: $cream;
   border: none;
   border-radius: 8px;
@@ -352,12 +378,20 @@ $white: #FFFFFF;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: inherit;
-  box-shadow: 0 4px 12px rgba($olive-green, 0.2);
+  box-shadow: 0 4px 12px rgba($blue-primary, 0.2);
   letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  .material-icons {
+    font-size: 18px;
+  }
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba($olive-green, 0.3);
+    box-shadow: 0 6px 16px rgba($blue-primary, 0.3);
   }
 
   &:active {
@@ -380,7 +414,7 @@ $white: #FFFFFF;
     border-color: rgba($gold, 0.4);
 
     .menu-header {
-      background: linear-gradient(135deg, $dark-olive 0%, $olive-green 100%);
+      background: linear-gradient(135deg, $blue-dark 0%, $blue-primary 100%);
     }
 
     .close-btn {
@@ -521,9 +555,9 @@ $white: #FFFFFF;
     width: 85vw !important;
     max-width: 340px !important;
     bottom: 70px !important;
-    right: auto !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
+    right: 24px !important;
+    left: auto !important;
+    transform: none !important;
     max-height: calc(100vh - 200px) !important;
   }
 
@@ -551,20 +585,25 @@ $white: #FFFFFF;
   .accessibility-menu {
     position: fixed !important;
     width: 90vw !important;
-    max-width: 100% !important;
+    max-width: 360px !important;
     bottom: 65px !important;
-    right: auto !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
+    right: 24px !important;
+    left: auto !important;
+    transform: none !important;
     max-height: calc(100vh - 150px) !important;
     border-radius: 12px !important;
   }
 
   .menu-header {
-    padding: 16px;
+    padding: 14px 16px;
+
+    .accessibility-logo {
+      width: 32px;
+      height: 32px;
+    }
 
     .menu-title {
-      font-size: 16px;
+      font-size: 14px;
     }
   }
 

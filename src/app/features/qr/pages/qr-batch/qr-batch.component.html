@@ -1,0 +1,197 @@
+<div class="qr-batch-container">
+  <div class="qr-card">
+    <!-- ══ Header ══════════════════════════════════════════════════════════ -->
+    <div class="card-header">
+      <h2>
+        <span class="material-icons">qr_code</span>
+        {{ i18n.translate('qr.batch.title') }}
+      </h2>
+      <p class="card-subtitle">{{ i18n.translate('qr.batch.subtitle') }}</p>
+    </div>
+
+    <!-- ══ Error Alert ═════════════════════════════════════════════════════ -->
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <span class="material-icons alert-icon">error</span>
+      <div class="alert-content">
+        <strong>{{ i18n.translate('common.error') }}</strong>
+        <p>{{ errorMessage }}</p>
+      </div>
+      <button
+        type="button"
+        class="alert-close"
+        (click)="errorMessage = null"
+        [attr.aria-label]="i18n.translate('common.close')">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <!-- ══ Success Alert ════════════════════════════════════════════════════ -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <span class="material-icons alert-icon">check_circle</span>
+      <div class="alert-content">
+        <p>{{ successMessage }}</p>
+      </div>
+      <button
+        type="button"
+        class="alert-close"
+        (click)="successMessage = null"
+        [attr.aria-label]="i18n.translate('common.close')">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <!-- ══ Form Section ════════════════════════════════════════════════════ -->
+    <div class="form-section">
+      <form [formGroup]="form" (ngSubmit)="generateQRBatch()">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="startTable" class="form-label">
+              {{ i18n.translate('qr.batch.startTable') }}
+              <span class="required-indicator" aria-label="required">*</span>
+            </label>
+            <input
+              id="startTable"
+              type="number"
+              formControlName="startTable"
+              class="form-input"
+              [class.is-invalid]="startTableControl?.invalid && startTableControl?.touched"
+              min="1"
+              max="999"
+              placeholder="1"
+              [disabled]="isLoading"
+              [attr.aria-invalid]="startTableControl?.invalid && startTableControl?.touched"
+              [attr.aria-describedby]="startTableControl?.invalid && startTableControl?.touched ? 'startTable-error' : null">
+            <small
+              id="startTable-error"
+              class="form-error"
+              *ngIf="getStartTableError()">
+              {{ getStartTableError() }}
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label for="endTable" class="form-label">
+              {{ i18n.translate('qr.batch.endTable') }}
+              <span class="required-indicator" aria-label="required">*</span>
+            </label>
+            <input
+              id="endTable"
+              type="number"
+              formControlName="endTable"
+              class="form-input"
+              [class.is-invalid]="endTableControl?.invalid && endTableControl?.touched"
+              min="1"
+              max="999"
+              placeholder="10"
+              [disabled]="isLoading"
+              [attr.aria-invalid]="endTableControl?.invalid && endTableControl?.touched"
+              [attr.aria-describedby]="endTableControl?.invalid && endTableControl?.touched ? 'endTable-error' : null">
+            <small
+              id="endTable-error"
+              class="form-error"
+              *ngIf="getEndTableError()">
+              {{ getEndTableError() }}
+            </small>
+          </div>
+        </div>
+
+        <!-- Info about table count -->
+        <div class="form-info" *ngIf="tableCount > 0">
+          <span class="material-icons info-icon">info</span>
+          <p>
+            {{ i18n.translate('qr.batch.info.tableCount', { count: tableCount }) }}
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isLoading || form.invalid">
+          <span class="material-icons" *ngIf="!isLoading">qr_code</span>
+          <span class="spinner" *ngIf="isLoading"></span>
+          {{ isLoading ? i18n.translate('qr.batch.generating') : i18n.translate('qr.batch.generate') }}
+        </button>
+      </form>
+    </div>
+
+    <!-- ══ Generated QRs Display ════────────────────────────────────────── -->
+    <div class="qr-batch-display" *ngIf="generatedQRs.length > 0">
+      <div class="batch-header">
+        <h3>
+          {{ i18n.translate('qr.batch.result') }}
+          <span class="qr-count">({{ generatedQRs.length }})</span>
+        </h3>
+        <p class="batch-subtitle">{{ i18n.translate('qr.batch.resultSubtitle') }}</p>
+      </div>
+
+      <!-- Batch Actions -->
+      <div class="batch-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="downloadAllQRs()"
+          [title]="i18n.translate('qr.batch.downloadAllTooltip')">
+          <span class="material-icons">download</span>
+          {{ i18n.translate('qr.batch.downloadAll') }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="printAllQRs()"
+          [title]="i18n.translate('qr.batch.printAllTooltip')">
+          <span class="material-icons">print</span>
+          {{ i18n.translate('qr.batch.printAll') }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-tertiary"
+          (click)="clearQRs()">
+          <span class="material-icons">clear</span>
+          {{ i18n.translate('qr.batch.clear') }}
+        </button>
+      </div>
+
+      <!-- QR Gallery -->
+      <div class="qr-gallery">
+        <div
+          class="qr-card-item"
+          *ngFor="let qr of generatedQRs"
+          role="img"
+          [attr.aria-label]="'QR Code for Table ' + qr.tableNumber">
+          <div class="qr-card-header">
+            <h4>{{ i18n.translate('qr.batch.tableLabel') }} {{ qr.tableNumber }}</h4>
+          </div>
+          <div class="qr-card-content">
+            <img
+              [src]="qr.dataUrl"
+              [alt]="'QR Code for Table ' + qr.tableNumber"
+              class="qr-image">
+          </div>
+          <div class="qr-card-footer">
+            <button
+              type="button"
+              class="btn-icon"
+              (click)="downloadQR(qr)"
+              [title]="i18n.translate('qr.batch.downloadTooltip')">
+              <span class="material-icons">download</span>
+            </button>
+            <button
+              type="button"
+              class="btn-icon"
+              (click)="printQR(qr)"
+              [title]="i18n.translate('qr.batch.printTooltip')">
+              <span class="material-icons">print</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Empty State ═────────────────────────────────────────────────── -->
+    <div class="empty-state" *ngIf="generatedQRs.length === 0 && !isLoading">
+      <span class="material-icons empty-icon">layers</span>
+      <p>{{ i18n.translate('qr.batch.empty') }}</p>
+    </div>
+  </div>
+</div>
+

@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 /* ═══════════════════════════════════════════════════════════════
    🎨 PROFILE COMPONENT STYLES
    Paleta alineada con categories (gold, beige)
@@ -219,7 +221,7 @@ $border-light: #EFEFEF;
       }
 
       &:hover {
-        background: darken($error-red, 10%);
+        background: color.adjust($error-red, $lightness: -10%);
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba($error-red, 0.3);
       }
@@ -673,7 +675,7 @@ $border-light: #EFEFEF;
         font-weight: 800 !important;
 
         &:hover {
-          background: darken($error-red, 10%) !important;
+          background: color.adjust($error-red, $lightness: -10%) !important;
         }
       }
     }

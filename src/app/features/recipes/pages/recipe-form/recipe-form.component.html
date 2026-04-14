@@ -1,0 +1,196 @@
+<div class="recipe-form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <h1>{{ isEditMode ? i18n.translate('recipes.modal.editTitle') : i18n.translate('recipes.modal.newTitle') }}</h1>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>{{ i18n.translate('recipes.loading') }}</p>
+  </div>
+
+  <div class="form-content" *ngIf="!isLoading">
+    <!-- Error Alert -->
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <span class="material-icons">error</span>
+      <div class="alert-content">
+        <strong>{{ i18n.translate('common.error') }}</strong>
+        <p>{{ errorMessage }}</p>
+      </div>
+      <button type="button" class="alert-close" (click)="closeMessage('error')">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <!-- Success Alert -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <span class="material-icons">check_circle</span>
+      <div class="alert-content">
+        <p>{{ successMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="recipeForm" (ngSubmit)="saveRecipe()" class="recipe-form">
+      <!-- Name -->
+      <div class="form-group">
+        <label for="name" class="form-label">
+          {{ i18n.translate('recipes.modal.nameLabel') }}
+          <span class="required">*</span>
+        </label>
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          class="form-input"
+          [class.is-invalid]="isFieldInvalid('name')"
+          placeholder="{{ i18n.translate('recipes.modal.namePlaceholder') }}"
+          (blur)="recipeForm.get('name')?.setValue(recipeForm.get('name')?.value?.trim())"
+          [disabled]="isSaving">
+        <small class="form-error" *ngIf="getFieldError('name')">
+          {{ getFieldError('name') }}
+        </small>
+      </div>
+
+      <!-- Quantity -->
+      <div class="form-group">
+        <label for="quantity" class="form-label">
+          {{ i18n.translate('recipes.modal.quantityLabel') }}
+          <span class="required">*</span>
+        </label>
+        <input
+          id="quantity"
+          type="number"
+          formControlName="quantity"
+          class="form-input"
+          [class.is-invalid]="isFieldInvalid('quantity')"
+          placeholder="1"
+          min="1"
+          [disabled]="isSaving">
+        <small class="form-error" *ngIf="getFieldError('quantity')">
+          {{ getFieldError('quantity') }}
+        </small>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="description" class="form-label">
+          {{ i18n.translate('recipes.modal.descriptionLabel') }}
+        </label>
+        <textarea
+          id="description"
+          formControlName="description"
+          class="form-textarea"
+          placeholder="{{ i18n.translate('recipes.modal.descriptionPlaceholder') }}"
+          rows="3"
+          [disabled]="isSaving"></textarea>
+      </div>
+
+      <!-- Item Details -->
+      <div class="form-section">
+        <h3>{{ i18n.translate('recipes.modal.itemsLabel') }}</h3>
+
+        <div class="items-list" formArrayName="itemDetails">
+          <div *ngFor="let item of itemDetailsArray.controls; let i = index" class="item-row" [formGroupName]="i">
+            <!-- Item Select -->
+            <div class="form-group">
+              <label class="form-label">
+                {{ i18n.translate('recipes.modal.itemLabel') }}
+                <span class="required">*</span>
+              </label>
+              <select
+                formControlName="itemId"
+                class="form-select"
+                [disabled]="isSaving">
+                <option [value]="null">{{ i18n.translate('common.selectOne') }}</option>
+                <option *ngFor="let it of items" [ngValue]="it.id">
+                  {{ it.name }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Quantity -->
+            <div class="form-group">
+              <label class="form-label">
+                {{ i18n.translate('recipes.modal.quantityLabel') }}
+                <span class="required">*</span>
+              </label>
+              <input
+                type="number"
+                formControlName="quantity"
+                class="form-input"
+                placeholder="0"
+                step="0.01"
+                min="0.01"
+                [disabled]="isSaving">
+            </div>
+
+            <!-- Annotation -->
+            <div class="form-group">
+              <label class="form-label">
+                {{ i18n.translate('recipes.modal.annotationLabel') }}
+              </label>
+              <input
+                type="text"
+                formControlName="annotation"
+                class="form-input"
+                placeholder="{{ i18n.translate('recipes.modal.annotationPlaceholder') }}"
+                [disabled]="isSaving">
+            </div>
+
+            <!-- Optional -->
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  formControlName="isOptional"
+                  [disabled]="isSaving">
+                {{ i18n.translate('recipes.modal.isOptional') }}
+              </label>
+            </div>
+
+            <!-- Remove Button -->
+            <button
+              type="button"
+              (click)="removeItemDetail(i)"
+              class="btn btn-sm btn-danger"
+              [disabled]="isSaving">
+              <span class="material-icons">delete</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Add Item Button -->
+        <button
+          type="button"
+          (click)="addItemDetail()"
+          class="btn btn-secondary"
+          [disabled]="isSaving">
+          <span class="material-icons">add</span>
+          {{ i18n.translate('recipes.modal.addItem') }}
+        </button>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button
+          type="button"
+          (click)="cancel()"
+          class="btn btn-secondary"
+          [disabled]="isSaving">
+          {{ i18n.translate('recipes.modal.cancel') }}
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isSaving || recipeForm.invalid || itemDetailsArray.length === 0">
+          <span *ngIf="isSaving" class="material-icons spinning">hourglass_empty</span>
+          <span *ngIf="!isSaving" class="material-icons">save</span>
+          {{ isSaving ? i18n.translate('recipes.modal.saving') : i18n.translate('recipes.modal.save') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+

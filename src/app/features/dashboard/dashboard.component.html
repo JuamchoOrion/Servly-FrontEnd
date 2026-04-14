@@ -214,6 +214,10 @@
             <span class="material-icons action-icon">handshake</span>
             <div class="action-text">{{ i18n.translate('dashboard.actions.manageSuppliers') }}</div>
           </a>
+          <a routerLink="/qr/single" class="quick-action" *ngIf="isAdmin">
+            <span class="material-icons action-icon">qr_code_2</span>
+            <div class="action-text">{{ i18n.translate('dashboard.actions.generateQR') }}</div>
+          </a>
         </div>
       </div>
 

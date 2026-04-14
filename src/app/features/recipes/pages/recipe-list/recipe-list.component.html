@@ -1,0 +1,91 @@
+<div class="recipe-list-container">
+  <!-- Header -->
+  <div class="list-header">
+    <h1>{{ i18n.translate('recipes.title') }}</h1>
+    <p class="subtitle">{{ i18n.translate('recipes.subtitle') }}</p>
+  </div>
+
+  <!-- Actions -->
+  <div class="list-actions">
+    <a routerLink="/recipes/new" class="btn btn-primary">
+      <span class="material-icons">add</span>
+      {{ i18n.translate('recipes.create') }}
+    </a>
+    <button (click)="refresh()" class="btn btn-secondary">
+      <span class="material-icons">refresh</span>
+      {{ i18n.translate('common.refresh') }}
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>{{ i18n.translate('recipes.loading') }}</p>
+  </div>
+
+  <!-- Error Alert -->
+  <div class="alert alert-error" *ngIf="errorMessage && !isLoading">
+    <span class="material-icons">error</span>
+    <div class="alert-content">
+      <strong>{{ i18n.translate('common.error') }}</strong>
+      <p>{{ errorMessage }}</p>
+    </div>
+    <button type="button" class="alert-close" (click)="closeMessage('error')">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+
+  <!-- Success Alert -->
+  <div class="alert alert-success" *ngIf="successMessage && !isLoading">
+    <span class="material-icons">check_circle</span>
+    <div class="alert-content">
+      <p>{{ successMessage }}</p>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && recipes.length === 0 && !errorMessage">
+    <span class="material-icons">fastfood</span>
+    <h2>{{ i18n.translate('recipes.empty') }}</h2>
+    <p>{{ i18n.translate('recipes.emptyMessage') }}</p>
+    <a routerLink="/recipes/new" class="btn btn-primary">
+      {{ i18n.translate('recipes.create') }}
+    </a>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper" *ngIf="!isLoading && recipes.length > 0">
+    <table class="recipes-table">
+      <thead>
+        <tr>
+          <th>{{ i18n.translate('recipes.table.id') }}</th>
+          <th>{{ i18n.translate('recipes.table.name') }}</th>
+          <th>{{ i18n.translate('recipes.table.description') }}</th>
+          <th>{{ i18n.translate('recipes.table.quantity') }}</th>
+          <th>{{ i18n.translate('recipes.table.items') }}</th>
+          <th>{{ i18n.translate('recipes.table.actions') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let recipe of recipes" class="recipe-row">
+          <td>#{{ recipe.id }}</td>
+          <td class="name">{{ recipe.name }}</td>
+          <td class="description">{{ recipe.description || '-' }}</td>
+          <td class="quantity">{{ recipe.quantity }}</td>
+          <td class="items">{{ recipe.itemDetails?.length || 0 }}</td>
+          <td class="actions">
+            <a [routerLink]="['/recipes', recipe.id, 'edit']" class="btn btn-sm btn-secondary">
+              <span class="material-icons">edit</span>
+              {{ i18n.translate('recipes.actions.edit') }}
+            </a>
+            <button type="button" (click)="deleteRecipe(recipe)" class="btn btn-sm btn-danger">
+              <span class="material-icons">delete</span>
+              {{ i18n.translate('recipes.actions.delete') }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+

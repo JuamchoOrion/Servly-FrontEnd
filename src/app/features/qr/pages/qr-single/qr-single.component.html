@@ -1,0 +1,139 @@
+<div class="qr-single-container">
+  <div class="qr-card">
+    <!-- ══ Header ══════════════════════════════════════════════════════════ -->
+    <div class="card-header">
+      <h2>
+        <span class="material-icons">qr_code_2</span>
+        {{ i18n.translate('qr.single.title') }}
+      </h2>
+      <p class="card-subtitle">{{ i18n.translate('qr.single.subtitle') }}</p>
+    </div>
+
+    <!-- ══ Error Alert ═════════════════════════════════════════════════════ -->
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <span class="material-icons alert-icon">error</span>
+      <div class="alert-content">
+        <strong>{{ i18n.translate('common.error') }}</strong>
+        <p>{{ errorMessage }}</p>
+      </div>
+      <button
+        type="button"
+        class="alert-close"
+        (click)="errorMessage = null"
+        [attr.aria-label]="i18n.translate('common.close')">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <!-- ══ Success Alert ════════════════════════════════════════════════════ -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <span class="material-icons alert-icon">check_circle</span>
+      <div class="alert-content">
+        <p>{{ successMessage }}</p>
+      </div>
+      <button
+        type="button"
+        class="alert-close"
+        (click)="successMessage = null"
+        [attr.aria-label]="i18n.translate('common.close')">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <!-- ══ Form Section ════════════════════════════════════════════════════ -->
+    <div class="form-section">
+      <form [formGroup]="form" (ngSubmit)="generateQR()">
+        <div class="form-group">
+          <label for="tableNumber" class="form-label">
+            {{ i18n.translate('qr.single.tableNumber') }}
+            <span class="required-indicator" aria-label="required">*</span>
+          </label>
+          <input
+            id="tableNumber"
+            type="number"
+            formControlName="tableNumber"
+            class="form-input"
+            [class.is-invalid]="tableNumberControl?.invalid && tableNumberControl?.touched"
+            min="1"
+            max="999"
+            placeholder="1"
+            [disabled]="isLoading"
+            [attr.aria-invalid]="tableNumberControl?.invalid && tableNumberControl?.touched"
+            [attr.aria-describedby]="tableNumberControl?.invalid && tableNumberControl?.touched ? 'tableNumber-error' : null">
+          <small
+            id="tableNumber-error"
+            class="form-error"
+            *ngIf="getTableNumberError()">
+            {{ getTableNumberError() }}
+          </small>
+          <small class="form-hint">
+            {{ i18n.translate('qr.single.tableNumberHint') }}
+          </small>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isLoading || form.invalid">
+          <span class="material-icons" *ngIf="!isLoading">qr_code_2</span>
+          <span class="spinner" *ngIf="isLoading"></span>
+          {{ isLoading ? i18n.translate('qr.single.generating') : i18n.translate('qr.single.generate') }}
+        </button>
+      </form>
+    </div>
+
+    <!-- ══ Generated QR Display ════════────────────────────────────────── -->
+    <div class="qr-display" *ngIf="generatedQR">
+      <div class="qr-content">
+        <h3>{{ i18n.translate('qr.single.result') }}</h3>
+        <div class="qr-wrapper">
+          <img
+            [src]="generatedQR.dataUrl"
+            [alt]="'QR Code for Table ' + generatedQR.tableNumber"
+            class="qr-image">
+        </div>
+        <div class="qr-info">
+          <p class="table-number">
+            {{ i18n.translate('qr.single.tableLabel') }}: <strong>{{ generatedQR.tableNumber }}</strong>
+          </p>
+          <p class="qr-url">
+            <small>{{ i18n.translate('qr.single.url') }}: <code>{{ generatedQR.url }}</code></small>
+          </p>
+        </div>
+
+        <div class="qr-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="downloadQR()"
+            [title]="i18n.translate('qr.single.downloadTooltip')">
+            <span class="material-icons">download</span>
+            {{ i18n.translate('qr.single.download') }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="printQR()"
+            [title]="i18n.translate('qr.single.printTooltip')">
+            <span class="material-icons">print</span>
+            {{ i18n.translate('qr.single.print') }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-tertiary"
+            (click)="clearQR()">
+            <span class="material-icons">clear</span>
+            {{ i18n.translate('qr.single.clear') }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Empty State ═════════────────────────────────────────────────── -->
+    <div class="empty-state" *ngIf="!generatedQR && !isLoading">
+      <span class="material-icons empty-icon">qr_code_scanner</span>
+      <p>{{ i18n.translate('qr.single.empty') }}</p>
+    </div>
+  </div>
+</div>
+

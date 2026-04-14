@@ -137,6 +137,7 @@ export class ItemService {
     );
   }
 
+
   /**
    * Obtener item por ID
    * GET /api/items/{id}

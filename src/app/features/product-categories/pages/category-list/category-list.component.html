@@ -1,0 +1,100 @@
+<div class="category-container">
+  <!-- Header -->
+  <div class="category-header">
+    <div class="header-content">
+      <h1>{{ i18n.translate('categories.title') }}</h1>
+      <p>{{ i18n.translate('categories.subtitle') }}</p>
+    </div>
+    <button class="btn btn-primary" (click)="createCategory()" *ngIf="isAdmin">
+      <span class="material-icons">add</span>
+      {{ i18n.translate('categories.create') }}
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Search -->
+  <div class="search-section">
+    <form class="search-form">
+      <div class="form-group">
+        <label>{{ i18n.translate('categories.name') }}</label>
+        <input
+          type="text"
+          placeholder="Buscar por nombre o descripción..."
+          [(ngModel)]="searchText"
+          (input)="getFilteredCategories()"
+          [ngModelOptions]="{ standalone: true }"
+          class="form-input">
+      </div>
+
+      <button type="button" class="btn btn-secondary" (click)="clearFilters()">
+        <span class="material-icons">clear</span>
+        {{ i18n.translate('common.clear') }}
+      </button>
+    </form>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>{{ i18n.translate('categories.loading') }}</p>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper" *ngIf="!isLoading">
+    <table class="categories-table" *ngIf="getFilteredCategories().length > 0">
+      <thead>
+        <tr>
+          <th>{{ i18n.translate('categories.name') }}</th>
+          <th>{{ i18n.translate('categories.description') }}</th>
+          <th>{{ i18n.translate('categories.status') }}</th>
+          <th>Creado</th>
+          <th *ngIf="isAdmin">{{ i18n.translate('categories.actions') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let category of getFilteredCategories()">
+          <td class="cell-name"><strong>{{ category.name }}</strong></td>
+          <td>{{ category.description }}</td>
+          <td>
+            <span class="badge" [class.badge-active]="category.active ?? true" [class.badge-inactive]="!(category.active ?? true)">
+              {{ getActiveText(category.active) }}
+            </span>
+          </td>
+          <td>{{ getFormattedDate(category.createdAt) }}</td>
+          <td *ngIf="isAdmin" class="cell-actions">
+            <button
+              class="btn btn-icon btn-edit"
+              (click)="editCategory(category.id)"
+              [title]="i18n.translate('categories.edit')">
+              <span class="material-icons">edit</span>
+            </button>
+            <button
+              class="btn btn-icon btn-delete"
+              (click)="deleteCategory(category)"
+              [title]="i18n.translate('categories.delete')">
+              <span class="material-icons">delete</span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="getFilteredCategories().length === 0">
+      <span class="material-icons">category</span>
+      <h3>{{ i18n.translate('categories.empty') }}</h3>
+      <p>{{ i18n.translate('categories.emptyMessage') }}</p>
+      <button class="btn btn-primary" (click)="createCategory()" *ngIf="isAdmin">
+        {{ i18n.translate('categories.create') }}
+      </button>
+    </div>
+  </div>
+</div>
+
