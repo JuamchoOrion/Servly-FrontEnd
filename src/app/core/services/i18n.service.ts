@@ -38,6 +38,7 @@ export class I18nService {
       'navbar.suppliers': 'Proveedores',
       'navbar.metrics': 'Métricas',
       'navbar.recipes': 'Recetas',
+      'navbar.tables': 'Mesas',
       'navbar.logout': 'Cerrar Sesión',
       // Rate Limit
       'rateLimit.message': 'Demasiados intentos. Intenta en {{remaining}} segundos',
@@ -550,6 +551,7 @@ export class I18nService {
       'navbar.suppliers': 'Suppliers',
       'navbar.metrics': 'Metrics',
       'navbar.recipes': 'Recipes',
+      'navbar.tables': 'Tables',
       'navbar.brand': 'SERVLY - Management',
       'navbar.profile': 'My Profile',
       'navbar.logout': 'Logout',
@@ -1046,6 +1048,7 @@ export class I18nService {
       'navbar.products': 'Produtos',
       'navbar.suppliers': 'Fornecedores',
       'navbar.metrics': 'Métricas',
+      'navbar.tables': 'Mesas',
       'navbar.brand': 'SERVLY - Gestão',
       'navbar.profile': 'Meu Perfil',
       'navbar.logout': 'Sair',

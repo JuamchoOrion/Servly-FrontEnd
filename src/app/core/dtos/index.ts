@@ -11,3 +11,4 @@ export * from './auth.dto';
 export * from './category.dto';
 export * from './employee.dto';
 export * from './audit-metrics.dto';
+export * from './table.dto';

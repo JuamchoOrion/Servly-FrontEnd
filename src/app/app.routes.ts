@@ -122,6 +122,12 @@ export const routes: Routes = [
       import('./features/qr/qr.routes').then(m => m.qrRoutes),
     canActivate: [authGuard]
   },
+  {
+    path: 'tables',
+    loadComponent: () =>
+      import('./features/tables/tables.component').then(m => m.TablesComponent),
+    canActivate: [authGuard, roleGuard(['ADMIN', 'STAFF'])]
+  },
 
   // Wildcard - must be last
   { path: '**', redirectTo: 'login' }
