@@ -49,6 +49,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
       roles: ['ADMIN', 'STOREKEEPER']
     },
     {
+      label: 'navbar.tables',
+      route: '/waiter/tables',
+      icon: 'table_restaurant',
+      roles: ['WAITER', 'ADMIN']
+    },
+    {
       label: 'navbar.categories',
       route: '/categories',
       icon: 'label',

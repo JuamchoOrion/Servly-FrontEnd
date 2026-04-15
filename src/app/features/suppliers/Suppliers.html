@@ -235,7 +235,7 @@
             [placeholder]="i18n.translate('suppliers.form.emailPlaceholder')"
             formControlName="email"
             (blur)="emailControl?.markAsTouched()"
-            aria-invalid="emailControl?.invalid && emailControl?.touched"
+            [attr.aria-invalid]="(emailControl?.invalid && emailControl?.touched) ?? false"
             aria-describedby="email-error">
           <span class="error-text" id="email-error" *ngIf="emailControl?.invalid && emailControl?.touched" role="alert">
             {{ getEmailError() }}
