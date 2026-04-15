@@ -1,0 +1,178 @@
+<div class="table-orders-page" role="main">
+  <!-- Header -->
+  <header class="orders-header">
+    <div class="header-content">
+      <h1>{{ i18n.translate('waiter.orders.title') || 'Órdenes de Mesa' }} #{{ tableNumber }}</h1>
+      <p>{{ i18n.translate('waiter.orders.subtitle') || 'Gestiona el estado de las órdenes' }}</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-back" (click)="backToTables()" aria-label="Volver a mesas">
+        <span class="material-icons">arrow_back</span>
+      </button>
+      <button class="btn btn-close" (click)="closeTable()" aria-label="Cerrar mesa">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="orders-container">
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="isLoading" role="status" aria-live="polite">
+      <div class="loading-spinner"></div>
+      <p>{{ i18n.translate('waiter.loading') || 'Cargando órdenes...' }}</p>
+    </div>
+
+    <!-- Error -->
+    <div class="error-banner" *ngIf="!isLoading && errorMessage" role="alert">
+      <span class="material-icons">error</span>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Orders List -->
+    <div class="orders-list" *ngIf="!isLoading && orders.length > 0">
+      <div *ngFor="let order of orders" class="order-card" [ngClass]="getStatusColor(order.status)">
+        <!-- Order Header -->
+        <div class="order-header" (click)="selectOrder(order)" role="button" tabindex="0">
+          <div class="order-info">
+            <span class="order-id">{{ i18n.translate('waiter.orders.order') || 'Orden' }} #{{ order.id }}</span>
+            <span class="order-time">{{ order.createdAt | date:'short' }}</span>
+          </div>
+          <div class="order-status">
+            <span class="material-icons">{{ getStatusIcon(order.status) }}</span>
+            <span>{{ i18n.translate('waiter.status.' + order.status) || order.status }}</span>
+          </div>
+          <span class="expand-icon">
+            <span class="material-icons">{{ selectedOrder?.id === order.id ? 'expand_less' : 'expand_more' }}</span>
+          </span>
+        </div>
+
+        <!-- Order Details -->
+        <div class="order-details" *ngIf="selectedOrder?.id === order.id">
+          <!-- Items -->
+          <div class="items-section">
+            <h3>{{ i18n.translate('waiter.orders.items') || 'Ítems' }}</h3>
+            <div class="items-list">
+              <div *ngFor="let item of order.items" class="order-item">
+                <div class="item-name">{{ item.name }}</div>
+                <div class="item-qty">x{{ item.quantity }}</div>
+                <div class="item-price">${{ getItemPrice(item).toFixed(2) }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total -->
+          <div class="total-section">
+            <div class="total-row">
+              <span>{{ i18n.translate('waiter.orders.total') || 'Total' }}</span>
+              <span>${{ order.total?.toFixed(2) || '0.00' }}</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="order-actions">
+            <!-- Change Status Button -->
+            <button
+              *ngIf="canUpdateStatus(order.status)"
+              class="btn btn-action btn-primary"
+              (click)="updateOrderStatus(order.id, getNextStatus(order.status) || '')"
+              [disabled]="isProcessing"
+            >
+              <span class="material-icons">arrow_forward</span>
+              {{ i18n.translate('waiter.orders.nextStatus') || 'Siguiente Estado' }}
+            </button>
+
+            <!-- Generate Invoice -->
+            <button
+              class="btn btn-action btn-secondary"
+              (click)="generateInvoice()"
+            >
+              <span class="material-icons">receipt</span>
+              {{ i18n.translate('waiter.orders.generateInvoice') || 'Generar Factura' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && orders.length === 0">
+      <span class="material-icons">receipt_long</span>
+      <h2>{{ i18n.translate('waiter.orders.noOrders') || 'Sin órdenes' }}</h2>
+      <p>{{ i18n.translate('waiter.orders.waitingForOrders') || 'Esperando órdenes del cliente...' }}</p>
+    </div>
+
+    <!-- Payment Section -->
+    <div class="payment-section" *ngIf="!isLoading && getPayableOrders().length > 0">
+      <h3>{{ i18n.translate('waiter.payment.title') || 'Pago' }}</h3>
+
+      <!-- Órdenes a pagar -->
+      <div class="payment-orders">
+        <div class="payment-orders-header">
+          <h4>{{ i18n.translate('waiter.payment.selectOrders') || 'Selecciona las órdenes a pagar' }}</h4>
+          <div class="header-actions">
+            <button class="btn btn-sm btn-link" (click)="selectAllForPayment()">
+              {{ i18n.translate('waiter.payment.selectAll') || 'Seleccionar todo' }}
+            </button>
+            <button class="btn btn-sm btn-link" (click)="deselectAllForPayment()">
+              {{ i18n.translate('waiter.payment.deselectAll') || 'Deseleccionar todo' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="orders-to-pay">
+          <div *ngFor="let order of getPayableOrders()" class="order-to-pay">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [checked]="isOrderSelectedForPayment(order.id)"
+                (change)="toggleOrderForPayment(order.id)"
+              />
+              <span class="order-info">
+                <span class="order-id">{{ i18n.translate('waiter.orders.order') || 'Orden' }} #{{ order.id }}</span>
+                <span class="order-amount">${{ order.total?.toFixed(2) || '0.00' }}</span>
+              </span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="payment-info">
+        <div class="payment-row">
+          <span>{{ i18n.translate('waiter.payment.total') || 'Total a Pagar' }}</span>
+          <span>${{ paymentAmount.toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <div class="payment-form" *ngIf="ordersToPayIds.size > 0">
+        <div class="form-group">
+          <label>{{ i18n.translate('waiter.payment.method') || 'Método de Pago' }}</label>
+          <select [(ngModel)]="paymentMethod">
+            <option value="CASH">{{ i18n.translate('waiter.payment.cash') || 'Efectivo' }}</option>
+            <option value="CARD">{{ i18n.translate('waiter.payment.card') || 'Tarjeta' }}</option>
+            <option value="QR_PAYMENT">{{ i18n.translate('waiter.payment.qr') || 'Código QR' }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>{{ i18n.translate('waiter.payment.tip') || 'Propina' }}</label>
+          <input type="number" [(ngModel)]="tip" min="0" step="0.01" />
+        </div>
+
+        <button
+          class="btn btn-confirm"
+          (click)="confirmPayment()"
+          [disabled]="isProcessing"
+        >
+          <span class="material-icons">check_circle</span>
+          {{ i18n.translate('waiter.payment.confirm') || 'Confirmar Pago' }}
+        </button>
+      </div>
+
+      <div class="empty-selection" *ngIf="ordersToPayIds.size === 0">
+        <p>{{ i18n.translate('waiter.payment.selectAtLeast') || 'Selecciona al menos una orden para continuar' }}</p>
+      </div>
+    </div>
+  </main>
+</div>
+

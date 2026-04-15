@@ -1,0 +1,91 @@
+<div class="waiter-tables" role="main" aria-labelledby="page-title">
+  <!-- Header -->
+  <header class="waiter-header">
+    <div class="header-content">
+      <h1 id="page-title">{{ i18n.translate('waiter.tables.title') || 'Mesas' }}</h1>
+      <p>{{ i18n.translate('waiter.tables.subtitle') || 'Gestiona los pedidos de las mesas' }}</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-refresh" (click)="refreshTables()" [disabled]="isLoading" aria-label="Refrescar mesas">
+        <span class="material-icons">refresh</span>
+      </button>
+      <button class="btn btn-logout" (click)="logout()" aria-label="Cerrar sesión">
+        <span class="material-icons">logout</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="tables-container">
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="isLoading" role="status" aria-live="polite" aria-busy="true">
+      <div class="loading-spinner"></div>
+      <p>{{ i18n.translate('waiter.loading') || 'Cargando mesas...' }}</p>
+    </div>
+
+    <!-- Error -->
+    <div class="error-banner" *ngIf="!isLoading && errorMessage" role="alert">
+      <span class="material-icons">error</span>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Tables Grid -->
+    <div class="tables-grid" *ngIf="!isLoading && tables.length > 0" role="list">
+      <div
+        *ngFor="let table of tables"
+        class="table-card"
+        [class.occupied]="table.status === 'OCCUPIED'"
+        [class.available]="table.status === 'AVAILABLE'"
+        [ngClass]="getStatusColor(table.status)"
+        (click)="selectTable(table.table_number || table.number || 0)"
+        role="button"
+        [attr.aria-label]="'Mesa ' + (table.table_number || table.number) + ', ' + (i18n.translate('waiter.status.' + table.status) || table.status)"
+        tabindex="0"
+        (keyup.enter)="selectTable(table.table_number || table.number || 0)"
+        (keyup.space)="selectTable(table.table_number || table.number || 0)">
+
+        <!-- Table Number -->
+        <div class="table-number">
+          <span class="number">{{ table.table_number || table.number }}</span>
+        </div>
+
+        <!-- Table Location -->
+        <div class="table-location" *ngIf="table.location">
+          <span class="material-icons">location_on</span>
+          <span>{{ table.location }}</span>
+        </div>
+
+        <!-- Table Info -->
+        <div class="table-info">
+          <div class="info-row">
+            <span class="material-icons">people</span>
+            <span>{{ table.capacity }} {{ i18n.translate('waiter.tables.capacity') || 'personas' }}</span>
+          </div>
+
+          <div class="info-row" *ngIf="table.activeOrders && table.activeOrders > 0">
+            <span class="material-icons">receipt</span>
+            <span>{{ table.activeOrders }} {{ i18n.translate('waiter.tables.orders') || 'órdenes' }}</span>
+          </div>
+
+          <div class="info-row" *ngIf="table.totalBill && table.totalBill > 0">
+            <span class="material-icons">attach_money</span>
+            <span>${{ table.totalBill.toFixed(2) }}</span>
+          </div>
+        </div>
+
+        <!-- Status Badge -->
+        <div class="table-status" [class.badge]="true">
+          <span class="material-icons">{{ getStatusIcon(table.status) }}</span>
+          <span>{{ i18n.translate('waiter.status.' + table.status) || table.status }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && tables.length === 0">
+      <span class="material-icons">restaurant</span>
+      <h2>{{ i18n.translate('waiter.tables.empty') || 'Sin mesas disponibles' }}</h2>
+    </div>
+  </main>
+</div>
+

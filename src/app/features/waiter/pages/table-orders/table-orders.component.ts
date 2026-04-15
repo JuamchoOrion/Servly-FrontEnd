@@ -1,0 +1,317 @@
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { WaiterService } from '../../../../core/services/waiter.service';
+import { StaffOrder, UpdateOrderStatusResponse, ConfirmPaymentRequest, ConfirmPaymentResponse } from '../../../../core/dtos/waiter.dto';
+import { I18nService } from '../../../../core/services/i18n.service';
+
+@Component({
+  selector: 'app-table-orders',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './table-orders.component.html',
+  styleUrls: ['./table-orders.component.scss']
+})
+export class TableOrdersComponent implements OnInit, OnDestroy {
+  tableNumber: number | null = null;
+  orders: StaffOrder[] = [];
+  isLoading = true;
+  errorMessage: string | null = null;
+  selectedOrder: StaffOrder | null = null;
+  isProcessing = false;
+  paymentMethod: 'CASH' | 'CARD' | 'QR_PAYMENT' = 'CASH';
+  paymentAmount: number = 0;
+  tip: number = 0;
+  ordersToPayIds: Set<number> = new Set();
+
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private waiterService: WaiterService,
+    private route: ActivatedRoute,
+    private router: Router,
+    public i18n: I18nService
+  ) {}
+
+  ngOnInit(): void {
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      this.tableNumber = parseInt(params['tableNumber'], 10);
+      console.log('🔵 [TableOrdersComponent] Cargando órdenes de mesa:', this.tableNumber);
+      this.loadOrders();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private loadOrders(): void {
+    if (!this.tableNumber) return;
+
+    this.waiterService.getTableOrders(this.tableNumber)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (orders: StaffOrder[]) => {
+          console.log('✅ Órdenes cargadas:', orders.length);
+          this.orders = orders;
+          this.isLoading = false;
+          if (orders.length > 0) {
+            this.paymentAmount = orders.reduce((sum, o) => sum + o.total, 0);
+          }
+        },
+        error: (error: any) => {
+          console.error('❌ Error cargando órdenes:', error);
+          this.errorMessage = 'Error al cargar las órdenes';
+          this.isLoading = false;
+        }
+      });
+  }
+
+  selectOrder(order: StaffOrder): void {
+    this.selectedOrder = this.selectedOrder?.id === order.id ? null : order;
+  }
+
+  updateOrderStatus(orderId: number, newStatus: string): void {
+    if (this.isProcessing) return;
+    this.isProcessing = true;
+
+    this.waiterService.updateOrderStatus(orderId, newStatus)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: UpdateOrderStatusResponse) => {
+          console.log('✅ Estado actualizado:', response);
+          this.loadOrders();
+          this.isProcessing = false;
+        },
+        error: (error: any) => {
+          console.error('❌ Error:', error);
+          alert('Error al actualizar el estado');
+          this.isProcessing = false;
+        }
+      });
+  }
+
+  confirmPayment(): void {
+    if (this.isProcessing || this.ordersToPayIds.size === 0) return;
+    this.isProcessing = true;
+
+    const paymentRequest: ConfirmPaymentRequest = {
+      paymentMethod: this.paymentMethod,
+      amount: this.paymentAmount,
+      tip: this.tip
+    };
+
+    // Confirmar pago para cada orden seleccionada
+    const orderIds = Array.from(this.ordersToPayIds);
+    let processed = 0;
+
+    orderIds.forEach(orderId => {
+      this.waiterService.confirmPayment(orderId, paymentRequest)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            processed++;
+            if (processed === orderIds.length) {
+              alert('Pago confirmado');
+              this.ordersToPayIds.clear();
+              this.paymentAmount = 0;
+              this.tip = 0;
+              this.loadOrders();
+              this.isProcessing = false;
+            }
+          },
+          error: (error: any) => {
+            console.error('❌ Error:', error);
+            alert('Error al confirmar el pago');
+            this.isProcessing = false;
+          }
+        });
+    });
+  }
+
+  generateInvoice(): void {
+    if (!this.selectedOrder) return;
+
+    this.waiterService.getInvoice(this.selectedOrder.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (invoice: any) => {
+          console.log('✅ Factura obtenida:', invoice);
+
+          // Si el backend devuelve un pdfUrl, descargarlo
+          if (invoice.pdfUrl) {
+            window.open(invoice.pdfUrl, '_blank');
+          } else {
+            // Si no, generar un PDF cliente-side con los datos de la orden
+            this.generateClientSidePDF(invoice);
+          }
+        },
+        error: (error: any) => {
+          console.error('❌ Error al generar factura:', error);
+          alert(this.i18n.translate('waiter.orders.invoiceError') || 'Error al generar la factura');
+        }
+      });
+  }
+
+  private generateClientSidePDF(invoice: any): void {
+    // Generar un PDF simple con los datos de la orden
+    const doc = `
+      <html>
+        <head>
+          <title>Factura #${invoice.id}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { color: #667eea; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+            th { background: #f5f5f5; }
+            .total { font-weight: bold; font-size: 18px; }
+          </style>
+        </head>
+        <body>
+          <h1>Factura #${invoice.id}</h1>
+          <p><strong>Mesa:</strong> ${invoice.table_number || this.tableNumber}</p>
+          <p><strong>Fecha:</strong> ${new Date(invoice.created_at).toLocaleString('es-ES')}</p>
+          <p><strong>Estado:</strong> ${invoice.status}</p>
+
+          <h2>Detalles de la Orden</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Unitario</th>
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${invoice.items?.map((item: any) => `
+                <tr>
+                  <td>${item.item_name}</td>
+                  <td>${item.quantity}</td>
+                  <td>$${(item.unit_price || 0).toFixed(2)}</td>
+                  <td>$${(item.subtotal || 0).toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div style="text-align: right; margin-top: 20px;">
+            <p><strong>Total:</strong> <span class="total">$${(invoice.total || 0).toFixed(2)}</span></p>
+          </div>
+
+          <footer style="margin-top: 40px; text-align: center; color: #999; font-size: 12px;">
+            <p>Gracias por su compra - SERVLY</p>
+          </footer>
+        </body>
+      </html>
+    `;
+
+    // Abrir en nueva ventana para imprimir
+    const printWindow = window.open('', '', 'height=600,width=800');
+    if (printWindow) {
+      printWindow.document.write(doc);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  }
+
+  closeTable(): void {
+    if (!this.tableNumber) return;
+    if (confirm('¿Seguro que deseas cerrar esta mesa?')) {
+      this.waiterService.closeTableSession(this.tableNumber)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            console.log('✅ Mesa cerrada');
+            this.router.navigate(['/waiter/tables']);
+          },
+          error: (error: any) => {
+            alert('Error al cerrar la mesa');
+          }
+        });
+    }
+  }
+
+  backToTables(): void {
+    this.router.navigate(['/waiter/tables']);
+  }
+
+  getStatusColor(status: string): string {
+    switch (status) {
+      case 'PENDING': return 'status-pending';
+      case 'IN_PREPARATION': return 'status-preparing';
+      case 'SERVED': return 'status-served';
+      case 'PAID': return 'status-paid';
+      default: return '';
+    }
+  }
+
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case 'PENDING': return 'schedule';
+      case 'IN_PREPARATION': return 'local_dining';
+      case 'SERVED': return 'done';
+      case 'PAID': return 'check_circle';
+      default: return 'help';
+    }
+  }
+
+  getNextStatus(currentStatus: string): string | null {
+    switch (currentStatus) {
+      case 'PENDING': return 'IN_PREPARATION';
+      case 'IN_PREPARATION': return 'SERVED';
+      case 'SERVED': return 'PAID';
+      default: return null;
+    }
+  }
+
+  canUpdateStatus(status: string): boolean {
+    return status !== 'PAID';
+  }
+
+  getItemPrice(item: any): number {
+    if (item.subtotal) return item.subtotal;
+    const price = item.price || item.unit_price || 0;
+    return (price * item.quantity);
+  }
+
+  toggleOrderForPayment(orderId: number): void {
+    if (this.ordersToPayIds.has(orderId)) {
+      this.ordersToPayIds.delete(orderId);
+    } else {
+      this.ordersToPayIds.add(orderId);
+    }
+    this.updatePaymentAmount();
+  }
+
+  isOrderSelectedForPayment(orderId: number): boolean {
+    return this.ordersToPayIds.has(orderId);
+  }
+
+  updatePaymentAmount(): void {
+    this.paymentAmount = this.orders
+      .filter(order => this.ordersToPayIds.has(order.id))
+      .reduce((sum, order) => sum + order.total, 0);
+  }
+
+  getPayableOrders(): StaffOrder[] {
+    return this.orders.filter(order => order.status !== 'PAID');
+  }
+
+  selectAllForPayment(): void {
+    this.getPayableOrders().forEach(order => {
+      this.ordersToPayIds.add(order.id);
+    });
+    this.updatePaymentAmount();
+  }
+
+  deselectAllForPayment(): void {
+    this.ordersToPayIds.clear();
+    this.updatePaymentAmount();
+  }
+}

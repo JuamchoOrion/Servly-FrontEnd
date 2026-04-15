@@ -1,0 +1,126 @@
+<div class="client-menu">
+  <header class="menu-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1>{{ i18n.translate('client.menu.title') }}</h1>
+        <span class="table-info">
+          <span class="material-icons">table_restaurant</span>
+          {{ i18n.translate('client.menu.table') }} {{ tableNumber }}
+        </span>
+      </div>
+      <div class="header-right">
+        <button class="btn-icon" (click)="viewOrders()" title="{{ i18n.translate('client.menu.myOrders') }}">
+          <span class="material-icons">receipt_long</span>
+        </button>
+        <button class="btn-icon btn-logout" (click)="logout()" title="{{ i18n.translate('client.menu.logout') }}">
+          <span class="material-icons">logout</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="menu-container">
+    <!-- Categorías -->
+    <div class="categories-filter">
+      <button
+        class="category-btn"
+        [class.active]="selectedCategory === null"
+        (click)="filterByCategory(null)"
+      >
+        {{ i18n.translate('client.menu.allItems') }}
+      </button>
+      <button
+        *ngFor="let category of categories"
+        class="category-btn"
+        [class.active]="selectedCategory === category.name"
+        (click)="filterByCategory(category.name)"
+      >
+        {{ category.name }}
+      </button>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="menu-content">
+      <!-- Menú Items -->
+      <div class="menu-items">
+        <div *ngIf="isLoading" class="loading">
+          <div class="spinner"></div>
+          {{ i18n.translate('client.loading') }}
+        </div>
+
+        <div *ngIf="!isLoading && errorMessage" class="error-banner">
+          <span class="material-icons">error</span>
+          <div>
+            <strong>{{ errorMessage }}</strong>
+            <p style="margin: 8px 0 0 0; font-size: 12px; opacity: 0.8;">Recarga la página o intenta más tarde</p>
+          </div>
+        </div>
+
+        <div *ngIf="!isLoading && !errorMessage && filteredItems.length === 0" class="empty">
+          <span class="material-icons">restaurant_menu</span>
+          {{ i18n.translate('client.menu.noItems') }}
+        </div>
+
+        <div class="items-grid">
+          <div *ngFor="let item of filteredItems" class="menu-item-card">
+            <div class="item-image">
+              <span class="material-icons">fastfood</span>
+            </div>
+            <div class="item-content">
+              <h3 class="item-name">{{ item.name }}</h3>
+              <p class="item-description">{{ item.description }}</p>
+              <div class="item-footer">
+                <span class="item-price">${{ (item.basePrice || item.price || 0).toFixed(2) }}</span>
+                <button class="btn-add" (click)="addToCart(item)">
+                  <span class="material-icons">add_shopping_cart</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Carrito -->
+      <aside class="cart-sidebar">
+        <div class="cart-header">
+          <h2>{{ i18n.translate('client.menu.cart') }}</h2>
+          <span class="cart-count" *ngIf="getCartCount() > 0">{{ getCartCount() }}</span>
+        </div>
+
+        <div class="cart-items">
+          <div *ngIf="cart.size === 0" class="empty-cart">
+            <span class="material-icons">shopping_cart_checkout</span>
+            {{ i18n.translate('client.menu.emptyCart') }}
+          </div>
+
+          <div *ngFor="let entry of cart | keyvalue" class="cart-item">
+            <div class="item-details">
+              <p class="item-name">{{ entry.value.item.name }}</p>
+              <p class="item-price">${{ ((entry.value.item.basePrice || entry.value.item.price || 0) * entry.value.quantity).toFixed(2) }}</p>
+            </div>
+            <div class="quantity-control">
+              <button (click)="updateQuantity(entry.key, entry.value.quantity - 1)" class="qty-btn">−</button>
+              <span class="qty">{{ entry.value.quantity }}</span>
+              <button (click)="updateQuantity(entry.key, entry.value.quantity + 1)" class="qty-btn">+</button>
+            </div>
+            <button (click)="removeFromCart(entry.key)" class="btn-remove">
+              <span class="material-icons">delete</span>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="cart.size > 0" class="cart-footer">
+          <div class="total">
+            <span>{{ i18n.translate('client.menu.total') }}</span>
+            <span class="amount">${{ getCartTotal().toFixed(2) }}</span>
+          </div>
+          <button class="btn btn-primary btn-checkout" (click)="goToCheckout()">
+            <span class="material-icons">payment</span>
+            {{ i18n.translate('client.menu.checkout') }}
+          </button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
