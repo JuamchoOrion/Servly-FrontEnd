@@ -47,9 +47,16 @@ export class WaiterTablesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (tables: Table[]) => {
           console.log('✅ [WaiterTablesComponent] Mesas cargadas:', tables.length);
-          console.log('📊 Estructura de mesa:', tables[0]);
+          console.log('📊 Estructura de mesa:', JSON.stringify(tables[0], null, 2));
+          console.log('📊 Campos disponibles:', Object.keys(tables[0] || {}));
           // Sortear por table_number o number
-          this.tables = tables.sort((a, b) => (a.table_number || a.number || 0) - (b.table_number || b.number || 0));
+          this.tables = tables.sort((a, b) => {
+            const aNum = a.table_number || a.number || 0;
+            const bNum = b.table_number || b.number || 0;
+            console.log(`Comparando ${aNum} vs ${bNum}`);
+            return aNum - bNum;
+          });
+          console.log('🎯 Mesas después del sort:', this.tables.map(t => ({ num: t.table_number || t.number, status: t.status })));
           this.isLoading = false;
         },
         error: (error: any) => {
@@ -62,8 +69,16 @@ export class WaiterTablesComponent implements OnInit, OnDestroy {
 
   selectTable(tableNumber: number): void {
     console.log('🔵 [WaiterTablesComponent] Seleccionando mesa:', tableNumber);
+    console.log('📍 Navegando a:', ['/waiter/table-orders', tableNumber]);
     this.selectedTableNumber = tableNumber;
-    this.router.navigate(['/waiter/table-orders', tableNumber]);
+    this.router.navigate(['/waiter/table-orders', tableNumber]).then(
+      success => {
+        console.log('✅ Navegación exitosa:', success);
+      },
+      error => {
+        console.error('❌ Error en navegación:', error);
+      }
+    );
   }
 
   getStatusColor(status: string): string {

@@ -1,0 +1,71 @@
+/* ═══════════════════════════════════════════════════════════════
+   🎨 GLOBAL VARIABLES - Paleta de Colores Consistente
+   ═══════════════════════════════════════════════════════════════ */
+
+// ── Colors - Paleta Principal ──────────────────────────────────
+$primary-black:   #1E1E1E;      // Negro principal
+$accent-gold:     #C8A951;      // Dorado/Naranja acentuado
+$gold-dark:       #B8941D;      // Dorado oscuro para gradientes
+$light-bg:        #F5F5F5;      // Fondo claro
+$success-green:   #2E7D32;      // Verde éxito
+$warning-orange:  #F57C00;      // Naranja advertencia
+$error-red:       #C62828;      // Rojo error
+$info-blue:       #1976D2;      // Azul información
+$text-dark:       #2C2C2C;      // Texto oscuro
+$text-light:      #666666;      // Texto claro
+$text-muted:      #999999;      // Texto atenuado
+$white:           #FFFFFF;      // Blanco
+$border-light:    #EFEFEF;      // Borde claro
+
+// ── Gradients ──────────────────────────────────────────────────
+$gradient-header: linear-gradient(135deg, $accent-gold 0%, $gold-dark 100%);
+$gradient-subtle: linear-gradient(135deg, rgba($accent-gold, 0.95), rgba($gold-dark, 0.95));
+
+// ── Shadows ────────────────────────────────────────────────────
+$shadow-sm:       0 2px 4px rgba(0, 0, 0, 0.08);
+$shadow-md:       0 2px 8px rgba(0, 0, 0, 0.1);
+$shadow-lg:       0 4px 12px rgba(0, 0, 0, 0.12);
+$shadow-xl:       0 4px 20px rgba($accent-gold, 0.2);
+$shadow-header:   0 4px 12px rgba($accent-gold, 0.2);
+
+// ── Border Radius ──────────────────────────────────────────────
+$radius-sm:       4px;
+$radius-md:       8px;
+$radius-lg:       12px;
+$radius-xl:       16px;
+
+// ── Spacing ────────────────────────────────────────────────────
+$space-xs:        4px;
+$space-sm:        8px;
+$space-md:        16px;
+$space-lg:        24px;
+$space-xl:        32px;
+$space-2xl:       48px;
+
+// ── Typography ─────────────────────────────────────────────────
+$font-family-base: 'Inter', 'Roboto', sans-serif;
+$font-size-xs:   12px;
+$font-size-sm:   14px;
+$font-size-base: 16px;
+$font-size-lg:   18px;
+$font-size-xl:   24px;
+$font-size-2xl:  32px;
+
+$font-weight-normal:  400;
+$font-weight-medium:  500;
+$font-weight-semibold: 600;
+$font-weight-bold:   700;
+$font-weight-extrabold: 800;
+
+// ── Transitions ────────────────────────────────────────────────
+$transition-fast:  all 0.15s ease-in-out;
+$transition-base:  all 0.3s ease-in-out;
+$transition-slow:  all 0.5s ease-in-out;
+
+// ── Z-Index ────────────────────────────────────────────────────
+$z-dropdown:   100;
+$z-navbar:     100;
+$z-modal:      1000;
+$z-tooltip:    1100;
+$z-accessibility: 999999;
+

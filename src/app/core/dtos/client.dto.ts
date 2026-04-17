@@ -15,6 +15,8 @@ export interface MenuItem {
   description: string;
   recipeItems?: RecipeItem[];
   category?: string;
+  imageUrl?: string;
+  image?: string;
 }
 
 export interface RecipeItem {

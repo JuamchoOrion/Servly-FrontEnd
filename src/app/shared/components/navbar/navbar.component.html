@@ -6,25 +6,38 @@
       <span class="logo-text">Servly</span>
     </div>
 
-    <!-- Nav Items (Desktop) -->
-    <div class="nav-items" *ngIf="isAuthenticated">
-      <a
-        *ngFor="let item of visibleNavItems"
-        [routerLink]="item.route"
-        [routerLinkActive]="['active']"
-        [routerLinkActiveOptions]="{ exact: true }"
-        class="nav-item"
-        (click)="closeDropdown()">
-        <span class="material-icons nav-icon">{{ item.icon }}</span>
-        <span class="nav-label">{{ i18n.translate(item.label) }}</span>
-      </a>
+    <!-- Nav Sections (Desktop) -->
+    <div class="nav-sections" *ngIf="isAuthenticated && !isClient">
+      <div *ngFor="let section of visibleSections" class="nav-section">
+        <button
+          class="section-toggle"
+          (click)="toggleSection(section.title)"
+          [class.open]="isSectionOpen(section.title)">
+          <span class="material-icons section-icon">{{ section.icon }}</span>
+          <span class="section-label">{{ i18n.translate(section.title) }}</span>
+          <span class="material-icons dropdown-arrow" [class.open]="isSectionOpen(section.title)">expand_more</span>
+        </button>
+
+        <div class="section-items" *ngIf="isSectionOpen(section.title)">
+          <a
+            *ngFor="let item of section.items"
+            [routerLink]="item.route"
+            [routerLinkActive]="['active']"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="section-item"
+            (click)="toggleSection(section.title)">
+            <span class="material-icons item-icon">{{ item.icon }}</span>
+            <span class="item-label">{{ i18n.translate(item.label) }}</span>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Right Section: Brand + User Menu -->
   <div class="navbar-right">
     <!-- Brand -->
-    <div class="navbar-brand">
+    <div class="navbar-brand" *ngIf="!isClient">
       <span class="brand-text">{{ i18n.translate('navbar.brand') }}</span>
     </div>
 
@@ -76,21 +89,34 @@
   <div class="mobile-nav-overlay" (click)="closeMobileMenu()"></div>
   <div class="mobile-nav-content">
     <div class="mobile-nav-header">
-      <span class="mobile-nav-title">Menú</span>
+      <span class="mobile-nav-title">{{ i18n.translate('navbar.menu') }}</span>
       <button class="mobile-nav-close" (click)="closeMobileMenu()">
         <span class="material-icons">close</span>
       </button>
     </div>
     <div class="mobile-nav-items">
-      <a
-        *ngFor="let item of visibleNavItems"
-        [routerLink]="item.route"
-        [routerLinkActive]="['active']"
-        class="mobile-nav-item"
-        (click)="closeMobileMenu()">
-        <span class="material-icons">{{ item.icon }}</span>
-        <span>{{ item.label }}</span>
-      </a>
+      <div *ngFor="let section of visibleSections" class="mobile-nav-section">
+        <button
+          class="mobile-section-toggle"
+          (click)="toggleSection(section.title)"
+          [class.open]="isSectionOpen(section.title)">
+          <span class="material-icons">{{ section.icon }}</span>
+          <span>{{ i18n.translate(section.title) }}</span>
+          <span class="material-icons dropdown-arrow" [class.open]="isSectionOpen(section.title)">expand_more</span>
+        </button>
+
+        <div class="mobile-section-items" *ngIf="isSectionOpen(section.title)">
+          <a
+            *ngFor="let item of section.items"
+            [routerLink]="item.route"
+            [routerLinkActive]="['active']"
+            class="mobile-section-item"
+            (click)="closeMobileMenu()">
+            <span class="material-icons">{{ item.icon }}</span>
+            <span>{{ i18n.translate(item.label) }}</span>
+          </a>
+        </div>
+      </div>
     </div>
     <div class="mobile-nav-footer">
       <div class="mobile-user-info">
@@ -102,7 +128,7 @@
       </div>
       <button class="mobile-logout-btn" (click)="logout(); closeMobileMenu()">
         <span class="material-icons">logout</span>
-        <span>Cerrar Sesión</span>
+        <span>{{ i18n.translate('navbar.logout') }}</span>
       </button>
     </div>
   </div>

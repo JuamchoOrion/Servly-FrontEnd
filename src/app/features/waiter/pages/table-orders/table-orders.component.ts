@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { WaiterService } from '../../../../core/services/waiter.service';
-import { StaffOrder, UpdateOrderStatusResponse, ConfirmPaymentRequest, ConfirmPaymentResponse } from '../../../../core/dtos/waiter.dto';
+import { StaffOrder, UpdateOrderStatusResponse, ConfirmPaymentRequest } from '../../../../core/dtos/waiter.dto';
 import { I18nService } from '../../../../core/services/i18n.service';
 
 @Component({
@@ -18,6 +18,7 @@ import { I18nService } from '../../../../core/services/i18n.service';
 export class TableOrdersComponent implements OnInit, OnDestroy {
   tableNumber: number | null = null;
   orders: StaffOrder[] = [];
+  filteredOrders: StaffOrder[] = [];
   isLoading = true;
   errorMessage: string | null = null;
   selectedOrder: StaffOrder | null = null;
@@ -25,7 +26,11 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
   paymentMethod: 'CASH' | 'CARD' | 'QR_PAYMENT' = 'CASH';
   paymentAmount: number = 0;
   tip: number = 0;
+  moneyReceived: number = 0;
+  change: number = 0;
   ordersToPayIds: Set<number> = new Set();
+  selectedStatusFilter: string = 'ALL';
+  showPaidOrders = false;
 
   private destroy$ = new Subject<void>();
 
@@ -57,10 +62,17 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (orders: StaffOrder[]) => {
           console.log('✅ Órdenes cargadas:', orders.length);
-          this.orders = orders;
+          // Priorizar: PENDING > IN_PREPARATION > SERVED > PAID
+          this.orders = orders.sort((a, b) => {
+            const priorityOrder = { 'PENDING': 0, 'IN_PREPARATION': 1, 'SERVED': 2, 'PAID': 3 };
+            const priorityA = priorityOrder[a.status as keyof typeof priorityOrder] ?? 99;
+            const priorityB = priorityOrder[b.status as keyof typeof priorityOrder] ?? 99;
+            return priorityA - priorityB;
+          });
+          this.applyFilters();
           this.isLoading = false;
           if (orders.length > 0) {
-            this.paymentAmount = orders.reduce((sum, o) => sum + o.total, 0);
+            this.paymentAmount = this.getPayableOrders().reduce((sum, o) => sum + o.total, 0);
           }
         },
         error: (error: any) => {
@@ -69,6 +81,36 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         }
       });
+  }
+
+  applyFilters(): void {
+    if (this.selectedStatusFilter === 'ALL') {
+      this.filteredOrders = [...this.orders];
+    } else {
+      this.filteredOrders = this.orders.filter(order => order.status === this.selectedStatusFilter);
+    }
+  }
+
+  getActiveOrders(): StaffOrder[] {
+    return this.filteredOrders.filter(o => o.status !== 'PAID');
+  }
+
+  getPaidOrders(): StaffOrder[] {
+    return this.orders.filter(o => o.status === 'PAID');
+  }
+
+  getPaidOrdersCount(): number {
+    return this.orders.filter(o => o.status === 'PAID').length;
+  }
+
+  hasActiveOrders(): boolean {
+    return this.filteredOrders.filter(o => o.status !== 'PAID').length > 0;
+  }
+
+  hasNoFilteredActiveOrders(): boolean {
+    return this.orders.length > 0 && this.filteredOrders.filter(o => o.status !== 'PAID').length === 0 && this.selectedStatusFilter !== 'PAID';
+  }  onStatusFilterChange(): void {
+    this.applyFilters();
   }
 
   selectOrder(order: StaffOrder): void {
@@ -99,10 +141,13 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
     if (this.isProcessing || this.ordersToPayIds.size === 0) return;
     this.isProcessing = true;
 
+    // En CASH, usar moneyReceived; en otros métodos, usar tip
+    const tipAmount = this.paymentMethod === 'CASH' ? 0 : this.tip;
+
     const paymentRequest: ConfirmPaymentRequest = {
       paymentMethod: this.paymentMethod,
       amount: this.paymentAmount,
-      tip: this.tip
+      tip: tipAmount
     };
 
     // Confirmar pago para cada orden seleccionada
@@ -116,10 +161,17 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
           next: () => {
             processed++;
             if (processed === orderIds.length) {
-              alert('Pago confirmado');
+              // Mostrar cambio si es CASH
+              if (this.paymentMethod === 'CASH') {
+                alert(`Pago confirmado. Cambio a entregar: $${this.change.toFixed(2)}`);
+              } else {
+                alert('Pago confirmado');
+              }
               this.ordersToPayIds.clear();
               this.paymentAmount = 0;
               this.tip = 0;
+              this.moneyReceived = 0;
+              this.change = 0;
               this.loadOrders();
               this.isProcessing = false;
             }
@@ -133,10 +185,11 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
     });
   }
 
-  generateInvoice(): void {
-    if (!this.selectedOrder) return;
+  generateInvoice(orderIds: number[]): void {
+    if (!orderIds || orderIds.length === 0) return;
 
-    this.waiterService.getInvoice(this.selectedOrder.id)
+    const orderId = orderIds[0];
+    this.waiterService.getInvoice(orderId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (invoice: any) => {
@@ -274,6 +327,22 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
     return status !== 'PAID';
   }
 
+  getAvailableNextStatuses(currentStatus: string): { value: string; label: string }[] {
+    const transitions: { [key: string]: string[] } = {
+      'PENDING': ['IN_PREPARATION', 'CANCELLED'],
+      'IN_PREPARATION': ['SERVED', 'CANCELLED'],
+      'SERVED': ['PAID', 'CANCELLED'],
+      'PAID': ['CANCELLED'],
+      'CANCELLED': []
+    };
+
+    const nextStatuses = transitions[currentStatus] || [];
+    return nextStatuses.map(status => ({
+      value: status,
+      label: `waiter.status.${status}`
+    }));
+  }
+
   getItemPrice(item: any): number {
     if (item.subtotal) return item.subtotal;
     const price = item.price || item.unit_price || 0;
@@ -313,5 +382,15 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
   deselectAllForPayment(): void {
     this.ordersToPayIds.clear();
     this.updatePaymentAmount();
+  }
+
+  calculateChange(): void {
+    if (this.paymentMethod === 'CASH') {
+      this.change = Math.max(0, this.moneyReceived - this.paymentAmount);
+    }
+  }
+
+  togglePaidOrdersSection(): void {
+    this.showPaidOrders = !this.showPaidOrders;
   }
 }

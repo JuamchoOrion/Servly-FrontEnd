@@ -14,6 +14,13 @@ interface NavItem {
   roles: string[];
 }
 
+interface NavSection {
+  title: string;
+  icon: string;
+  items: NavItem[];
+  roles: string[];
+}
+
 interface CurrentUser {
   email: string;
   name: string;
@@ -29,82 +36,120 @@ interface CurrentUser {
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   isAuthenticated = false;
+  isClient = false;
   currentUser: CurrentUser | null = null;
   dropdownOpen = false;
   mobileMenuOpen = false;
   userEmail = '';
   userRole = '';
+  openSections: Set<string> = new Set();
 
-  navItems: NavItem[] = [
+  navSections: NavSection[] = [
     {
-      label: 'navbar.dashboard',
-      route: '/dashboard',
-      icon: 'dashboard',
-      roles: ['ADMIN', 'STOREKEEPER', 'STAFF']
+      title: 'navbar.sections.operations',
+      icon: 'store',
+      roles: ['ADMIN', 'STOREKEEPER', 'WAITER', 'STAFF'],
+      items: [
+        {
+          label: 'navbar.dashboard',
+          route: '/dashboard',
+          icon: 'dashboard',
+          roles: ['ADMIN', 'STOREKEEPER', 'STAFF']
+        },
+        {
+          label: 'navbar.waiterTables',
+          route: '/waiter/tables',
+          icon: 'table_restaurant',
+          roles: ['WAITER', 'ADMIN']
+        }
+      ]
     },
     {
-      label: 'navbar.inventory',
-      route: '/inventory',
+      title: 'navbar.sections.inventory',
       icon: 'inventory_2',
-      roles: ['ADMIN', 'STOREKEEPER']
+      roles: ['ADMIN', 'STOREKEEPER'],
+      items: [
+        {
+          label: 'navbar.inventory',
+          route: '/inventory',
+          icon: 'storage',
+          roles: ['ADMIN', 'STOREKEEPER']
+        },
+        {
+          label: 'navbar.categories',
+          route: '/categories',
+          icon: 'label',
+          roles: ['ADMIN', 'STOREKEEPER']
+        },
+        {
+          label: 'navbar.items',
+          route: '/items',
+          icon: 'format_list_bulleted',
+          roles: ['ADMIN', 'STOREKEEPER']
+        },
+        {
+          label: 'navbar.suppliers',
+          route: '/inventory/providers',
+          icon: 'handshake',
+          roles: ['ADMIN', 'STOREKEEPER']
+        }
+      ]
     },
     {
-      label: 'navbar.tables',
-      route: '/waiter/tables',
-      icon: 'table_restaurant',
-      roles: ['WAITER', 'ADMIN']
-    },
-    {
-      label: 'navbar.categories',
-      route: '/categories',
-      icon: 'label',
-      roles: ['ADMIN', 'STOREKEEPER']
-    },
-    {
-      label: 'navbar.items',
-      route: '/items',
-      icon: 'format_list_bulleted',
-      roles: ['ADMIN', 'STOREKEEPER']
-    },
-    {
-      label: 'navbar.products',
-      route: '/products',
+      title: 'navbar.sections.menu',
       icon: 'restaurant_menu',
-      roles: ['ADMIN']
+      roles: ['ADMIN'],
+      items: [
+        {
+          label: 'navbar.products',
+          route: '/products',
+          icon: 'restaurant_menu',
+          roles: ['ADMIN']
+        },
+        {
+          label: 'navbar.productCategories',
+          route: '/product-categories',
+          icon: 'category',
+          roles: ['ADMIN']
+        },
+        {
+          label: 'navbar.recipes',
+          route: '/recipes',
+          icon: 'restaurant',
+          roles: ['ADMIN']
+        }
+      ]
     },
     {
-      label: 'navbar.productCategories',
-      route: '/product-categories',
-      icon: 'category',
-      roles: ['ADMIN']
+      title: 'navbar.sections.restaurant',
+      icon: 'meeting_room',
+      roles: ['ADMIN'],
+      items: [
+        {
+          label: 'navbar.tableManagement',
+          route: '/tables',
+          icon: 'event_note',
+          roles: ['ADMIN']
+        }
+      ]
     },
     {
-      label: 'navbar.recipes',
-      route: '/recipes',
-      icon: 'restaurant',
-      roles: ['ADMIN']
-    },
-    {
-      label: 'navbar.suppliers',
-      route: '/inventory/providers',
-      icon: 'handshake',
-      roles: ['ADMIN', 'STOREKEEPER']
-    },
-    {
-      label: 'navbar.metrics',
-      route: '/admin/audit-metrics',
+      title: 'navbar.sections.reports',
       icon: 'analytics',
-      roles: ['ADMIN']
-    },
-    {
-      label: 'navbar.tables',
-      route: '/tables',
-      icon: 'table_restaurant',
-      roles: ['ADMIN', 'STAFF']
+      roles: ['ADMIN'],
+      items: [
+        {
+          label: 'navbar.metrics',
+          route: '/admin/audit-metrics',
+          icon: 'analytics',
+          roles: ['ADMIN']
+        }
+      ]
     }
   ];
 
-  visibleNavItems: NavItem[] = [];
+  visibleSections: NavSection[] = [];
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -126,7 +171,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         } else {
           this.isAuthenticated = false;
           this.currentUser = null;
-          this.visibleNavItems = [];
+          this.visibleSections = [];
         }
       });
   }
@@ -138,10 +183,37 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   private updateVisibleItems(): void {
     if (this.currentUser && this.currentUser.roles) {
-      this.visibleNavItems = this.navItems.filter(item =>
-        item.roles.some(role => this.currentUser?.roles.includes(role))
-      );
+      // Detectar si es cliente
+      this.isClient = this.currentUser.roles.includes('CLIENT');
+
+      if (this.isClient) {
+        // Si es cliente, no mostrar secciones de navegación
+        this.visibleSections = [];
+      } else {
+        // Mostrar secciones para usuarios no-cliente
+        this.visibleSections = this.navSections
+          .filter(section => section.roles.some(role => this.currentUser?.roles.includes(role)))
+          .map(section => ({
+            ...section,
+            items: section.items.filter(item =>
+              item.roles.some(role => this.currentUser?.roles.includes(role))
+            )
+          }))
+          .filter(section => section.items.length > 0);
+      }
     }
+  }
+
+  toggleSection(sectionTitle: string): void {
+    if (this.openSections.has(sectionTitle)) {
+      this.openSections.delete(sectionTitle);
+    } else {
+      this.openSections.add(sectionTitle);
+    }
+  }
+
+  isSectionOpen(sectionTitle: string): boolean {
+    return this.openSections.has(sectionTitle);
   }
 
   toggleDropdown(): void {

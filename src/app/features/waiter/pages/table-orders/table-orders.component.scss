@@ -1,28 +1,43 @@
+// ── Variables ──────────────────────────────────────────────────────────────
+$primary-black:   #1E1E1E;
+$accent-gold:     #C8A951;
+$light-bg:        #F5F5F5;
+$success-green:   #2E7D32;
+$warning-orange:  #F57C00;
+$error-red:       #C62828;
+$info-blue:       #1976D2;
+$text-dark:       #2C2C2C;
+$text-light:      #666666;
+$text-muted:      #999999;
+$white:           #FFFFFF;
+$border-light:    #EFEFEF;
+
 .table-orders-page {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f5f5f5;
+  background: $light-bg;
 
   .orders-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, $accent-gold 0%, #B8941D 100%);
+    color: $primary-black;
     padding: 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba($accent-gold, 0.15);
 
     .header-content h1 {
       margin: 0;
       font-size: 28px;
       font-weight: 700;
+      color: $primary-black;
     }
 
     .header-content p {
       margin: 8px 0 0 0;
       font-size: 14px;
-      opacity: 0.9;
+      color: rgba($primary-black, 0.8);
     }
 
     .header-actions {
@@ -30,9 +45,9 @@
       gap: 12px;
 
       .btn {
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba($primary-black, 0.15);
         border: none;
-        color: white;
+        color: $primary-black;
         padding: 10px;
         border-radius: 50%;
         cursor: pointer;
@@ -42,7 +57,7 @@
         transition: all 0.3s ease;
 
         &:hover {
-          background: rgba(255, 255, 255, 0.3);
+          background: rgba($primary-black, 0.25);
         }
       }
     }
@@ -54,6 +69,41 @@
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
+
+    .filters-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      background: $white;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+      label {
+        font-weight: 600;
+        color: $text-dark;
+        white-space: nowrap;
+      }
+
+      select {
+        flex: 1;
+        max-width: 300px;
+        padding: 10px 12px;
+        border: 1px solid $border-light;
+        border-radius: 6px;
+        font-size: 14px;
+        background: $white;
+        cursor: pointer;
+        transition: border-color 0.3s;
+
+        &:hover,
+        &:focus {
+          border-color: $accent-gold;
+          outline: none;
+        }
+      }
+    }
   }
 
   .loading-state {
@@ -67,22 +117,22 @@
     .loading-spinner {
       width: 50px;
       height: 50px;
-      border: 4px solid #f0f0f0;
-      border-top: 4px solid #667eea;
+      border: 4px solid $border-light;
+      border-top: 4px solid $accent-gold;
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
 
     p {
       margin-top: 20px;
-      color: #666;
+      color: $text-light;
       font-size: 16px;
     }
   }
 
   .error-banner {
-    background: #fee;
-    border-left: 4px solid #dc3545;
+    background: rgba($error-red, 0.1);
+    border-left: 4px solid $error-red;
     padding: 16px;
     border-radius: 4px;
     display: flex;
@@ -90,7 +140,7 @@
     margin-bottom: 24px;
 
     .material-icons {
-      color: #dc3545;
+      color: $error-red;
       flex-shrink: 0;
     }
   }
@@ -237,9 +287,102 @@
       .order-actions {
         display: flex;
         gap: 12px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+
+        .status-change-group {
+          display: flex;
+          gap: 8px;
+          align-items: flex-end;
+          flex: 1;
+          min-width: 300px;
+
+          .status-input {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+
+            label {
+              font-size: 13px;
+              font-weight: 600;
+              color: $text-dark;
+            }
+
+            select {
+              padding: 10px 12px;
+              border: 2px solid $accent-gold;
+              border-radius: 6px;
+              background: $white;
+              color: $text-dark;
+              font-size: 14px;
+              cursor: pointer;
+              transition: all 0.3s ease;
+
+              &:hover:not(:disabled) {
+                background: rgba($accent-gold, 0.05);
+                box-shadow: 0 2px 8px rgba($accent-gold, 0.15);
+              }
+
+              &:focus {
+                outline: none;
+                box-shadow: 0 0 0 3px rgba($accent-gold, 0.2);
+              }
+
+              &:disabled {
+                background: #f5f5f5;
+                cursor: not-allowed;
+                opacity: 0.6;
+              }
+
+              option {
+                padding: 8px;
+                background: $white;
+                color: $text-dark;
+              }
+            }
+          }
+
+          .btn-primary {
+            padding: 10px 16px;
+            background: $accent-gold;
+            color: $primary-black;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+
+            &:hover:not(:disabled) {
+              background: #B8941D;
+              box-shadow: 0 4px 12px rgba($accent-gold, 0.3);
+              transform: translateY(-2px);
+            }
+
+            &:active:not(:disabled) {
+              transform: translateY(0);
+            }
+
+            &:disabled {
+              background: #ccc;
+              cursor: not-allowed;
+              opacity: 0.6;
+            }
+
+            .material-icons {
+              font-size: 20px;
+            }
+          }
+        }
 
         .btn {
-          flex: 1;
+          flex: 0 1 auto;
+          min-width: 140px;
           padding: 10px 16px;
           border: none;
           border-radius: 4px;
@@ -251,19 +394,6 @@
           gap: 8px;
           transition: all 0.3s ease;
 
-          &.btn-primary {
-            background: #667eea;
-            color: white;
-
-            &:hover:not(:disabled) {
-              background: #5568d3;
-            }
-
-            &:disabled {
-              opacity: 0.5;
-              cursor: not-allowed;
-            }
-          }
 
           &.btn-secondary {
             background: #e9ecef;
@@ -498,6 +628,119 @@
       p {
         margin: 0;
         font-size: 14px;
+      }
+    }
+
+    .paid-orders-section {
+      margin-top: 32px;
+      background: $white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+
+      .paid-orders-header {
+        background: rgba($success-green, 0.05);
+        border-left: 4px solid $success-green;
+        padding: 16px 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        &:hover {
+          background: rgba($success-green, 0.1);
+        }
+
+        h3 {
+          margin: 0;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 16px;
+          font-weight: 600;
+          color: $text-dark;
+
+          .material-icons {
+            color: $success-green;
+            font-size: 24px;
+          }
+
+          .badge {
+            background: $success-green;
+            color: $white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+          }
+        }
+      }
+
+      .paid-orders-list {
+        padding: 16px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-height: 400px;
+        overflow-y: auto;
+
+        .paid-order-card {
+          background: rgba($success-green, 0.02);
+          border: 1px solid rgba($success-green, 0.2);
+          border-radius: 6px;
+          padding: 12px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          transition: all 0.3s ease;
+
+          &:hover {
+            background: rgba($success-green, 0.05);
+            border-color: rgba($success-green, 0.4);
+          }
+
+          .paid-order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+
+            .order-info {
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+
+              .order-id {
+                font-weight: 600;
+                color: $text-dark;
+                font-size: 14px;
+              }
+
+              .order-time {
+                font-size: 12px;
+                color: $text-muted;
+              }
+            }
+
+            .order-amount {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+
+              .material-icons {
+                color: $success-green;
+                font-size: 20px;
+              }
+
+              .amount {
+                font-weight: 700;
+                color: $success-green;
+                font-size: 16px;
+              }
+            }
+          }
+        }
       }
     }
   }

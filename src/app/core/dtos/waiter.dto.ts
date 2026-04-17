@@ -31,12 +31,16 @@ export interface StaffOrder {
 }
 
 export interface StaffOrderItem {
-  name: string;
+  id?: number;
+  name?: string;
   quantity: number;
   notes?: string;
   price?: number;
   unit_price?: number;
   subtotal?: number;
+  item_id?: number;
+  item_name?: string;
+  tax_percent?: number;
 }
 
 // Status Update

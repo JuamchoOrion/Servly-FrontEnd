@@ -1,3 +1,17 @@
+// ── Variables ──────────────────────────────────────────────────────────────
+$primary-black:   #1E1E1E;
+$accent-gold:     #C8A951;
+$light-bg:        #F5F5F5;
+$success-green:   #2E7D32;
+$warning-orange:  #F57C00;
+$error-red:       #C62828;
+$info-blue:       #1976D2;
+$text-dark:       #2C2C2C;
+$text-light:      #666666;
+$text-muted:      #999999;
+$white:           #FFFFFF;
+$border-light:    #EFEFEF;
+
 .category-form-container {
   max-width: 700px;
   margin: 0 auto;
@@ -24,10 +38,10 @@
       display: block;
       margin-bottom: 8px;
       font-weight: 500;
-      color: #333;
+      color: $text-dark;
 
       .required {
-        color: #d32f2f;
+        color: $error-red;
       }
     }
 
@@ -35,7 +49,7 @@
     .form-textarea {
       width: 100%;
       padding: 10px 12px;
-      border: 1px solid #ddd;
+      border: 1px solid $border-light;
       border-radius: 4px;
       font-family: inherit;
       font-size: 1rem;
@@ -43,16 +57,16 @@
 
       &:focus {
         outline: none;
-        border-color: #1976d2;
+        border-color: $info-blue;
         box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
       }
 
       &.is-invalid {
-        border-color: #d32f2f;
+        border-color: $error-red;
       }
 
       &:disabled {
-        background-color: #f5f5f5;
+        background-color: $light-bg;
         cursor: not-allowed;
       }
     }
@@ -64,7 +78,7 @@
     .form-error {
       display: block;
       margin-top: 5px;
-      color: #d32f2f;
+      color: $error-red;
       font-size: 0.85rem;
     }
   }
@@ -103,7 +117,7 @@
     }
 
     .btn-primary {
-      background-color: #1976d2;
+      background-color: $info-blue;
       color: white;
 
       &:hover:not(:disabled) {
@@ -113,7 +127,7 @@
 
     .btn-secondary {
       background-color: #e0e0e0;
-      color: #333;
+      color: $text-dark;
 
       &:hover:not(:disabled) {
         background-color: #d0d0d0;
@@ -129,7 +143,7 @@
       width: 40px;
       height: 40px;
       border: 4px solid #f3f3f3;
-      border-top: 4px solid #1976d2;
+      border-top: 4px solid $info-blue;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin: 0 auto 20px;
@@ -149,14 +163,13 @@
 
   &.alert-success {
     background-color: #e8f5e9;
-    color: #2e7d32;
-    border-left: 4px solid #2e7d32;
+    color: $success-green;
+    border-left: 4px solid $success-green;
   }
 
   &.alert-error {
     background-color: #ffebee;
-    color: #c62828;
-    border-left: 4px solid #c62828;
+    color: $error-red;
+    border-left: 4px solid $error-red;
   }
 }
-

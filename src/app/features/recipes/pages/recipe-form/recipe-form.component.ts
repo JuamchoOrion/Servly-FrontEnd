@@ -56,9 +56,24 @@ export class RecipeFormComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.loadItems();
-    this.addItemDetail(); // Agregar un item por defecto
-    this.checkIfEditMode();
+    // Primero cargar items
+    this.itemService.getAllItems()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (items: any[]) => {
+          this.items = items;
+          console.log('📦 Items cargados:', this.items.length, 'items');
+          this.cdr.markForCheck();
+
+          // Después verificar si es modo edición
+          this.checkIfEditMode();
+        },
+        error: (error) => {
+          console.error('❌ Error cargando items:', error);
+          this.checkIfEditMode();
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -70,24 +85,6 @@ export class RecipeFormComponent implements OnInit, OnDestroy {
     return this.recipeForm.get('itemDetails') as FormArray;
   }
 
-  /**
-   * Carga los items disponibles
-   */
-  private loadItems(): void {
-    this.itemService.getAllItems()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (items: any[]) => {
-          this.items = items; // ItemResponse no tiene un campo 'active'
-          console.log('Items cargados:', this.items);
-          this.cdr.markForCheck();
-        },
-        error: (error) => {
-          console.error('Error cargando items:', error);
-          this.cdr.markForCheck();
-        }
-      });
-  }
 
   /**
    * Verifica si es modo edición
@@ -100,8 +97,13 @@ export class RecipeFormComponent implements OnInit, OnDestroy {
           this.recipeId = parseInt(params['id'], 10);
           this.isEditMode = true;
           this.loadRecipe(this.recipeId);
+        } else {
+          // Modo crear - agregar un item por defecto
+          if (this.itemDetailsArray.length === 0) {
+            this.addItemDetail();
+          }
+          this.cdr.markForCheck();
         }
-        this.cdr.markForCheck();
       });
   }
 
@@ -119,22 +121,37 @@ export class RecipeFormComponent implements OnInit, OnDestroy {
           this.recipe = recipe;
           this.recipeForm.patchValue({
             name: recipe.name,
-            quantity: recipe.quantity,
+            quantity: recipe.quantity || 1,
             description: recipe.description || ''
           });
 
           // Llenar itemDetails
           const itemDetailsArray = this.itemDetailsArray;
           itemDetailsArray.clear();
-          recipe.itemDetails?.forEach(item => {
-            itemDetailsArray.push(this.fb.group({
-              itemId: [item.itemId, Validators.required],
-              quantity: [item.baseQuantity, [Validators.required, Validators.min(0.01)]],
-              annotation: [item.annotation || ''],
-              isOptional: [item.isOptional || false]
-            }));
+
+          // Usar itemDetailList (de la API) o itemDetails (del DTO)
+          const items = (recipe as any).itemDetailList || recipe.itemDetails || [];
+
+          console.log('🔍 Items a cargar:', items.length, 'items');
+
+          items.forEach((item: any) => {
+            // Extraer el ID del item - puede venir como itemId directo o como item.id (anidado)
+            const itemId = item.itemId || (item.item?.id);
+            const quantity = item.quantity || 0;
+
+            console.log('📦 Item cargado:', { itemId, quantity, annotation: item.annotation });
+
+            if (itemId) {
+              itemDetailsArray.push(this.fb.group({
+                itemId: [itemId, Validators.required],
+                quantity: [quantity, [Validators.required, Validators.min(0.01)]],
+                annotation: [item.annotation || ''],
+                isOptional: [item.isOptional || false]
+              }));
+            }
           });
 
+          console.log('✅ ItemDetailsArray poblado con', itemDetailsArray.length, 'items');
           this.isLoading = false;
           this.cdr.markForCheck();
         },
@@ -144,6 +161,29 @@ export class RecipeFormComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         }
       });
+  }
+
+  /**
+   * Obtiene el nombre del item por su ID
+   */
+  getItemName(itemId: number): string {
+    const item = this.items.find(i => i.id === itemId);
+    return item?.name || 'Sin nombre';
+  }
+
+  /**
+   * Obtiene el control de un item detail
+   */
+  getItemControl(index: number): any {
+    return this.itemDetailsArray.at(index);
+  }
+
+  /**
+   * Obtiene el nombre del item del control
+   */
+  getItemNameFromControl(index: number): string {
+    const itemId = this.itemDetailsArray.at(index).get('itemId')?.value;
+    return this.getItemName(itemId);
   }
 
   /**
@@ -227,7 +267,7 @@ export class RecipeFormComponent implements OnInit, OnDestroy {
   /**
    * Cancela y vuelve a la lista
    */
-  cancel(): void {
+  cancelForm(): void {
     this.router.navigate(['/recipes']);
   }
 
@@ -285,14 +325,6 @@ export class RecipeFormComponent implements OnInit, OnDestroy {
   isFieldInvalid(fieldName: string): boolean {
     const field = this.recipeForm.get(fieldName);
     return !!(field && field.invalid && field.touched);
-  }
-
-  /**
-   * Obtiene el nombre del item
-   */
-  getItemName(itemId: number): string {
-    const item = this.items.find(i => i.id === itemId);
-    return item?.name || '';
   }
 }
 

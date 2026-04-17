@@ -133,11 +133,83 @@ export class ProductService {
   }
 
   /**
+   * Crea un nuevo producto con imagen (requiere autenticación)
+   * POST /api/admin/products/with-image
+   * Envía FormData con campos: name, description, price, categoryId, recipeId, active, image
+   */
+  createProductWithImage(
+    data: {
+      name: string;
+      description: string;
+      price: number;
+      categoryId: number;
+      recipeId?: number;
+      active?: boolean;
+    },
+    imageFile?: File
+  ): Observable<Product> {
+    const formData = new FormData();
+    formData.append('name', data.name);
+    formData.append('description', data.description);
+    formData.append('price', data.price.toString());
+    formData.append('categoryId', data.categoryId.toString());
+    if (data.recipeId) {
+      formData.append('recipeId', data.recipeId.toString());
+    }
+    if (data.active !== undefined) {
+      formData.append('active', data.active.toString());
+    }
+    if (imageFile) {
+      formData.append('image', imageFile, imageFile.name);
+    }
+
+    return this.http.post<Product>(`${this.API_URL}/api/admin/products/with-image`, formData).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
    * Actualiza un producto existente (requiere autenticación)
    * PUT /api/staff/products/{id}
    */
   updateProduct(id: number, product: Partial<CreateProductRequest>): Observable<Product> {
     return this.http.put<Product>(`${this.STAFF_PRODUCTS_ENDPOINT}/${id}`, product).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Actualiza un producto con nueva imagen (requiere autenticación)
+   * PUT /api/admin/products/{id}/with-image
+   * Envía FormData con campos a actualizar e imagen opcional
+   */
+  updateProductWithImage(
+    id: number,
+    data: {
+      name?: string;
+      description?: string;
+      price?: number;
+      categoryId?: number;
+      recipeId?: number;
+      active?: boolean;
+    },
+    imageFile?: File
+  ): Observable<Product> {
+    const formData = new FormData();
+    if (data.name) formData.append('name', data.name);
+    if (data.description) formData.append('description', data.description);
+    if (data.price) formData.append('price', data.price.toString());
+    if (data.categoryId) formData.append('categoryId', data.categoryId.toString());
+    if (data.recipeId) formData.append('recipeId', data.recipeId.toString());
+    if (data.active !== undefined) formData.append('active', data.active.toString());
+    if (imageFile) {
+      formData.append('image', imageFile, imageFile.name);
+    }
+
+    return this.http.put<Product>(
+      `${this.API_URL}/api/admin/products/${id}/with-image`,
+      formData
+    ).pipe(
       catchError(this.handleError)
     );
   }

@@ -37,7 +37,7 @@
         [class.occupied]="table.status === 'OCCUPIED'"
         [class.available]="table.status === 'AVAILABLE'"
         [ngClass]="getStatusColor(table.status)"
-        (click)="selectTable(table.table_number || table.number || 0)"
+        (click)="selectTable(table.table_number || table.number || 0); $event.stopPropagation()"
         role="button"
         [attr.aria-label]="'Mesa ' + (table.table_number || table.number) + ', ' + (i18n.translate('waiter.status.' + table.status) || table.status)"
         tabindex="0"

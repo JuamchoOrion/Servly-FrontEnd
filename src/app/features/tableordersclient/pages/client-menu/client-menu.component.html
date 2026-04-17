@@ -64,7 +64,12 @@
         <div class="items-grid">
           <div *ngFor="let item of filteredItems" class="menu-item-card">
             <div class="item-image">
-              <span class="material-icons">fastfood</span>
+              <img
+                *ngIf="item.imageUrl || item.image"
+                [src]="item.imageUrl || item.image"
+                [alt]="item.name"
+                class="product-image">
+              <span *ngIf="!(item.imageUrl || item.image)" class="material-icons icon-fallback">restaurant</span>
             </div>
             <div class="item-content">
               <h3 class="item-name">{{ item.name }}</h3>

@@ -1,3 +1,17 @@
+// ── Variables ──────────────────────────────────────────────────────────────
+$primary-black:   #1E1E1E;
+$accent-gold:     #C8A951;
+$light-bg:        #F5F5F5;
+$success-green:   #2E7D32;
+$warning-orange:  #F57C00;
+$error-red:       #C62828;
+$info-blue:       #1976D2;
+$text-dark:       #2C2C2C;
+$text-light:      #666666;
+$text-muted:      #999999;
+$white:           #FFFFFF;
+$border-light:    #EFEFEF;
+
 .tables-container {
   width: 100%;
   padding: 2rem 1rem;
@@ -16,20 +30,20 @@
     h1 {
       margin: 0 0 0.5rem 0;
       font-size: 1.75rem;
-      color: var(--text-primary, #1a1a1a);
+      color: $primary-black;
       display: flex;
       align-items: center;
       gap: 0.5rem;
 
       .material-icons {
         font-size: 2rem;
-        color: var(--primary-color, #4a90e2);
+        color: $accent-gold;
       }
     }
 
     p {
       margin: 0;
-      color: var(--text-secondary, #666);
+      color: $text-light;
       font-size: 0.95rem;
     }
   }
@@ -51,11 +65,12 @@
   align-items: center;
   justify-content: center;
   padding: 4rem 2rem;
-  color: var(--text-secondary, #666);
+  color: $text-light;
 
   .material-icons {
     font-size: 3rem;
     margin-bottom: 1rem;
+    color: $accent-gold;
 
     &.spinning {
       animation: spin 1s linear infinite;
