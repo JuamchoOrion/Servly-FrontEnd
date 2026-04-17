@@ -51,11 +51,15 @@ export class ClientMenuComponent implements OnInit, OnDestroy {
   }
 
   private loadMenu(): void {
-    console.log('🔵 [ClientMenuComponent] Iniciando carga de menú...');
+    console.log('🔵 [ClientMenuComponent] Iniciando carga de menú (endpoint público)...');
     this.clientService.getMenu()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (items: MenuItem[]) => {
+        next: (response: any) => {
+          // El endpoint público retorna un array directo o respuesta paginada
+          const items = Array.isArray(response)
+            ? response
+            : (response.content || response.data || []);
           console.log('✅ [ClientMenuComponent] Menú recibido:', items.length, 'productos');
           this.menuItems = items;
           this.filteredItems = items;

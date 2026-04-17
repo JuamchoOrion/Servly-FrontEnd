@@ -62,7 +62,8 @@ export class QrGeneratorService {
 
     const mergedOptions = { ...this.DEFAULT_OPTIONS, ...options };
     const baseUrl = this.getBaseUrl();
-    const qrUrl = `${baseUrl}/table?number=${tableNumber}`;
+    // Generar URL que redirige a cliente con número de mesa como parámetro
+    const qrUrl = `${baseUrl}/client?table=${tableNumber}`;
 
     try {
       const dataUrl = await QRCode.toDataURL(qrUrl, {

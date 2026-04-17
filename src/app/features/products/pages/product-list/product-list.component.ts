@@ -231,14 +231,15 @@ export class ProductListComponent implements OnInit, OnDestroy {
    * Obtiene el nombre de la categoría
    */
   getCategoryName(product: Product): string {
-    return product.category || '-';
+    // Usar categoryName si está disponible en la respuesta del API
+    return (product as any).categoryName || product.category || '-';
   }
 
   /**
    * Obtiene la URL de imagen o una imagen por defecto
    */
   getImageUrl(product: Product): string {
-    return product.image || 'assets/images/no-image.png';
+    return product.imageUrl || product.image || 'assets/images/no-image.png';
   }
 
   /**

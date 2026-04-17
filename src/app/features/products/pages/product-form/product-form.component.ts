@@ -118,12 +118,18 @@ export class ProductFormComponent implements OnInit, OnDestroy {
           this.productForm.patchValue({
             name: product.name,
             description: product.description,
-            price: product.basePrice,
+            price: product.basePrice || product.price,
             categoryId: product.id, // Ajustar según respuesta real del backend
             recipeId: product.id || '', // Ajustar según respuesta real
             active: product.active ?? true,
-            image: product.image || ''
+            image: product.imageUrl || product.image || ''
           });
+
+          // Mostrar imagen actual si existe
+          if (product.imageUrl || product.image) {
+            this.imagePreviewUrl = product.imageUrl || product.image || null;
+          }
+
           this.isLoading = false;
           this.cdr.markForCheck();
         },
@@ -152,18 +158,28 @@ export class ProductFormComponent implements OnInit, OnDestroy {
 
     const formData = this.productForm.value as any;
 
-    const request: CreateProductRequest = {
+    const productData = {
       name: formData.name.trim(),
       description: formData.description.trim(),
       price: parseFloat(formData.price.toString()),
-      productCategoryId: parseInt(formData.categoryId.toString()),
-      recipeId: formData.recipeId ? parseInt(formData.recipeId.toString()) : undefined,
       active: formData.active
     };
 
+    // Si estamos editando y hay imagen, usar updateProductWithImage
+    // Si solo tenemos cambios normales, usar updateProduct
     const operation$ = this.isEditMode && this.productId
-      ? this.productService.updateProduct(this.productId, request)
-      : this.productService.createProduct(request);
+      ? this.imageFile
+        ? this.productService.updateProductWithImage(this.productId, productData, this.imageFile)
+        : this.productService.updateProduct(this.productId, {
+            ...productData,
+            productCategoryId: parseInt(formData.categoryId.toString()),
+            recipeId: formData.recipeId ? parseInt(formData.recipeId.toString()) : undefined
+          })
+      : this.productService.createProduct({
+          ...productData,
+          productCategoryId: parseInt(formData.categoryId.toString()),
+          recipeId: formData.recipeId ? parseInt(formData.recipeId.toString()) : undefined
+        });
 
     operation$
       .pipe(takeUntil(this.destroy$))

@@ -64,15 +64,19 @@ export class ClientService {
   }
 
   /**
-   * Obtiene el menú disponible
+   * Obtiene el menú disponible (SIN AUTENTICACIÓN - endpoint público)
+   * GET /api/menu/products o /api/products/active?page=0&size=10
    */
   getMenu(): Observable<MenuItem[]> {
-    console.log('🔵 [ClientService] Cargando menú...');
-    return this.http.get<MenuItem[]>(
-      `${this.apiUrl}/api/menu/products?page=0&size=100`,
-      { withCredentials: true }
+    console.log('🔵 [ClientService] Cargando menú desde endpoint público...');
+    // Usar endpoint público sin autenticación
+    return this.http.get<any>(
+      `${this.apiUrl}/api/menu/products`,
+      { withCredentials: false } // Sin credenciales para endpoint público
     ).pipe(
-      tap(items => {
+      tap(response => {
+        // Manejar tanto array directo como respuesta paginada
+        const items = Array.isArray(response) ? response : (response.content || response.data || []);
         console.log('✅ [ClientService] Menú cargado:', items.length, 'productos');
       }),
       catchError(error => {
@@ -83,12 +87,12 @@ export class ClientService {
   }
 
   /**
-   * Obtiene las categorías del menú
+   * Obtiene las categorías del menú (SIN AUTENTICACIÓN - endpoint público)
    */
   getMenuCategories(): Observable<any> {
     return this.http.get<any>(
       `${this.apiUrl}/api/menu/categories`,
-      { withCredentials: true }
+      { withCredentials: false } // Sin credenciales para endpoint público
     ).pipe(
       catchError(error => {
         console.warn('⚠️ [ClientService] Error cargando categorías (no es crítico):', error);
@@ -99,12 +103,13 @@ export class ClientService {
   }
 
   /**
-   * Detalle de un producto
+   * Detalle de un producto (SIN AUTENTICACIÓN - endpoint público)
+   * GET /api/menu/products/{id}
    */
   getMenuItemDetail(itemId: number): Observable<MenuItem> {
     return this.http.get<MenuItem>(
       `${this.apiUrl}/api/menu/products/${itemId}`,
-      { withCredentials: true }
+      { withCredentials: false } // Sin credenciales para endpoint público
     );
   }
 
