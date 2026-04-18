@@ -1,757 +1,826 @@
-// ── Variables ──────────────────────────────────────────────────────────────
-$primary-black:   #1E1E1E;
-$accent-gold:     #C8A951;
-$light-bg:        #F5F5F5;
-$success-green:   #2E7D32;
-$warning-orange:  #F57C00;
-$error-red:       #C62828;
-$info-blue:       #1976D2;
-$text-dark:       #2C2C2C;
-$text-light:      #666666;
-$text-muted:      #999999;
-$white:           #FFFFFF;
-$border-light:    #EFEFEF;
+// ── Variables ─────────────────────────────────────────────────────────────
+$primary-color: #FF9500;
+$primary-dark: #F7A500;
+$success-color: #51CF66;
+$warning-color: #FFA500;
+$error-color: #FF6B6B;
 
+$status-pending: #FFB347;
+$status-preparing: #FF9500;
+$status-served: #51CF66;
+$status-paid: #2E7D32;
+
+$bg-light: #f8f9fa;
+$bg-white: #ffffff;
+$text-dark: #2c3e50;
+$text-muted: #6c757d;
+$border-color: #e0e0e0;
+
+$radius-sm: 4px;
+$radius-md: 8px;
+$radius-lg: 12px;
+
+$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+$shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+
+// ── Estilos Globales ───────────────────────────────────────────────────────
 .table-orders-page {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background: $light-bg;
+  background: $bg-light;
+  color: $text-dark;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 
-  .orders-header {
-    background: linear-gradient(135deg, $accent-gold 0%, #B8941D 100%);
-    color: $primary-black;
-    padding: 24px;
+// ── Header ─────────────────────────────────────────────────────────────────
+.orders-header {
+  background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
+  color: white;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: $shadow-md;
+  min-height: 80px;
+
+  .header-left {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 8px rgba($accent-gold, 0.15);
-
-    .header-content h1 {
-      margin: 0;
-      font-size: 28px;
-      font-weight: 700;
-      color: $primary-black;
-    }
-
-    .header-content p {
-      margin: 8px 0 0 0;
-      font-size: 14px;
-      color: rgba($primary-black, 0.8);
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 12px;
-
-      .btn {
-        background: rgba($primary-black, 0.15);
-        border: none;
-        color: $primary-black;
-        padding: 10px;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s ease;
-
-        &:hover {
-          background: rgba($primary-black, 0.25);
-        }
-      }
-    }
-  }
-
-  .orders-container {
-    flex: 1;
-    padding: 24px;
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-
-    .filters-section {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 24px;
-      background: $white;
-      padding: 16px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-      label {
-        font-weight: 600;
-        color: $text-dark;
-        white-space: nowrap;
-      }
-
-      select {
-        flex: 1;
-        max-width: 300px;
-        padding: 10px 12px;
-        border: 1px solid $border-light;
-        border-radius: 6px;
-        font-size: 14px;
-        background: $white;
-        cursor: pointer;
-        transition: border-color 0.3s;
-
-        &:hover,
-        &:focus {
-          border-color: $accent-gold;
-          outline: none;
-        }
-      }
-    }
-  }
-
-  .loading-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 20px;
-    text-align: center;
-
-    .loading-spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid $border-light;
-      border-top: 4px solid $accent-gold;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    p {
-      margin-top: 20px;
-      color: $text-light;
-      font-size: 16px;
-    }
-  }
-
-  .error-banner {
-    background: rgba($error-red, 0.1);
-    border-left: 4px solid $error-red;
-    padding: 16px;
-    border-radius: 4px;
-    display: flex;
-    gap: 12px;
-    margin-bottom: 24px;
-
-    .material-icons {
-      color: $error-red;
-      flex-shrink: 0;
-    }
-  }
-
-  .orders-list {
-    display: flex;
-    flex-direction: column;
     gap: 16px;
-    margin-bottom: 24px;
-  }
+    flex: 1;
 
-  .order-card {
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-
-    &.status-pending {
-      border-left: 4px solid #ffc107;
-    }
-
-    &.status-preparing {
-      border-left: 4px solid #17a2b8;
-    }
-
-    &.status-served {
-      border-left: 4px solid #28a745;
-    }
-
-    &.status-paid {
-      border-left: 4px solid #6c757d;
-    }
-
-    .order-header {
-      padding: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .btn-back {
+      width: 44px;
+      height: 44px;
+      border-radius: $radius-md;
+      border: none;
+      background: rgba(white, 0.2);
+      color: white;
       cursor: pointer;
-      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
 
       &:hover {
-        background: #f8f9fa;
-      }
-
-      .order-info {
-        flex: 1;
-
-        .order-id {
-          display: block;
-          font-weight: 600;
-          color: #333;
-        }
-
-        .order-time {
-          display: block;
-          font-size: 12px;
-          color: #999;
-          margin-top: 4px;
-        }
-      }
-
-      .order-status {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 14px;
-        font-weight: 500;
-        margin: 0 20px;
-
-        .material-icons {
-          font-size: 20px;
-        }
-      }
-
-      .expand-icon {
-        .material-icons {
-          cursor: pointer;
-        }
+        background: rgba(white, 0.3);
+        transform: scale(1.05);
       }
     }
 
-    .order-details {
-      padding: 0 16px 16px;
-      border-top: 1px solid #eee;
-
-      .items-section {
-        margin-bottom: 16px;
-
-        h3 {
-          margin: 0 0 12px 0;
-          font-size: 14px;
-          font-weight: 600;
-          color: #333;
-        }
-
-        .items-list {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-
-          .order-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
-            background: #f8f9fa;
-            border-radius: 4px;
-            font-size: 14px;
-
-            .item-name {
-              flex: 1;
-              color: #333;
-            }
-
-            .item-qty {
-              color: #999;
-              margin: 0 12px;
-            }
-
-            .item-price {
-              font-weight: 600;
-              color: #667eea;
-            }
-          }
-        }
+    .header-info {
+      h1 {
+        margin: 0 0 4px 0;
+        font-size: 24px;
+        font-weight: 700;
       }
-
-      .total-section {
-        padding: 12px;
-        background: #f8f9fa;
-        border-radius: 4px;
-        margin-bottom: 16px;
-
-        .total-row {
-          display: flex;
-          justify-content: space-between;
-          font-weight: 600;
-          color: #333;
-        }
-      }
-
-      .order-actions {
-        display: flex;
-        gap: 12px;
-        margin-top: 16px;
-        flex-wrap: wrap;
-
-        .status-change-group {
-          display: flex;
-          gap: 8px;
-          align-items: flex-end;
-          flex: 1;
-          min-width: 300px;
-
-          .status-input {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex: 1;
-
-            label {
-              font-size: 13px;
-              font-weight: 600;
-              color: $text-dark;
-            }
-
-            select {
-              padding: 10px 12px;
-              border: 2px solid $accent-gold;
-              border-radius: 6px;
-              background: $white;
-              color: $text-dark;
-              font-size: 14px;
-              cursor: pointer;
-              transition: all 0.3s ease;
-
-              &:hover:not(:disabled) {
-                background: rgba($accent-gold, 0.05);
-                box-shadow: 0 2px 8px rgba($accent-gold, 0.15);
-              }
-
-              &:focus {
-                outline: none;
-                box-shadow: 0 0 0 3px rgba($accent-gold, 0.2);
-              }
-
-              &:disabled {
-                background: #f5f5f5;
-                cursor: not-allowed;
-                opacity: 0.6;
-              }
-
-              option {
-                padding: 8px;
-                background: $white;
-                color: $text-dark;
-              }
-            }
-          }
-
-          .btn-primary {
-            padding: 10px 16px;
-            background: $accent-gold;
-            color: $primary-black;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-
-            &:hover:not(:disabled) {
-              background: #B8941D;
-              box-shadow: 0 4px 12px rgba($accent-gold, 0.3);
-              transform: translateY(-2px);
-            }
-
-            &:active:not(:disabled) {
-              transform: translateY(0);
-            }
-
-            &:disabled {
-              background: #ccc;
-              cursor: not-allowed;
-              opacity: 0.6;
-            }
-
-            .material-icons {
-              font-size: 20px;
-            }
-          }
-        }
-
-        .btn {
-          flex: 0 1 auto;
-          min-width: 140px;
-          padding: 10px 16px;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-weight: 500;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          transition: all 0.3s ease;
-
-
-          &.btn-secondary {
-            background: #e9ecef;
-            color: #333;
-
-            &:hover {
-              background: #dee2e6;
-            }
-          }
-
-          .material-icons {
-            font-size: 18px;
-          }
-        }
-      }
-    }
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-
-    .material-icons {
-      font-size: 64px;
-      color: #ccc;
-      display: block;
-      margin-bottom: 16px;
-    }
-
-    h2 {
-      color: #666;
-      margin: 0 0 8px 0;
-    }
-
-    p {
-      color: #999;
-      margin: 0;
-    }
-  }
-
-  .payment-section {
-    background: white;
-    padding: 24px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-    h3 {
-      margin: 0 0 16px 0;
-      color: #333;
-      font-weight: 600;
-    }
-
-    .payment-orders {
-      margin-bottom: 20px;
-      padding: 16px;
-      background: #f8f9fa;
-      border-radius: 6px;
-
-      .payment-orders-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-
-        h4 {
-          margin: 0;
-          color: #333;
-          font-size: 14px;
-          font-weight: 600;
-        }
-
-        .header-actions {
-          display: flex;
-          gap: 8px;
-
-          .btn-link {
-            background: none;
-            border: none;
-            color: #667eea;
-            cursor: pointer;
-            font-size: 12px;
-            padding: 4px 8px;
-            text-decoration: underline;
-
-            &:hover {
-              color: #5568d3;
-            }
-          }
-        }
-      }
-
-      .orders-to-pay {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-
-        .order-to-pay {
-          background: white;
-          padding: 12px;
-          border-radius: 4px;
-          border: 1px solid #ddd;
-
-          .checkbox-label {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-
-            input[type="checkbox"] {
-              width: 18px;
-              height: 18px;
-              margin-right: 12px;
-              cursor: pointer;
-              accent-color: #667eea;
-            }
-
-            .order-info {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              flex: 1;
-
-              .order-id {
-                font-weight: 500;
-                color: #333;
-              }
-
-              .order-amount {
-                font-weight: 600;
-                color: #667eea;
-                font-size: 14px;
-              }
-            }
-
-            &:hover {
-              background: #f0f0f0;
-            }
-          }
-        }
-      }
-    }
-
-    .payment-info {
-      margin-bottom: 20px;
-      padding: 12px;
-      background: #f8f9fa;
-      border-radius: 6px;
-    }
-
-    .payment-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid #eee;
-      font-size: 16px;
-      font-weight: 500;
-
-      &:last-child {
-        border-bottom: none;
-      }
-    }
-
-    .payment-form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-
-      .form-group {
-        display: flex;
-        flex-direction: column;
-
-        label {
-          margin-bottom: 8px;
-          font-weight: 500;
-          color: #333;
-          font-size: 14px;
-        }
-
-        select,
-        input {
-          padding: 10px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          font-size: 14px;
-          font-family: inherit;
-
-          &:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-          }
-        }
-      }
-
-      .btn-confirm {
-        padding: 12px 24px;
-        background: #28a745;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        transition: all 0.3s ease;
-
-        &:hover:not(:disabled) {
-          background: #218838;
-        }
-
-        &:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .material-icons {
-          font-size: 20px;
-        }
-      }
-    }
-
-    .empty-selection {
-      padding: 20px;
-      text-align: center;
-      background: #fff3cd;
-      border: 1px solid #ffc107;
-      border-radius: 4px;
-      color: #856404;
 
       p {
         margin: 0;
-        font-size: 14px;
+        font-size: 13px;
+        opacity: 0.9;
       }
     }
+  }
 
-    .paid-orders-section {
-      margin-top: 32px;
-      background: $white;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      overflow: hidden;
+  .header-actions {
+    display: flex;
+    gap: 12px;
 
-      .paid-orders-header {
-        background: rgba($success-green, 0.05);
-        border-left: 4px solid $success-green;
-        padding: 16px 20px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+    button {
+      width: 44px;
+      height: 44px;
+      border-radius: $radius-md;
+      border: none;
+      background: rgba(white, 0.2);
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
 
-        &:hover {
-          background: rgba($success-green, 0.1);
-        }
+      &:hover {
+        background: rgba(white, 0.3);
+        transform: scale(1.05);
+      }
+    }
+  }
+}
 
-        h3 {
-          margin: 0;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-size: 16px;
-          font-weight: 600;
-          color: $text-dark;
+// ── Container ──────────────────────────────────────────────────────────────
+.orders-container {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
 
-          .material-icons {
-            color: $success-green;
-            font-size: 24px;
-          }
+// ── Loading State ──────────────────────────────────────────────────────────
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
 
-          .badge {
-            background: $success-green;
-            color: $white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 700;
-          }
-        }
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba($primary-color, 0.2);
+    border-top-color: $primary-color;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  p {
+    margin: 0;
+    color: $text-muted;
+    font-size: 15px;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Error Banner ───────────────────────────────────────────────────────────
+.error-banner {
+  background: rgba($error-color, 0.08);
+  border-left: 4px solid $error-color;
+  border-radius: $radius-md;
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+
+  .material-icons {
+    color: $error-color;
+    flex-shrink: 0;
+  }
+
+  .error-content {
+    strong {
+      display: block;
+      color: $error-color;
+      margin-bottom: 4px;
+    }
+
+    p {
+      margin: 0;
+      color: $text-dark;
+      font-size: 14px;
+    }
+  }
+}
+
+// ── Empty State ────────────────────────────────────────────────────────────
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+  color: $text-muted;
+
+  .material-icons {
+    font-size: 80px;
+    opacity: 0.3;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 24px;
+    color: $text-dark;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .btn {
+    margin-top: 16px;
+  }
+}
+
+// ── Content Area ───────────────────────────────────────────────────────────
+.content-area {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// ── Controls Section ───────────────────────────────────────────────────────
+.controls-section {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  background: $bg-white;
+  padding: 16px;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    label {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .status-filter {
+      padding: 8px 12px;
+      border: 1px solid $border-color;
+      border-radius: $radius-md;
+      font-size: 14px;
+      background: white;
+      cursor: pointer;
+
+      &:focus {
+        outline: 2px solid $primary-color;
+        outline-offset: 2px;
+      }
+    }
+  }
+
+  .orders-summary {
+    display: flex;
+    gap: 16px;
+    margin-left: auto;
+
+    .summary-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      background: rgba($primary-color, 0.08);
+      border-radius: $radius-md;
+
+      .badge-label {
+        font-size: 12px;
+        color: $text-muted;
       }
 
-      .paid-orders-list {
-        padding: 16px 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        max-height: 400px;
-        overflow-y: auto;
+      .badge-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: $primary-color;
+      }
 
-        .paid-order-card {
-          background: rgba($success-green, 0.02);
-          border: 1px solid rgba($success-green, 0.2);
-          border-radius: 6px;
-          padding: 12px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          transition: all 0.3s ease;
+      &.total {
+        background: rgba($success-color, 0.08);
 
-          &:hover {
-            background: rgba($success-green, 0.05);
-            border-color: rgba($success-green, 0.4);
-          }
-
-          .paid-order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-
-            .order-info {
-              display: flex;
-              flex-direction: column;
-              gap: 4px;
-
-              .order-id {
-                font-weight: 600;
-                color: $text-dark;
-                font-size: 14px;
-              }
-
-              .order-time {
-                font-size: 12px;
-                color: $text-muted;
-              }
-            }
-
-            .order-amount {
-              display: flex;
-              align-items: center;
-              gap: 8px;
-
-              .material-icons {
-                color: $success-green;
-                font-size: 20px;
-              }
-
-              .amount {
-                font-weight: 700;
-                color: $success-green;
-                font-size: 16px;
-              }
-            }
-          }
+        .badge-value {
+          color: $success-color;
         }
       }
     }
   }
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
+// ── Orders Section ────────────────────────────────────────────────────────
+.orders-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid $border-color;
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      flex: 1;
+    }
+
+    .order-count {
+      background: $primary-color;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    &.collapsed {
+      cursor: pointer;
+      user-select: none;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.02);
+      }
+
+      .toggle-icon {
+        margin-left: auto;
+      }
+    }
   }
-  100% {
-    transform: rotate(360deg);
+}
+
+// ── Orders Grid ────────────────────────────────────────────────────────────
+.orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+// ── Order Card ────────────────────────────────────────────────────────────
+.order-card {
+  background: $bg-white;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  transition: all 0.3s ease;
+  position: relative;
+  border-left: 4px solid transparent;
+
+  &.status-pending {
+    border-left-color: $status-pending;
+  }
+
+  &.status-preparing {
+    border-left-color: $status-preparing;
+  }
+
+  &.status-served {
+    border-left-color: $status-served;
+  }
+
+  &.status-paid {
+    border-left-color: $status-paid;
+    opacity: 0.7;
+  }
+
+  &:hover:not(.status-paid) {
+    box-shadow: $shadow-lg;
+    transform: translateY(-2px);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 16px;
+    border-bottom: 1px solid $border-color;
+    gap: 12px;
+
+    .order-title {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .order-id {
+        font-weight: 700;
+        font-size: 16px;
+      }
+
+      .order-time {
+        font-size: 12px;
+        color: $text-muted;
+      }
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      background: rgba($status-pending, 0.1);
+      color: $status-pending;
+
+      .material-icons {
+        font-size: 16px;
+      }
+
+      &.status-in_preparation {
+        background: rgba($status-preparing, 0.1);
+        color: $status-preparing;
+      }
+
+      &.status-served {
+        background: rgba($status-served, 0.1);
+        color: $status-served;
+      }
+
+      &.status-paid {
+        background: rgba($status-paid, 0.1);
+        color: $status-paid;
+      }
+    }
+  }
+
+  .card-body {
+    padding: 16px;
+
+    .items-section {
+      margin-bottom: 16px;
+
+      h3 {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .items-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        .order-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          padding: 8px;
+          background: rgba(0, 0, 0, 0.02);
+          border-radius: $radius-sm;
+          font-size: 13px;
+
+          .item-details {
+            flex: 1;
+            min-width: 0;
+
+            .item-name {
+              font-weight: 600;
+              margin-bottom: 4px;
+              word-break: break-word;
+            }
+
+            .item-quantity {
+              color: $text-muted;
+              font-size: 12px;
+            }
+          }
+
+          .item-price {
+            font-weight: 700;
+            color: $primary-color;
+            flex-shrink: 0;
+            margin-left: 8px;
+          }
+        }
+      }
+    }
+
+    .totals-section {
+      border-top: 1px solid $border-color;
+      padding-top: 12px;
+      margin-bottom: 16px;
+
+      .total-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        margin-bottom: 8px;
+
+        &.total {
+          font-weight: 700;
+          font-size: 16px;
+          color: $primary-color;
+          margin-top: 8px;
+        }
+      }
+    }
+
+    .card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      .action-group {
+        display: flex;
+        gap: 8px;
+
+        .status-selector {
+          flex: 1;
+          padding: 8px;
+          border: 1px solid $border-color;
+          border-radius: $radius-sm;
+          font-size: 13px;
+        }
+
+        .btn-update {
+          padding: 8px 12px;
+          background: $primary-color;
+          color: white;
+          border: none;
+          border-radius: $radius-sm;
+          cursor: pointer;
+          font-size: 13px;
+          font-weight: 600;
+
+          &:hover:not(:disabled) {
+            background: $primary-dark;
+          }
+
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+        }
+      }
+
+      .btn-success {
+        padding: 8px 12px;
+        background: rgba($success-color, 0.1);
+        color: $success-color;
+        border: 1px solid rgba($success-color, 0.3);
+        border-radius: $radius-sm;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+
+        &.selected {
+          background: $success-color;
+          color: white;
+          border-color: $success-color;
+        }
+
+        .material-icons {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+
+  .card-amount {
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.02);
+
+    .amount-label {
+      font-size: 13px;
+      color: $text-muted;
+    }
+
+    .amount-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: $status-paid;
+    }
+  }
+
+  .expand-toggle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $text-muted;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: $primary-color;
+    }
+  }
+
+  &.selected {
+    box-shadow: $shadow-lg;
+  }
+}
+
+// ── Paid Orders Section ─────────────────────────────────────────────────────
+.paid-section {
+  .section-header {
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.02);
+    }
+  }
+}
+
+// ── Payment Section ───────────────────────────────────────────────────────
+.payment-section {
+  background: $bg-white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  padding: 24px;
+  border-top: 4px solid $success-color;
+
+  .payment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid $border-color;
+
+    h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .payment-amount {
+      font-size: 24px;
+      font-weight: 700;
+      color: $success-color;
+    }
+  }
+
+  .payment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      label {
+        font-weight: 600;
+        font-size: 13px;
+      }
+
+      .form-input,
+      select {
+        padding: 10px 12px;
+        border: 1px solid $border-color;
+        border-radius: $radius-md;
+        font-size: 14px;
+
+        &:focus {
+          outline: 2px solid $primary-color;
+          outline-offset: 2px;
+          border-color: $primary-color;
+        }
+      }
+
+      .change-display {
+        background: rgba($success-color, 0.08);
+        padding: 12px;
+        border-radius: $radius-md;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .label {
+          font-size: 13px;
+          color: $text-muted;
+        }
+
+        .value {
+          font-size: 18px;
+          font-weight: 700;
+          color: $success-color;
+        }
+      }
+    }
+
+    .payment-methods {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+
+      .payment-method {
+        padding: 12px;
+        border: 2px solid $border-color;
+        border-radius: $radius-md;
+        background: transparent;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+
+        .material-icons {
+          font-size: 24px;
+        }
+
+        &:hover {
+          border-color: $primary-color;
+          color: $primary-color;
+        }
+
+        &.active {
+          background: $primary-color;
+          color: white;
+          border-color: $primary-color;
+        }
+      }
+    }
+  }
+
+  .btn-confirm-payment,
+  .btn-primary,
+  .btn-secondary {
+    padding: 12px;
+    border: none;
+    border-radius: $radius-md;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+
+    .material-icons {
+      font-size: 20px;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-confirm-payment,
+  .btn-primary {
+    margin-top: 12px;
+    background: $success-color;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: darken($success-color, 10%);
+      transform: scale(1.02);
+    }
+  }
+
+  .btn-secondary {
+    background: $border-color;
+    color: $text-dark;
+
+    &:hover:not(:disabled) {
+      background: darken($border-color, 10%);
+    }
+  }
+}
+
+// ── Responsive Design ──────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .orders-header {
+    flex-direction: column;
+    gap: 12px;
+    min-height: auto;
+
+    .header-left {
+      width: 100%;
+    }
+
+    .header-actions {
+      align-self: flex-end;
+    }
+  }
+
+  .orders-container {
+    padding: 16px;
+  }
+
+  .controls-section {
+    flex-direction: column;
+    gap: 12px;
+
+    .orders-summary {
+      margin-left: 0;
+      width: 100%;
+      justify-content: space-around;
+    }
+  }
+
+  .orders-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-methods {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 }
 
