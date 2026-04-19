@@ -78,6 +78,11 @@
               </span>
             </div>
           </div>
+          <!-- ✅ NUEVO: Botón para borrar lote expirado -->
+          <button class="btn-delete-batch" (click)="deleteExpiredBatch(batch)" title="Eliminar lote expirado">
+            <span class="material-icons">delete_forever</span>
+            <span>{{ i18n.translate('inventory.delete') }}</span>
+          </button>
         </div>
       </div>
 

@@ -317,6 +317,34 @@ export class InventoryComponent implements OnInit {
       });
   }
 
+  /**
+   * ✅ NUEVO: Elimina un lote expirado
+   */
+  deleteExpiredBatch(batch: StockBatch): void {
+    const confirmDelete = confirm(
+      `¿Deseas eliminar el lote expirado "${batch.batchNumber}"?\n\n` +
+      `Cantidad: ${batch.quantity} unidades\n` +
+      `Vencimiento: ${this.formatDate(batch.expiryDate)}`
+    );
+
+    if (!confirmDelete) return;
+
+    this.stockBatchService.deleteBatch(batch.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          console.log('✅ Lote eliminado:', batch.batchNumber);
+          // Remover de la lista
+          this.expiredBatches = this.expiredBatches.filter(b => b.id !== batch.id);
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('❌ Error al eliminar lote:', error);
+          alert('Error al eliminar el lote. Por favor intenta de nuevo.');
+        }
+      });
+  }
+
   // === MÉTODOS PARA CREAR NUEVO LOTE ===
 
   /**
@@ -639,3 +667,5 @@ export class InventoryComponent implements OnInit {
     return pages;
   }
 }
+
+
