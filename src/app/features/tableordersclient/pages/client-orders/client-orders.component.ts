@@ -6,11 +6,13 @@ import { takeUntil, startWith, switchMap } from 'rxjs/operators';
 import { ClientService } from '../../../../core/services/client.service';
 import { Order } from '../../../../core/dtos/client.dto';
 import { I18nService } from '../../../../core/services/i18n.service';
+import { ClientNavbarComponent } from '../../../../shared/components/client-navbar/client-navbar.component';
+import { FooterComponent } from '../../../../shared/components/footer/footer.component';
 
 @Component({
   selector: 'app-client-orders',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ClientNavbarComponent, FooterComponent],
   templateUrl: './client-orders.component.html',
   styleUrls: ['./client-orders.component.scss']
 })

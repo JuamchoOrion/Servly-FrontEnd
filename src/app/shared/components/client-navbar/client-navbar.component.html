@@ -1,0 +1,24 @@
+<nav class="client-navbar">
+  <!-- Logo -->
+  <div class="navbar-logo">
+    <span class="logo-text">Servly</span>
+  </div>
+
+  <!-- User Section -->
+  <div class="user-section" *ngIf="isAuthenticated">
+    <button class="user-btn" (click)="toggleDropdown()" [attr.aria-label]="'Menú de usuario: ' + userEmail">
+      <span class="material-icons user-icon">account_circle</span>
+      <span class="user-email">{{ userEmail }}</span>
+      <span class="material-icons dropdown-arrow" [class.open]="dropdownOpen">expand_more</span>
+    </button>
+
+    <!-- Dropdown Menu -->
+    <div class="user-dropdown" *ngIf="dropdownOpen" role="menu">
+      <button class="dropdown-item" (click)="logout()" role="menuitem" [attr.aria-label]="i18n.translate('common.logout')">
+        <span class="material-icons">logout</span>
+        <span>{{ i18n.translate('common.logout') }}</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
