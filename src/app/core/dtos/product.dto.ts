@@ -5,13 +5,15 @@
 
 export interface RecipeItem {
   id: number;
-  itemId: number;
-  itemName: string;
-  baseQuantity: number;
+  itemId?: number; // ID del item (a veces viene así)
+  item?: { id: number; name: string }; // O como objeto completo
+  itemName?: string; // Nombre del item
+  quantity?: number; // Campo alternativo para cantidad
+  baseQuantity?: number;
   annotation?: string | null;
   isOptional: boolean;
-  minQuantity: number;
-  maxQuantity: number;
+  minQuantity?: number;
+  maxQuantity?: number;
 }
 
 export interface ItemDetail {
@@ -41,6 +43,7 @@ export interface Recipe {
   quantity: number;
   description?: string;
   itemDetails?: RecipeItem[];
+  itemDetailList?: RecipeItem[]; // API también retorna con este nombre
   createdAt?: string;
   updatedAt?: string;
 }
@@ -59,8 +62,10 @@ export interface Product {
   name: string;
   description: string;
   basePrice: number; // Campo del backend es basePrice, no price
+  price?: number; // Alias para basePrice
   category?: string;
   image?: string;
+  imageUrl?: string; // URL de imagen en Cloudinary (desde POST con imagen)
   active?: boolean;
   recipeItems?: RecipeItem[]; // Items opcionales de la receta
   createdAt?: string;
@@ -74,6 +79,7 @@ export interface CreateProductRequest {
   productCategoryId: number;
   active?: boolean;
   recipeId?: number;
+  image?: File; // Para enviar como FormData
 }
 
 export interface UpdateProductRequest {
@@ -83,7 +89,8 @@ export interface UpdateProductRequest {
   basePrice?: number;
   category?: string;
   active?: boolean;
-  image?: string;
+  image?: string | File; // URL o archivo
+  imageUrl?: string; // URL después de actualizar
 }
 
 export interface ProductFormData {

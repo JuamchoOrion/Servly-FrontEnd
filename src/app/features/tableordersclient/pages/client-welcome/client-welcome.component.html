@@ -1,0 +1,44 @@
+<div class="client-welcome">
+  <div class="welcome-container">
+    <div class="logo">
+      <span class="material-icons">restaurant</span>
+    </div>
+
+    <h1>{{ i18n.translate('client.welcome.title') }}</h1>
+    <p class="subtitle">{{ i18n.translate('client.welcome.subtitle') }}</p>
+
+    <form [formGroup]="form" (ngSubmit)="openSession()" class="welcome-form">
+      <div class="form-group">
+        <label for="tableNumber">{{ i18n.translate('client.welcome.tableNumber') }}</label>
+        <input
+          id="tableNumber"
+          type="number"
+          class="form-input"
+          formControlName="tableNumber"
+          min="1"
+          max="999"
+          placeholder="{{ i18n.translate('client.welcome.enterTable') }}"
+        />
+        <span class="error" *ngIf="form.get('tableNumber')?.invalid && form.get('tableNumber')?.touched">
+          {{ i18n.translate('client.errors.invalidTable') }}
+        </span>
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary btn-lg"
+        [disabled]="form.invalid || isLoading"
+      >
+        <span *ngIf="!isLoading" class="material-icons">login</span>
+        <span *ngIf="isLoading" class="spinner"></span>
+        {{ isLoading ? i18n.translate('client.loading') : i18n.translate('client.welcome.startOrder') }}
+      </button>
+    </form>
+
+    <div class="error-message" *ngIf="errorMessage">
+      <span class="material-icons">error</span>
+      {{ errorMessage }}
+    </div>
+  </div>
+</div>
+

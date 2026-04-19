@@ -25,8 +25,10 @@ export class App implements OnInit {
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
       const url = event.urlAfterRedirects;
-      this.showNavbar = !url.includes('/login');
-      this.showFooter = !url.includes('/login');
+      // Ocultar navbar en: /login y /client (flujo del cliente)
+      this.showNavbar = !url.includes('/login') && !url.includes('/client');
+      // Ocultar footer en: /login y /client (flujo del cliente)
+      this.showFooter = !url.includes('/login') && !url.includes('/client');
     });
   }
 }

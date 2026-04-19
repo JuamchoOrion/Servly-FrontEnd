@@ -1,6 +1,7 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { ClientService } from '../services/client.service';
 import { Router } from '@angular/router';
 import { BehaviorSubject, catchError, filter, switchMap, take, throwError } from 'rxjs';
 let isRefreshing = false;
@@ -21,16 +22,18 @@ const refreshTokenSubject = new BehaviorSubject<string | null>(null);
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
+  const clientService = inject(ClientService);
   const router = inject(Router);
 
-  // URLs excluidas (no requieren token)
+  // URLs excluidas (no requieren token JWT, pero SÍ envían cookies)
   const excludedUrls = [
     '/oauth2/',
     '/login/oauth2/',
     '/api/auth/login',
     '/api/auth/verify-2fa',
     '/api/auth/refresh',
-    '/n8n/',
+    '/api/client/session',     // Solo la sesión no requiere autenticación
+    '/api/menu/',              // Menú público
   ];
 
   const isExcluded = excludedUrls.some(url => req.url.includes(url));
@@ -38,6 +41,23 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // Logging para requests excluidos
   if (isExcluded) {
     console.log('🔵 [AuthInterceptor] Request EXCLUIDO (no requiere token):', req.method, req.url);
+    // ✅ IMPORTANTE: Siempre enviar withCredentials para mantener cookies
+    return next(req.clone({
+      withCredentials: true,
+      setHeaders: { 'Content-Type': 'application/json' }
+    }));
+  }
+
+  // ✅ Para /api/client/orders, /api/client/... (no excluidas), enviar con cookies
+  // El navegador envía automáticamente las cookies gracias a withCredentials: true
+  const isClientEndpoint = req.url.includes('/api/client/');
+
+  if (isClientEndpoint) {
+    console.log('🔵 [AuthInterceptor] Request de CLIENTE:', req.method, req.url);
+    console.log('🔵 [AuthInterceptor] SessionToken almacenado:', clientService.getSessionToken() ? '✅ SÍ' : '❌ NO');
+
+    // ✅ El navegador envía automáticamente las cookies del dominio (sessionToken)
+    // porque withCredentials: true está configurado
     return next(req.clone({
       withCredentials: true,
       setHeaders: { 'Content-Type': 'application/json' }

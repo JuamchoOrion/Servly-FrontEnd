@@ -1,3 +1,17 @@
+// ── Variables ──────────────────────────────────────────────────────────────
+$primary-black:   #1E1E1E;
+$accent-gold:     #C8A951;
+$light-bg:        #F5F5F5;
+$success-green:   #2E7D32;
+$warning-orange:  #F57C00;
+$error-red:       #C62828;
+$info-blue:       #1976D2;
+$text-dark:       #2C2C2C;
+$text-light:      #666666;
+$text-muted:      #999999;
+$white:           #FFFFFF;
+$border-light:    #EFEFEF;
+
 .product-form-container {
   width: 100%;
   max-width: 800px;
@@ -296,6 +310,128 @@
   }
 }
 
+// ══ Image Upload ════────────────────────────────────────────────────────
+.image-preview-container {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .image-preview {
+    max-width: 300px;
+    max-height: 300px;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid $border-light;
+    background-color: $light-bg;
+  }
+}
+
+.image-upload-area {
+  position: relative;
+  border: 2px dashed $accent-gold;
+  border-radius: 8px;
+  padding: 2rem 1rem;
+  text-align: center;
+  background-color: rgba($accent-gold, 0.05);
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  .file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .upload-content {
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+
+    .material-icons {
+      font-size: 2.5rem;
+      color: $accent-gold;
+    }
+
+    p {
+      margin: 0;
+      font-weight: 500;
+      color: $text-dark;
+    }
+
+    small {
+      color: $text-muted;
+      display: block;
+    }
+  }
+
+  &:hover:not(:disabled) {
+    border-color: $primary-black;
+    background-color: rgba($accent-gold, 0.1);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &.has-image {
+    display: none;
+  }
+}
+
+.btn-small {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.btn-danger {
+  background-color: $error-red;
+  color: white;
+  border: none;
+
+  &:hover:not(:disabled) {
+    background-color: scale-color($error-red, $lightness: -10%);
+  }
+}
+
+// Dark mode image upload
+:root.dark-mode {
+  .image-upload-area {
+    border-color: $accent-gold;
+    background-color: rgba($accent-gold, 0.05);
+
+    .upload-content {
+      p {
+        color: #ffffff;
+      }
+
+      small {
+        color: #999999;
+      }
+    }
+
+    &:hover:not(:disabled) {
+      background-color: rgba($accent-gold, 0.1);
+    }
+  }
+
+  .image-preview-container {
+    .image-preview {
+      background-color: #2a2a2a;
+      border-color: #404040;
+    }
+  }
+}
+
 // ══ Dark Mode ══────────────────────────────────────────────────────────
 :root.dark-mode {
   --text-primary: #ffffff;
@@ -338,4 +474,3 @@
     }
   }
 }
-

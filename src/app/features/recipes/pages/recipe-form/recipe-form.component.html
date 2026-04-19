@@ -91,7 +91,11 @@
       <div class="form-section">
         <h3>{{ i18n.translate('recipes.modal.itemsLabel') }}</h3>
 
-        <div class="items-list" formArrayName="itemDetails">
+        <div *ngIf="!isLoading && itemDetailsArray.length === 0" class="empty-state">
+          <p>No hay ingredientes agregados</p>
+        </div>
+
+        <div class="items-list" formArrayName="itemDetails" *ngIf="itemDetailsArray.length > 0">
           <div *ngFor="let item of itemDetailsArray.controls; let i = index" class="item-row" [formGroupName]="i">
             <!-- Item Select -->
             <div class="form-group">
@@ -99,15 +103,20 @@
                 {{ i18n.translate('recipes.modal.itemLabel') }}
                 <span class="required">*</span>
               </label>
-              <select
-                formControlName="itemId"
-                class="form-select"
-                [disabled]="isSaving">
-                <option [value]="null">{{ i18n.translate('common.selectOne') }}</option>
-                <option *ngFor="let it of items" [ngValue]="it.id">
-                  {{ it.name }}
-                </option>
-              </select>
+              <div class="select-wrapper">
+                <select
+                  formControlName="itemId"
+                  class="form-select"
+                  [disabled]="isSaving">
+                  <option [value]="null">{{ i18n.translate('common.selectOne') }}</option>
+                  <option *ngFor="let it of items" [ngValue]="it.id">
+                    {{ it.name }}
+                  </option>
+                </select>
+                <span class="item-selected" *ngIf="itemDetailsArray.at(i).get('itemId')?.value">
+                  ✓ {{ getItemNameFromControl(i) }}
+                </span>
+              </div>
             </div>
 
             <!-- Quantity -->
@@ -176,7 +185,7 @@
       <div class="form-actions">
         <button
           type="button"
-          (click)="cancel()"
+          (click)="cancelForm()"
           class="btn btn-secondary"
           [disabled]="isSaving">
           {{ i18n.translate('recipes.modal.cancel') }}

@@ -129,6 +129,21 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard(['ADMIN', 'STAFF'])]
   },
 
+  // Mesero - Gestión de mesas y órdenes
+  {
+    path: 'waiter',
+    loadChildren: () =>
+      import('./features/waiter/waiter.routes').then(m => m.waiterRoutes),
+    canActivate: [authGuard]
+  },
+
+  // Cliente - Órdenes desde QR
+  {
+    path: 'client',
+    loadChildren: () =>
+      import('./features/tableordersclient/tableorderclient.routes').then(m => m.TABLE_ORDER_CLIENT_ROUTES)
+  },
+
   // Wildcard - must be last
   { path: '**', redirectTo: 'login' }
 ];

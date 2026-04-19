@@ -1,0 +1,145 @@
+<div class="waiter-tables" role="main" aria-labelledby="page-title">
+  <!-- Header con navegación y controles -->
+  <header class="waiter-header">
+    <div class="header-content">
+      <div class="header-top">
+        <h1 id="page-title" class="page-title">{{ i18n.translate('waiter.tables.title') || 'Mesas' }}</h1>
+        <p class="page-subtitle">{{ i18n.translate('waiter.tables.subtitle') || 'Gestiona los pedidos de las mesas' }}</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button
+        class="btn btn-icon btn-refresh"
+        (click)="refreshTables()"
+        [disabled]="isLoading"
+        aria-label="Refrescar mesas"
+        title="Refrescar mesas">
+        <span class="material-icons">refresh</span>
+      </button>
+      <button
+        class="btn btn-icon btn-logout"
+        (click)="logout()"
+        aria-label="Cerrar sesión"
+        title="Cerrar sesión">
+        <span class="material-icons">logout</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="tables-container">
+    <!-- Estado de carga -->
+    <div class="loading-state" *ngIf="isLoading" role="status" aria-live="polite" aria-busy="true">
+      <div class="loading-spinner"></div>
+      <p>{{ i18n.translate('waiter.loading') || 'Cargando mesas...' }}</p>
+    </div>
+
+    <!-- Banner de error -->
+    <div class="error-banner" *ngIf="!isLoading && errorMessage" role="alert" aria-live="assertive">
+      <span class="material-icons">error</span>
+      <div class="error-content">
+        <strong>Error</strong>
+        <p>{{ errorMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Resumen de mesas (estadísticas) -->
+    <div class="tables-summary" *ngIf="!isLoading && tables.length > 0">
+      <div class="summary-card summary-occupied">
+        <span class="material-icons">people</span>
+        <div class="summary-info">
+          <span class="summary-label">Ocupadas</span>
+          <span class="summary-count">{{ (tables | slice:0 | filter:'OCCUPIED').length }}</span>
+        </div>
+      </div>
+      <div class="summary-card summary-available">
+        <span class="material-icons">check_circle</span>
+        <div class="summary-info">
+          <span class="summary-label">Disponibles</span>
+          <span class="summary-count">{{ (tables | filter:'AVAILABLE').length }}</span>
+        </div>
+      </div>
+      <div class="summary-card summary-reserved">
+        <span class="material-icons">event_busy</span>
+        <div class="summary-info">
+          <span class="summary-label">Reservadas</span>
+          <span class="summary-count">{{ (tables | filter:'RESERVED').length }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grilla de mesas -->
+    <div class="tables-grid" *ngIf="!isLoading && tables.length > 0" role="list" aria-label="Lista de mesas">
+      <div
+        *ngFor="let table of tables"
+        class="table-card"
+        [class.status-occupied]="table.status === 'OCCUPIED'"
+        [class.status-available]="table.status === 'AVAILABLE'"
+        [class.status-reserved]="table.status === 'RESERVED'"
+        [class.status-dirty]="table.status === 'DIRTY'"
+        (click)="selectTable(table.table_number || table.number || 0)"
+        (keydown.enter)="selectTable(table.table_number || table.number || 0)"
+        (keydown.space)="selectTable(table.table_number || table.number || 0)"
+        role="button"
+        [attr.aria-label]="'Mesa ' + (table.table_number || table.number) + ', Estado: ' + (i18n.translate('waiter.status.' + table.status) || table.status)"
+        [attr.aria-pressed]="selectedTableNumber === (table.table_number || table.number)"
+        tabindex="0">
+
+        <!-- Número de mesa -->
+        <div class="table-number">
+          <span class="number" aria-hidden="true">{{ table.table_number || table.number }}</span>
+        </div>
+
+        <!-- Estado badge (arriba a la derecha) -->
+        <div class="table-status-badge">
+          <span class="material-icons status-icon">{{ getStatusIcon(table.status) }}</span>
+          <span class="status-text">{{ i18n.translate('waiter.status.' + table.status) || table.status }}</span>
+        </div>
+
+        <!-- Ubicación (si existe) -->
+        <div class="table-location" *ngIf="table.location">
+          <span class="material-icons" aria-hidden="true">location_on</span>
+          <span class="location-text">{{ table.location }}</span>
+        </div>
+
+        <!-- Información de la mesa -->
+        <div class="table-details">
+          <!-- Capacidad -->
+          <div class="detail-item">
+            <span class="material-icons" aria-hidden="true">people</span>
+            <span class="detail-text">{{ table.capacity }} {{ i18n.translate('waiter.tables.capacity') || 'personas' }}</span>
+          </div>
+
+          <!-- Órdenes activas -->
+          <div class="detail-item" *ngIf="table.activeOrders && table.activeOrders > 0">
+            <span class="material-icons" aria-hidden="true">receipt</span>
+            <span class="detail-text">{{ table.activeOrders }} {{ i18n.translate('waiter.tables.orders') || 'órdenes' }}</span>
+          </div>
+
+          <!-- Total de cuenta -->
+          <div class="detail-item" *ngIf="table.totalBill && table.totalBill > 0">
+            <span class="material-icons" aria-hidden="true">attach_money</span>
+            <span class="detail-text bill-amount">${{ table.totalBill.toFixed(2) }}</span>
+          </div>
+        </div>
+
+        <!-- Acción (flecha o indicador) -->
+        <div class="table-action" aria-hidden="true">
+          <span class="material-icons">chevron_right</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado vacío -->
+    <div class="empty-state" *ngIf="!isLoading && tables.length === 0">
+      <span class="material-icons empty-icon">restaurant</span>
+      <h2>{{ i18n.translate('waiter.tables.empty') || 'Sin mesas disponibles' }}</h2>
+      <p>{{ i18n.translate('waiter.tables.emptyMessage') || 'No hay mesas para mostrar' }}</p>
+      <button class="btn btn-primary" (click)="refreshTables()">
+        <span class="material-icons">refresh</span>
+        Recargar
+      </button>
+    </div>
+  </main>
+</div>
+

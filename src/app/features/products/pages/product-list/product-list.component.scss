@@ -1,3 +1,18 @@
+// ── Variables ──────────────────────────────────────────────────────────────
+$primary-black:   #1E1E1E;
+$accent-gold:     #C8A951;
+$light-bg:        #F5F5F5;
+$success-green:   #2E7D32;
+$warning-orange:  #F57C00;
+$error-red:       #C62828;
+$info-blue:       #1976D2;
+$text-dark:       #2C2C2C;
+$text-light:      #666666;
+$text-muted:      #999999;
+$white:           #FFFFFF;
+$border-light:    #EFEFEF;
+
+// ══ Product List Styles ═══════════════════════════════════════════════════
 .products-container {
   width: 100%;
   padding: 2rem 1rem;
@@ -297,6 +312,37 @@
           color: #2196f3;
         }
 
+        &.cell-image {
+          width: 80px;
+          text-align: center;
+          padding: 0.5rem;
+
+          .product-thumbnail {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #eee;
+            background-color: #f5f5f5;
+          }
+
+          .no-image {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            border: 1px solid #eee;
+            color: #999;
+
+            .material-icons {
+              font-size: 1.5rem;
+            }
+          }
+        }
+
         &.cell-actions {
           display: flex;
           gap: 0.5rem;
@@ -445,4 +491,3 @@
     }
   }
 }
-

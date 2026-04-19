@@ -1,0 +1,140 @@
+<div class="orders-history-page" role="main">
+  <!-- Header -->
+  <header class="history-header">
+    <div class="header-content">
+      <h1>{{ i18n.translate('admin.ordersHistory.title') || 'Historial de Órdenes' }}</h1>
+      <p>{{ i18n.translate('admin.ordersHistory.subtitle') || 'Visualiza todas las órdenes del restaurante' }}</p>
+    </div>
+    <button class="btn btn-export" (click)="exportToCSV()" [disabled]="isLoading">
+      <span class="material-icons">download</span>
+      {{ i18n.translate('admin.ordersHistory.export') || 'Descargar CSV' }}
+    </button>
+  </header>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <label>{{ i18n.translate('admin.ordersHistory.filterByStatus') || 'Estado' }}</label>
+      <select [(ngModel)]="statusFilter" (change)="applyFilters()">
+        <option value="">{{ i18n.translate('admin.ordersHistory.allStatus') || 'Todos' }}</option>
+        <option value="PENDING">{{ i18n.translate('waiter.status.PENDING') || 'Pendiente' }}</option>
+        <option value="IN_PREPARATION">{{ i18n.translate('waiter.status.IN_PREPARATION') || 'En Preparación' }}</option>
+        <option value="SERVED">{{ i18n.translate('waiter.status.SERVED') || 'Servido' }}</option>
+        <option value="PAID">{{ i18n.translate('waiter.status.PAID') || 'Pagado' }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>{{ i18n.translate('admin.ordersHistory.filterByDate') || 'Fecha' }}</label>
+      <input type="date" [(ngModel)]="dateFilter" (change)="applyFilters()" />
+    </div>
+
+    <div class="filter-group">
+      <label>{{ i18n.translate('admin.ordersHistory.searchById') || 'Buscar por ID' }}</label>
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (change)="applyFilters()"
+        [placeholder]="i18n.translate('admin.ordersHistory.enterOrderId') || 'Ingresa ID de orden'"
+      />
+    </div>
+
+    <button class="btn btn-reset" (click)="resetFilters()">
+      <span class="material-icons">refresh</span>
+      {{ i18n.translate('admin.ordersHistory.reset') || 'Resetear' }}
+    </button>
+  </div>
+
+  <!-- Content -->
+  <main class="history-container">
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="isLoading" role="status" aria-live="polite">
+      <div class="loading-spinner"></div>
+      <p>{{ i18n.translate('admin.ordersHistory.loading') || 'Cargando historial...' }}</p>
+    </div>
+
+    <!-- Error -->
+    <div class="error-banner" *ngIf="!isLoading && errorMessage" role="alert">
+      <span class="material-icons">error</span>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrapper" *ngIf="!isLoading && filteredOrders.length > 0">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>{{ i18n.translate('admin.ordersHistory.id') || 'ID' }}</th>
+            <th>{{ i18n.translate('admin.ordersHistory.status') || 'Estado' }}</th>
+            <th>{{ i18n.translate('admin.ordersHistory.date') || 'Fecha' }}</th>
+            <th>{{ i18n.translate('admin.ordersHistory.time') || 'Hora' }}</th>
+            <th>{{ i18n.translate('admin.ordersHistory.items') || 'Ítems' }}</th>
+            <th>{{ i18n.translate('admin.ordersHistory.total') || 'Total' }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of getPaginatedOrders()" [ngClass]="getStatusColor(order.status)">
+            <td>
+              <span class="order-id">#{{ order.id }}</span>
+            </td>
+            <td>
+              <span class="status-badge">
+                <span class="material-icons">{{ getStatusIcon(order.status) }}</span>
+                {{ i18n.translate('waiter.status.' + order.status) || order.status }}
+              </span>
+            </td>
+            <td>{{ getOrderDate(order) }}</td>
+            <td>{{ getOrderTime(order) }}</td>
+            <td>{{ getOrderItemsCount(order) }}</td>
+            <td><strong>${{ order.total?.toFixed(2) || '0.00' }}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="getTotalPages() > 1">
+        <button
+          class="btn btn-sm"
+          (click)="goToPage(currentPage - 1)"
+          [disabled]="currentPage === 1"
+        >
+          <span class="material-icons">chevron_left</span>
+        </button>
+
+        <span class="page-info">
+          {{ i18n.translate('admin.ordersHistory.page') || 'Página' }} {{ currentPage }}
+          {{ i18n.translate('admin.ordersHistory.of') || 'de' }} {{ getTotalPages() }}
+        </span>
+
+        <button
+          class="btn btn-sm"
+          (click)="goToPage(currentPage + 1)"
+          [disabled]="currentPage === getTotalPages()"
+        >
+          <span class="material-icons">chevron_right</span>
+        </button>
+      </div>
+
+      <!-- Summary -->
+      <div class="summary">
+        <p>
+          {{ i18n.translate('admin.ordersHistory.showing') || 'Mostrando' }}
+          {{ (currentPage - 1) * pageSize + 1 }}
+          -
+          {{ Math.min(currentPage * pageSize, filteredOrders.length) }}
+          {{ i18n.translate('admin.ordersHistory.of') || 'de' }}
+          {{ filteredOrders.length }}
+          {{ i18n.translate('admin.ordersHistory.orders') || 'órdenes' }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && filteredOrders.length === 0">
+      <span class="material-icons">receipt_long</span>
+      <h2>{{ i18n.translate('admin.ordersHistory.noOrders') || 'Sin órdenes' }}</h2>
+      <p>{{ i18n.translate('admin.ordersHistory.noOrdersFound') || 'No se encontraron órdenes con los filtros seleccionados' }}</p>
+    </div>
+  </main>
+</div>
+

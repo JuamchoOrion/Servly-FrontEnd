@@ -32,6 +32,10 @@ export class ProductFormComponent implements OnInit, OnDestroy {
   errorMessage: string | null = null;
   successMessage: string | null = null;
 
+  // Image handling
+  imageFile: File | null = null;
+  imagePreviewUrl: string | null = null;
+
   private productId: number | null = null;
   private destroy$ = new Subject<void>();
 
@@ -114,12 +118,18 @@ export class ProductFormComponent implements OnInit, OnDestroy {
           this.productForm.patchValue({
             name: product.name,
             description: product.description,
-            price: product.basePrice,
+            price: product.basePrice || product.price,
             categoryId: product.id, // Ajustar según respuesta real del backend
             recipeId: product.id || '', // Ajustar según respuesta real
             active: product.active ?? true,
-            image: product.image || ''
+            image: product.imageUrl || product.image || ''
           });
+
+          // Mostrar imagen actual si existe
+          if (product.imageUrl || product.image) {
+            this.imagePreviewUrl = product.imageUrl || product.image || null;
+          }
+
           this.isLoading = false;
           this.cdr.markForCheck();
         },
@@ -148,18 +158,28 @@ export class ProductFormComponent implements OnInit, OnDestroy {
 
     const formData = this.productForm.value as any;
 
-    const request: CreateProductRequest = {
+    const productData = {
       name: formData.name.trim(),
       description: formData.description.trim(),
       price: parseFloat(formData.price.toString()),
-      productCategoryId: parseInt(formData.categoryId.toString()),
-      recipeId: formData.recipeId ? parseInt(formData.recipeId.toString()) : undefined,
       active: formData.active
     };
 
+    // Si estamos editando y hay imagen, usar updateProductWithImage
+    // Si solo tenemos cambios normales, usar updateProduct
     const operation$ = this.isEditMode && this.productId
-      ? this.productService.updateProduct(this.productId, request)
-      : this.productService.createProduct(request);
+      ? this.imageFile
+        ? this.productService.updateProductWithImage(this.productId, productData, this.imageFile)
+        : this.productService.updateProduct(this.productId, {
+            ...productData,
+            productCategoryId: parseInt(formData.categoryId.toString()),
+            recipeId: formData.recipeId ? parseInt(formData.recipeId.toString()) : undefined
+          })
+      : this.productService.createProduct({
+          ...productData,
+          productCategoryId: parseInt(formData.categoryId.toString()),
+          recipeId: formData.recipeId ? parseInt(formData.recipeId.toString()) : undefined
+        });
 
     operation$
       .pipe(takeUntil(this.destroy$))
@@ -254,6 +274,70 @@ export class ProductFormComponent implements OnInit, OnDestroy {
     if (control && typeof control.value === 'string') {
       control.setValue(control.value.trim());
     }
+  }
+
+  /**
+   * Maneja la selección de imagen
+   */
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = input.files;
+
+    if (files && files.length > 0) {
+      const file = files[0];
+
+      // Validar tipo de archivo
+      if (!file.type.startsWith('image/')) {
+        this.errorMessage = this.i18n.translate('products.errors.invalidImageType');
+        this.cdr.markForCheck();
+        return;
+      }
+
+      // Validar tamaño (máximo 10MB)
+      const maxSizeInBytes = 10 * 1024 * 1024;
+      if (file.size > maxSizeInBytes) {
+        this.errorMessage = this.i18n.translate('products.errors.imageTooLarge');
+        this.cdr.markForCheck();
+        return;
+      }
+
+      this.imageFile = file;
+      this.errorMessage = null;
+
+      // Crear vista previa
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imagePreviewUrl = e.target.result;
+        this.cdr.markForCheck();
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  /**
+   * Elimina la imagen seleccionada
+   */
+  removeImage(): void {
+    this.imageFile = null;
+    this.imagePreviewUrl = null;
+    this.productForm.patchValue({ image: '' });
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Obtiene la URL de imagen para mostrar (actual o vista previa)
+   */
+  getImageUrl(): string | null {
+    if (this.imagePreviewUrl) {
+      return this.imagePreviewUrl;
+    }
+    if (this.product && this.product.imageUrl) {
+      return this.product.imageUrl;
+    }
+    if (this.product && this.product.image) {
+      return this.product.image;
+    }
+    return null;
   }
 }
 

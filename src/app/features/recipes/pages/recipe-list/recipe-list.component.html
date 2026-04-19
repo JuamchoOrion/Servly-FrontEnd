@@ -72,7 +72,7 @@
           <td class="name">{{ recipe.name }}</td>
           <td class="description">{{ recipe.description || '-' }}</td>
           <td class="quantity">{{ recipe.quantity }}</td>
-          <td class="items">{{ recipe.itemDetails?.length || 0 }}</td>
+          <td class="items">{{ (recipe.itemDetailList || recipe.itemDetails || [])?.length || 0 }}</td>
           <td class="actions">
             <a [routerLink]="['/recipes', recipe.id, 'edit']" class="btn btn-sm btn-secondary">
               <span class="material-icons">edit</span>

@@ -80,6 +80,7 @@
     <table class="products-table" *ngIf="products.length > 0">
       <thead>
         <tr>
+          <th>{{ i18n.translate('products.image') }}</th>
           <th>{{ i18n.translate('products.name') }}</th>
           <th>{{ i18n.translate('products.category') }}</th>
           <th>{{ i18n.translate('products.price') }}</th>
@@ -89,6 +90,16 @@
       </thead>
       <tbody>
         <tr *ngFor="let product of products">
+          <td class="cell-image">
+            <img
+              *ngIf="product.imageUrl || product.image"
+              [src]="product.imageUrl || product.image"
+              alt="{{ product.name }}"
+              class="product-thumbnail">
+            <div *ngIf="!(product.imageUrl || product.image)" class="no-image">
+              <span class="material-icons">image</span>
+            </div>
+          </td>
           <td class="cell-name">
             <div class="product-info">
               <strong>{{ product.name }}</strong>

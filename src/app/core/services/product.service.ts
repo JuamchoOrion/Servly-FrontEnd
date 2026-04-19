@@ -86,26 +86,25 @@ export class ProductService {
   }
 
   /**
-   * Obtiene todos los productos con paginación (sin autenticación)
-   * GET /api/menu/products?page=0&size=10
-   * Retorna un array directo de productos
+   * Obtiene todos los productos con paginación (requiere autenticación)
+   * GET /api/admin/products?page=0&size=10&sort=id,desc
+   * Retorna una respuesta paginada con imageUrl
    */
-  getProducts(page: number = 0, size: number = 10): Observable<PaginatedProductResponse> {
+  getProducts(page: number = 0, size: number = 10, sort: string = 'id,desc'): Observable<PaginatedProductResponse> {
     let params = new HttpParams()
       .set('page', page.toString())
-      .set('size', size.toString());
+      .set('size', size.toString())
+      .set('sort', sort);
 
-    return this.http.get<Product[]>(this.MENU_PRODUCTS_ENDPOINT, { params }).pipe(
-      map((products: Product[]) => {
-        // El backend retorna un array directo, no una estructura paginada
-        // Simulamos la paginación del lado del cliente
+    return this.http.get<any>(`${this.STAFF_PRODUCTS_ENDPOINT}`, { params }).pipe(
+      map((response: any) => {
         return {
-          content: products,
-          pageNumber: page,
-          pageSize: size,
-          totalElements: products.length,
-          totalPages: Math.ceil(products.length / size),
-          isLast: (page + 1) * size >= products.length
+          content: response.content || [],
+          pageNumber: response.currentPage || page,
+          pageSize: response.pageSize || size,
+          totalElements: response.totalElements || 0,
+          totalPages: response.totalPages || 0,
+          isLast: response.currentPage >= (response.totalPages - 1)
         };
       }),
       catchError(this.handleError)
@@ -113,11 +112,38 @@ export class ProductService {
   }
 
   /**
-   * Obtiene un producto por ID (sin autenticación)
-   * GET /api/menu/products/{id}
+   * Obtiene todos los productos del menú con imágenes (sin autenticación)
+   * GET /api/admin/products?page=0&size=10&sort=id,desc
+   * Retorna una respuesta paginada con imageUrl para mostrar al cliente
+   */
+  getMenuProducts(page: number = 0, size: number = 10, sort: string = 'id,desc'): Observable<PaginatedProductResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString())
+      .set('sort', sort);
+
+    return this.http.get<any>(`${this.STAFF_PRODUCTS_ENDPOINT}`, { params }).pipe(
+      map((response: any) => {
+        return {
+          content: response.content || [],
+          pageNumber: response.currentPage || page,
+          pageSize: response.pageSize || size,
+          totalElements: response.totalElements || 0,
+          totalPages: response.totalPages || 0,
+          isLast: response.currentPage >= (response.totalPages - 1)
+        };
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Obtiene un producto por ID (requiere autenticación ADMIN)
+   * GET /api/admin/products/{id}
+   * Retorna el producto completo con imageUrl
    */
   getProductById(id: number): Observable<Product> {
-    return this.http.get<Product>(`${this.MENU_PRODUCTS_ENDPOINT}/${id}`).pipe(
+    return this.http.get<Product>(`${this.STAFF_PRODUCTS_ENDPOINT}/${id}`).pipe(
       catchError(this.handleError)
     );
   }
@@ -133,11 +159,79 @@ export class ProductService {
   }
 
   /**
+   * Crea un nuevo producto con imagen (requiere autenticación)
+   * POST /api/admin/products/with-image
+   * Envía FormData con campos: name, description, price, categoryId, recipeId, active, image
+   */
+  createProductWithImage(
+    data: {
+      name: string;
+      description: string;
+      price: number;
+      categoryId: number;
+      recipeId?: number;
+      active?: boolean;
+    },
+    imageFile?: File
+  ): Observable<Product> {
+    const formData = new FormData();
+    formData.append('name', data.name);
+    formData.append('description', data.description);
+    formData.append('price', data.price.toString());
+    formData.append('categoryId', data.categoryId.toString());
+    if (data.recipeId) {
+      formData.append('recipeId', data.recipeId.toString());
+    }
+    if (data.active !== undefined) {
+      formData.append('active', data.active.toString());
+    }
+    if (imageFile) {
+      formData.append('image', imageFile, imageFile.name);
+    }
+
+    return this.http.post<Product>(`${this.API_URL}/api/admin/products/with-image`, formData).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
    * Actualiza un producto existente (requiere autenticación)
    * PUT /api/staff/products/{id}
    */
   updateProduct(id: number, product: Partial<CreateProductRequest>): Observable<Product> {
     return this.http.put<Product>(`${this.STAFF_PRODUCTS_ENDPOINT}/${id}`, product).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Actualiza un producto con nueva imagen (requiere autenticación)
+   * PUT /api/admin/products/{id}/with-image
+   * Envía FormData con campos a actualizar e imagen opcional
+   */
+  updateProductWithImage(
+    id: number,
+    data: {
+      name?: string;
+      description?: string;
+      price?: number;
+      active?: boolean;
+    },
+    imageFile?: File
+  ): Observable<Product> {
+    const formData = new FormData();
+    if (data.name) formData.append('name', data.name);
+    if (data.description) formData.append('description', data.description);
+    if (data.price) formData.append('price', data.price.toString());
+    if (data.active !== undefined) formData.append('active', data.active.toString());
+    if (imageFile) {
+      formData.append('image', imageFile, imageFile.name);
+    }
+
+    return this.http.put<Product>(
+      `${this.API_URL}/api/admin/products/${id}/with-image`,
+      formData
+    ).pipe(
       catchError(this.handleError)
     );
   }

@@ -134,18 +134,39 @@
       </select>
     </div>
 
-    <!-- Image URL -->
+    <!-- Image Upload -->
     <div class="form-group">
-      <label for="image" class="form-label">
-        {{ i18n.translate('products.imageUrl') }}
+      <label class="form-label">
+        {{ i18n.translate('products.image') }}
       </label>
-      <input
-        id="image"
-        type="text"
-        formControlName="image"
-        class="form-input"
-        placeholder="https://ejemplo.com/producto.jpg"
-        [disabled]="isSaving">
+
+      <!-- Image Preview -->
+      <div class="image-preview-container" *ngIf="getImageUrl()">
+        <img [src]="getImageUrl()" alt="Product Image" class="image-preview">
+        <button
+          type="button"
+          class="btn btn-small btn-danger"
+          (click)="removeImage()"
+          [disabled]="isSaving">
+          {{ i18n.translate('common.remove') }}
+        </button>
+      </div>
+
+      <!-- Upload Area -->
+      <div class="image-upload-area" [class.has-image]="getImageUrl()">
+        <input
+          #fileInput
+          type="file"
+          accept="image/*"
+          class="file-input"
+          (change)="onImageSelected($event)"
+          [disabled]="isSaving">
+        <div class="upload-content" *ngIf="!getImageUrl()">
+          <span class="material-icons">cloud_upload</span>
+          <p>{{ i18n.translate('products.dropImage') }}</p>
+          <small>{{ i18n.translate('products.imageSizeHint') }}</small>
+        </div>
+      </div>
     </div>
 
     <!-- Active Toggle -->
