@@ -4,5 +4,14 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
+  },
+  "/n8n/webhook/**": {
+    "target": "http://localhost:5678",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/n8n": ""
+    },
+    "logLevel": "debug"
   }
 }

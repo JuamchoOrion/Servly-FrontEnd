@@ -30,6 +30,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     '/api/auth/login',
     '/api/auth/verify-2fa',
     '/api/auth/refresh',
+    '/n8n/',
   ];
 
   const isExcluded = excludedUrls.some(url => req.url.includes(url));

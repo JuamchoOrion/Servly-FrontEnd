@@ -1,0 +1,662 @@
+// Variables
+$primary-color: #E74C3C;
+$secondary-color: #2C3E50;
+$text-color: #333;
+$border-color: #ECF0F1;
+$available-color: #27AE60;
+$unavailable-color: #E74C3C;
+$background-color: #F8F9FA;
+$shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+
+.chatbot-container {
+  position: fixed;
+  bottom: 25px;
+  right: 95px;
+  z-index: 998;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  // Botón flotante
+  .chatbot-toggle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    background: $primary-color;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: $shadow;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999;
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 20px rgba(231, 76, 60, 0.3);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    .toggle-icon {
+      width: 32px;
+      height: 32px;
+      animation: pulse 2s infinite;
+    }
+  }
+
+  // Panel del chatbot
+  .chatbot-panel {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    width: 380px;
+    max-height: 600px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: $shadow;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999;
+
+    // Header
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: linear-gradient(135deg, $primary-color 0%, #C0392B 100%);
+      color: white;
+
+      .chatbot-logo {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+      }
+
+      .header-info {
+        flex: 1;
+        min-width: 0;
+
+        .panel-title {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 600;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .panel-subtitle {
+          margin: 2px 0 0 0;
+          font-size: 12px;
+          opacity: 0.9;
+        }
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 4px;
+        }
+
+        .material-icons {
+          font-size: 20px;
+        }
+      }
+    }
+
+    // Divider
+    .panel-divider {
+      height: 1px;
+      background: $border-color;
+    }
+
+    // Contenedor de mensajes
+    .messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      // Empty state
+      .empty-state {
+        text-align: center;
+        color: #7F8C8D;
+        padding: 40px 20px;
+
+        p {
+          margin: 8px 0;
+          font-size: 14px;
+
+          &:first-child {
+            font-size: 32px;
+            margin: 0;
+          }
+        }
+      }
+
+      // Mensaje del usuario
+      .message-item {
+        background: $background-color;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border-left: 3px solid $primary-color;
+
+        .message-text {
+          margin: 0 0 4px 0;
+          font-size: 14px;
+          color: $text-color;
+          word-wrap: break-word;
+        }
+
+        .message-time {
+          color: #95A5A6;
+          font-size: 12px;
+        }
+      }
+
+      // Respuesta
+      .response-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        .response-stats {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 8px;
+
+          .stat {
+            font-size: 12px;
+            color: #7F8C8D;
+            padding: 8px;
+            background: $background-color;
+            border-radius: 6px;
+            text-align: center;
+
+            strong {
+              color: $primary-color;
+              font-size: 14px;
+              display: block;
+              margin-top: 2px;
+            }
+          }
+        }
+      }
+
+      // Lista de recetas
+      .recipes-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        .recipe-card {
+          background: white;
+          border: 1px solid $border-color;
+          border-radius: 8px;
+          padding: 12px;
+          transition: all 0.2s;
+
+          &:hover:not(.unavailable) {
+            border-color: $primary-color;
+            background: rgba(231, 76, 60, 0.02);
+          }
+
+          &.unavailable {
+            opacity: 0.7;
+            background: rgba(231, 76, 60, 0.05);
+          }
+
+          .recipe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+
+            .recipe-name {
+              margin: 0;
+              font-size: 14px;
+              font-weight: 600;
+              color: $text-color;
+              flex: 1;
+            }
+
+            .recipe-status {
+              font-size: 11px;
+              font-weight: 600;
+              padding: 2px 6px;
+              border-radius: 4px;
+              white-space: nowrap;
+              background: #ECF0F1;
+              color: $unavailable-color;
+
+              &.available {
+                background: rgba(39, 174, 96, 0.1);
+                color: $available-color;
+              }
+            }
+          }
+
+          .recipe-description {
+            margin: 0 0 8px 0;
+            font-size: 13px;
+            color: #7F8C8D;
+            line-height: 1.4;
+          }
+
+          .recipe-info {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 8px;
+
+            .info-item {
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              font-size: 12px;
+              color: #7F8C8D;
+
+              .material-icons {
+                font-size: 16px;
+              }
+            }
+          }
+
+          .recipe-ingredients {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid $border-color;
+
+            .ingredients-label {
+              margin: 0 0 6px 0;
+              font-size: 12px;
+              font-weight: 600;
+              color: #E74C3C;
+            }
+
+            .ingredients-list {
+              margin: 0;
+              padding-left: 16px;
+              font-size: 12px;
+              color: #7F8C8D;
+
+              li {
+                margin: 2px 0;
+              }
+            }
+          }
+
+          .recipe-status-detail {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 6px;
+            background: rgba(39, 174, 96, 0.1);
+            border-radius: 4px;
+            font-size: 12px;
+            color: $available-color;
+            font-weight: 500;
+
+            .material-icons {
+              font-size: 16px;
+            }
+
+            &.success {
+              color: $available-color;
+              background: rgba(39, 174, 96, 0.1);
+            }
+          }
+        }
+      }
+
+      // Sin resultados
+      .no-results {
+        text-align: center;
+        color: #7F8C8D;
+        padding: 30px 20px;
+
+        p {
+          margin: 8px 0;
+          font-size: 14px;
+        }
+      }
+
+      // Error
+      .error-message {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 12px;
+        background: rgba(231, 76, 60, 0.1);
+        border-radius: 6px;
+        color: $unavailable-color;
+
+        .material-icons {
+          flex-shrink: 0;
+          margin-top: 2px;
+          font-size: 20px;
+        }
+
+        p {
+          margin: 0;
+          font-size: 13px;
+        }
+      }
+
+      // Loading
+      .loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px 20px;
+        gap: 12px;
+
+        .loading-spinner {
+          width: 30px;
+          height: 30px;
+          border: 3px solid $border-color;
+          border-top-color: $primary-color;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+
+        p {
+          margin: 0;
+          font-size: 14px;
+          color: #7F8C8D;
+        }
+      }
+    }
+
+    // Input container
+    .input-container {
+      padding: 12px;
+      border-top: 1px solid $border-color;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .input-group {
+        display: flex;
+        gap: 8px;
+
+        .chat-input {
+          flex: 1;
+          padding: 10px 12px;
+          border: 1px solid $border-color;
+          border-radius: 6px;
+          font-size: 14px;
+          font-family: inherit;
+          transition: all 0.2s;
+
+          &:focus {
+            outline: none;
+            border-color: $primary-color;
+            box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.1);
+          }
+
+          &:disabled {
+            background: $background-color;
+            cursor: not-allowed;
+          }
+
+          &::placeholder {
+            color: #BDC3C7;
+          }
+        }
+
+        .send-btn {
+          width: 40px;
+          height: 40px;
+          padding: 0;
+          border: none;
+          border-radius: 6px;
+          background: $primary-color;
+          color: white;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+
+          &:hover:not(:disabled) {
+            background: #C0392B;
+            transform: scale(1.05);
+          }
+
+          &:active:not(:disabled) {
+            transform: scale(0.95);
+          }
+
+          &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+          }
+
+          .material-icons {
+            font-size: 20px;
+          }
+        }
+      }
+
+      .clear-history-btn {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid $border-color;
+        border-radius: 6px;
+        background: white;
+        color: $text-color;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.2s;
+
+        &:hover {
+          border-color: $primary-color;
+          color: $primary-color;
+          background: rgba(231, 76, 60, 0.05);
+        }
+
+        .material-icons {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+}
+
+// Animaciones
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Scrollbar personalizado
+.chatbot-panel .messages-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(231, 76, 60, 0.3) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(231, 76, 60, 0.3);
+    border-radius: 3px;
+
+    &:hover {
+      background: rgba(231, 76, 60, 0.5);
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 480px) {
+  .chatbot-container {
+    bottom: 10px;
+    right: 10px;
+
+    .chatbot-toggle {
+      width: 50px;
+      height: 50px;
+
+      .toggle-icon {
+        width: 28px;
+        height: 28px;
+      }
+    }
+
+    .chatbot-panel {
+      width: calc(100vw - 20px);
+      max-width: 100%;
+      max-height: 70vh;
+      bottom: 65px;
+    }
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .chatbot-container {
+    .chatbot-panel {
+      background: #2C3E50;
+      color: #ECF0F1;
+
+      .panel-header {
+        background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
+      }
+
+      .panel-divider {
+        border-color: #34495E;
+      }
+
+      .messages-container {
+        .empty-state {
+          color: #95A5A6;
+        }
+
+        .message-item {
+          background: #34495E;
+          color: #ECF0F1;
+
+          .message-text {
+            color: #ECF0F1;
+          }
+        }
+
+        .response-stats {
+          .stat {
+            background: #34495E;
+            color: #ECF0F1;
+          }
+        }
+
+        .recipes-list .recipe-card {
+          background: #34495E;
+          border-color: #34495E;
+          color: #ECF0F1;
+
+          .recipe-header .recipe-name {
+            color: #ECF0F1;
+          }
+
+          .recipe-description {
+            color: #BDC3C7;
+          }
+
+          .recipe-info .info-item {
+            color: #BDC3C7;
+          }
+
+          .recipe-ingredients {
+            border-color: #2C3E50;
+
+            .ingredients-label {
+              color: #ECF0F1;
+            }
+
+            .ingredients-list {
+              color: #BDC3C7;
+            }
+          }
+        }
+      }
+
+      .input-container {
+        border-color: #34495E;
+
+        .chat-input {
+          background: #34495E;
+          border-color: #34495E;
+          color: #ECF0F1;
+
+          &::placeholder {
+            color: #7F8C8D;
+          }
+        }
+
+        .clear-history-btn {
+          background: #34495E;
+          border-color: #34495E;
+          color: #ECF0F1;
+
+          &:hover {
+            border-color: $primary-color;
+            background: rgba(231, 76, 60, 0.1);
+          }
+        }
+      }
+    }
+  }
+}

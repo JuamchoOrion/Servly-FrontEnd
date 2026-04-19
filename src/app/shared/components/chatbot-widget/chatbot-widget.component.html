@@ -1,0 +1,127 @@
+<div class="chatbot-container">
+  <!-- Botón flotante -->
+  <button
+    class="chatbot-toggle"
+    (click)="toggleChat()"
+    aria-label="Abrir chatbot"
+    title="Asistente de Recetas"
+    [attr.aria-expanded]="isOpen"
+    aria-controls="chatbot-panel"
+  >
+    <svg class="toggle-icon" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="256" cy="256" r="256" fill="#E74C3C"/>
+      <path d="M 100 200 Q 100 150 150 150 L 350 150 Q 400 150 400 200 L 400 300 Q 400 350 350 350 L 200 350 L 120 420 L 150 350 L 150 350 Q 100 350 100 300 Z" fill="white"/>
+      <circle cx="180" cy="250" r="8" fill="#E74C3C"/>
+      <circle cx="256" cy="250" r="8" fill="#E74C3C"/>
+      <circle cx="332" cy="250" r="8" fill="#E74C3C"/>
+    </svg>
+  </button>
+
+  <!-- Panel -->
+  <div
+    *ngIf="isOpen"
+    class="chatbot-panel"
+    role="dialog"
+    id="chatbot-panel"
+    aria-label="Panel del chatbot"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header -->
+    <div class="panel-header">
+      <svg class="chatbot-logo" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="256" cy="256" r="256" fill="#E74C3C"/>
+        <path d="M 100 200 Q 100 150 150 150 L 350 150 Q 400 150 400 200 L 400 300 Q 400 350 350 350 L 200 350 L 120 420 L 150 350 L 150 350 Q 100 350 100 300 Z" fill="white"/>
+        <circle cx="180" cy="250" r="8" fill="#E74C3C"/>
+        <circle cx="256" cy="250" r="8" fill="#E74C3C"/>
+        <circle cx="332" cy="250" r="8" fill="#E74C3C"/>
+      </svg>
+      <div class="header-info">
+        <h2 class="panel-title">Asistente de Recetas</h2>
+        <p class="panel-subtitle">Busca recetas disponibles</p>
+      </div>
+      <button (click)="closeChat()" class="close-btn" aria-label="Cerrar chatbot">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="panel-divider"></div>
+
+    <!-- Mensajes -->
+    <div class="messages-container" #messagesContainer>
+
+      <!-- Estado vacío -->
+      <div *ngIf="messageHistory.length === 0" class="empty-state">
+        <p>Hola 👋</p>
+        <p>Pregúntame sobre las recetas del menú y te ayudaré a elegir</p>
+      </div>
+
+      <!-- Historial de conversación -->
+      <div *ngFor="let message of messageHistory" class="conversation-item">
+
+        <!-- Pregunta del usuario -->
+        <div class="user-bubble">
+          <p class="message-text">{{ message.pregunta }}</p>
+          <small class="message-time">{{ message.timestamp | date: 'HH:mm' }}</small>
+        </div>
+
+        <!-- Respuesta de la IA -->
+        <div *ngIf="message.respuestaIA" class="ia-bubble">
+          <div class="ia-avatar">🤖</div>
+          <div class="ia-content">
+            <p class="ia-text">{{ message.respuestaIA }}</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="loading">
+        <div class="loading-spinner"></div>
+        <p>Consultando menú...</p>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="error" class="error-message">
+        <span class="material-icons">error_outline</span>
+        <p>{{ error }}</p>
+      </div>
+
+    </div>
+
+    <div class="panel-divider"></div>
+
+    <!-- Input -->
+    <div class="input-container">
+      <div class="input-group">
+        <input
+          id="chatbot-input"
+          type="text"
+          [(ngModel)]="inputPregunta"
+          (keydown.enter)="enviarPregunta()"
+          class="chat-input"
+          placeholder="Ej: ¿Tienen hamburguesas disponibles?"
+          aria-label="Escribe tu pregunta"
+          [disabled]="isLoading"
+        />
+        <button
+          (click)="enviarPregunta()"
+          class="send-btn"
+          [disabled]="isLoading || !inputPregunta.trim()"
+          aria-label="Enviar"
+        >
+          <span class="material-icons">send</span>
+        </button>
+      </div>
+
+      <button
+        *ngIf="messageHistory.length > 0"
+        (click)="limpiarHistorial()"
+        class="clear-history-btn"
+        aria-label="Limpiar historial"
+      >
+        <span class="material-icons">delete_outline</span>
+        Limpiar
+      </button>
+    </div>
+  </div>
+</div>

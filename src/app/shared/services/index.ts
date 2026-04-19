@@ -1,3 +1,3 @@
 // Exportar servicios compartidos
 export { AccessibilityService, type AccessibilitySettings } from './accessibility.service';
-
+export { ChatbotService } from './chatbot.service';
