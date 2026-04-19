@@ -48,21 +48,21 @@
       <div class="summary-card summary-occupied">
         <span class="material-icons">people</span>
         <div class="summary-info">
-          <span class="summary-label">Ocupadas</span>
+          <span class="summary-label">{{ i18n.translate('waiter.status.OCCUPIED') }}</span>
           <span class="summary-count">{{ (tables | slice:0 | filter:'OCCUPIED').length }}</span>
         </div>
       </div>
       <div class="summary-card summary-available">
         <span class="material-icons">check_circle</span>
         <div class="summary-info">
-          <span class="summary-label">Disponibles</span>
+          <span class="summary-label">{{ i18n.translate('waiter.status.AVAILABLE') }}</span>
           <span class="summary-count">{{ (tables | filter:'AVAILABLE').length }}</span>
         </div>
       </div>
       <div class="summary-card summary-reserved">
         <span class="material-icons">event_busy</span>
         <div class="summary-info">
-          <span class="summary-label">Reservadas</span>
+          <span class="summary-label">{{ i18n.translate('waiter.status.RESERVED') }}</span>
           <span class="summary-count">{{ (tables | filter:'RESERVED').length }}</span>
         </div>
       </div>
@@ -137,7 +137,7 @@
       <p>{{ i18n.translate('waiter.tables.emptyMessage') || 'No hay mesas para mostrar' }}</p>
       <button class="btn btn-primary" (click)="refreshTables()">
         <span class="material-icons">refresh</span>
-        Recargar
+        {{ i18n.translate('common.refresh') || 'Recargar' }}
       </button>
     </div>
   </main>

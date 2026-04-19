@@ -567,6 +567,19 @@ export class I18nService {
       'qr.batch.success.printStarted': 'Se abrió la ventana de impresión',
       // Dashboard
       'dashboard.actions.generateQR': 'Generar QRs',
+      // Waiter Tables
+      'waiter.tables.title': 'Mesas',
+      'waiter.tables.subtitle': 'Gestiona los pedidos de las mesas',
+      'waiter.tables.capacity': 'personas',
+      'waiter.tables.orders': 'órdenes',
+      'waiter.tables.empty': 'Sin mesas disponibles',
+      'waiter.tables.emptyMessage': 'No hay mesas para mostrar',
+      'waiter.loading': 'Cargando mesas...',
+      'waiter.status.OCCUPIED': 'Ocupada',
+      'waiter.status.AVAILABLE': 'Disponible',
+      'waiter.status.RESERVED': 'Reservada',
+      'waiter.status.DIRTY': 'Sucia',
+      'waiter.errors.loadFailed': 'Error al cargar las mesas',
     },
     en: {
       // Auth - Login
@@ -1126,6 +1139,19 @@ export class I18nService {
       'qr.batch.success.printStarted': 'Se abrió la ventana de impresión',
       // Dashboard
       'dashboard.actions.generateQR': 'Generar QRs',
+      // Waiter Tables
+      'waiter.tables.title': 'Tables',
+      'waiter.tables.subtitle': 'Manage table orders',
+      'waiter.tables.capacity': 'people',
+      'waiter.tables.orders': 'orders',
+      'waiter.tables.empty': 'No tables available',
+      'waiter.tables.emptyMessage': 'There are no tables to display',
+      'waiter.loading': 'Loading tables...',
+      'waiter.status.OCCUPIED': 'Occupied',
+      'waiter.status.AVAILABLE': 'Available',
+      'waiter.status.RESERVED': 'Reserved',
+      'waiter.status.DIRTY': 'Dirty',
+      'waiter.errors.loadFailed': 'Error loading tables',
     },
     pt: {
       // Auth - Login
@@ -1647,6 +1673,19 @@ export class I18nService {
       'qr.batch.success.printStarted': 'Se abrió la ventana de impresión',
       // Dashboard
       'dashboard.actions.generateQR': 'Generar QRs',
+      // Waiter Tables
+      'waiter.tables.title': 'Mesas',
+      'waiter.tables.subtitle': 'Gerenciar pedidos das mesas',
+      'waiter.tables.capacity': 'pessoas',
+      'waiter.tables.orders': 'pedidos',
+      'waiter.tables.empty': 'Nenhuma mesa disponível',
+      'waiter.tables.emptyMessage': 'Não há mesas para exibir',
+      'waiter.loading': 'Carregando mesas...',
+      'waiter.status.OCCUPIED': 'Ocupada',
+      'waiter.status.AVAILABLE': 'Disponível',
+      'waiter.status.RESERVED': 'Reservada',
+      'waiter.status.DIRTY': 'Suja',
+      'waiter.errors.loadFailed': 'Erro ao carregar as mesas',
     },
   };
 

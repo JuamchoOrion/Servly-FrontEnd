@@ -34,6 +34,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     '/api/auth/refresh',
     '/api/client/session',     // Solo la sesión no requiere autenticación
     '/api/menu/',              // Menú público
+    '/n8n/',
   ];
 
   const isExcluded = excludedUrls.some(url => req.url.includes(url));

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -38,7 +38,8 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
     private waiterService: WaiterService,
     private route: ActivatedRoute,
     private router: Router,
-    public i18n: I18nService
+    public i18n: I18nService,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -54,42 +55,44 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-   private loadOrders(): void {
-     if (!this.tableNumber) return;
+  private loadOrders(): void {
+    if (!this.tableNumber) return;
 
-     this.waiterService.getTableOrders(this.tableNumber)
-       .pipe(takeUntil(this.destroy$))
-       .subscribe({
-         next: (orders: StaffOrder[]) => {
-           console.log('✅ Órdenes cargadas:', orders.length);
-           // Priorizar: PENDING > IN_PREPARATION > SERVED > PAID
-           this.orders = orders.sort((a, b) => {
-             const priorityOrder = { 'PENDING': 0, 'IN_PREPARATION': 1, 'SERVED': 2, 'PAID': 3 };
-             const priorityA = priorityOrder[a.status as keyof typeof priorityOrder] ?? 99;
-             const priorityB = priorityOrder[b.status as keyof typeof priorityOrder] ?? 99;
-             return priorityA - priorityB;
-           });
-           this.applyFilters();
-           this.isLoading = false;
-           if (orders.length > 0) {
-             this.paymentAmount = this.getPayableOrders().reduce((sum, o) => sum + o.total, 0);
-           }
-         },
-         error: (error: any) => {
-           console.error('❌ Error cargando órdenes:', error);
-           this.errorMessage = 'Error al cargar las órdenes';
-           this.isLoading = false;
-         }
-       });
-   }
+    this.waiterService.getTableOrders(this.tableNumber)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (orders: StaffOrder[]) => {
+          console.log('✅ Órdenes cargadas:', orders.length);
+          // Priorizar: PENDING > IN_PREPARATION > SERVED > PAID
+          this.orders = orders.sort((a, b) => {
+            const priorityOrder = { 'PENDING': 0, 'IN_PREPARATION': 1, 'SERVED': 2, 'PAID': 3 };
+            const priorityA = priorityOrder[a.status as keyof typeof priorityOrder] ?? 99;
+            const priorityB = priorityOrder[b.status as keyof typeof priorityOrder] ?? 99;
+            return priorityA - priorityB;
+          });
+          this.applyFilters();
+          this.isLoading = false;
+          this.cd.detectChanges();
+          if (orders.length > 0) {
+            this.paymentAmount = this.getPayableOrders().reduce((sum, o) => sum + o.total, 0);
+          }
+        },
+        error: (error: any) => {
+          console.error('❌ Error cargando órdenes:', error);
+          this.errorMessage = 'Error al cargar las órdenes';
+          this.isLoading = false;
+          this.cd.detectChanges();
+        }
+      });
+  }
 
-   /**
-    * Recarga las órdenes (público para el template)
-    */
-   public refreshOrders(): void {
-     this.isLoading = true;
-     this.loadOrders();
-   }
+  /**
+   * Recarga las órdenes (público para el template)
+   */
+  public refreshOrders(): void {
+    this.isLoading = true;
+    this.loadOrders();
+  }
 
   applyFilters(): void {
     if (this.selectedStatusFilter === 'ALL') {
@@ -121,43 +124,43 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
     this.applyFilters();
   }
 
-   selectOrder(order: StaffOrder): void {
-     this.selectedOrder = this.selectedOrder?.id === order.id ? null : order;
-   }
+  selectOrder(order: StaffOrder): void {
+    this.selectedOrder = this.selectedOrder?.id === order.id ? null : order;
+  }
 
-   updateOrderStatus(orderOrId: StaffOrder | number, newStatus?: string): void {
-     // Sobrecarga: puede ser updateOrderStatus(order) o updateOrderStatus(orderId, newStatus)
-     let orderId: number;
-     let statusToUpdate: string;
+  updateOrderStatus(orderOrId: StaffOrder | number, newStatus?: string): void {
+    // Sobrecarga: puede ser updateOrderStatus(order) o updateOrderStatus(orderId, newStatus)
+    let orderId: number;
+    let statusToUpdate: string;
 
-     if (typeof orderOrId === 'object') {
-       // Caso 1: updateOrderStatus(order) - desde select directo
-       orderId = orderOrId.id;
-       statusToUpdate = orderOrId.status;
-     } else {
-       // Caso 2: updateOrderStatus(orderId, newStatus)
-       orderId = orderOrId;
-       statusToUpdate = newStatus || '';
-     }
+    if (typeof orderOrId === 'object') {
+      // Caso 1: updateOrderStatus(order) - desde select directo
+      orderId = orderOrId.id;
+      statusToUpdate = orderOrId.status;
+    } else {
+      // Caso 2: updateOrderStatus(orderId, newStatus)
+      orderId = orderOrId;
+      statusToUpdate = newStatus || '';
+    }
 
-     if (this.isProcessing || !statusToUpdate) return;
-     this.isProcessing = true;
+    if (this.isProcessing || !statusToUpdate) return;
+    this.isProcessing = true;
 
-     this.waiterService.updateOrderStatus(orderId, statusToUpdate)
-       .pipe(takeUntil(this.destroy$))
-       .subscribe({
-         next: (response: UpdateOrderStatusResponse) => {
-           console.log('✅ Estado actualizado:', response);
-           this.loadOrders();
-           this.isProcessing = false;
-         },
-         error: (error: any) => {
-           console.error('❌ Error:', error);
-           alert('Error al actualizar el estado');
-           this.isProcessing = false;
-         }
-       });
-   }
+    this.waiterService.updateOrderStatus(orderId, statusToUpdate)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: UpdateOrderStatusResponse) => {
+          console.log('✅ Estado actualizado:', response);
+          this.loadOrders();
+          this.isProcessing = false;
+        },
+        error: (error: any) => {
+          console.error('❌ Error:', error);
+          alert('Error al actualizar el estado');
+          this.isProcessing = false;
+        }
+      });
+  }
 
   confirmPayment(): void {
     if (this.isProcessing || this.ordersToPayIds.size === 0) return;
@@ -316,115 +319,115 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
     this.router.navigate(['/waiter/tables']);
   }
 
-   getStatusColor(status: string): string {
-     switch (status) {
-       case 'PENDING': return 'status-pending';
-       case 'IN_PREPARATION': return 'status-preparing';
-       case 'SERVED': return 'status-served';
-       case 'PAID': return 'status-paid';
-       case 'CANCELLED': return 'status-cancelled';
-       default: return '';
-     }
-   }
+  getStatusColor(status: string): string {
+    switch (status) {
+      case 'PENDING': return 'status-pending';
+      case 'IN_PREPARATION': return 'status-preparing';
+      case 'SERVED': return 'status-served';
+      case 'PAID': return 'status-paid';
+      case 'CANCELLED': return 'status-cancelled';
+      default: return '';
+    }
+  }
 
-    getStatusIcon(status: string): string {
-      switch (status) {
-        case 'PENDING': return 'schedule';
-        case 'IN_PREPARATION': return 'local_dining';
-        case 'SERVED': return 'done';
-        case 'PAID': return 'check_circle';
-        case 'CANCELLED': return 'cancel';
-        default: return 'help';
-      }
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case 'PENDING': return 'schedule';
+      case 'IN_PREPARATION': return 'local_dining';
+      case 'SERVED': return 'done';
+      case 'PAID': return 'check_circle';
+      case 'CANCELLED': return 'cancel';
+      default: return 'help';
+    }
+  }
+
+  /**
+   * Obtiene el label del estado
+   */
+  getStatusLabel(status: string): string {
+    const labels: { [key: string]: string } = {
+      'PENDING': 'Pendiente',
+      'IN_PREPARATION': 'En Preparación',
+      'SERVED': 'Servido',
+      'PAID': 'Pagado',
+      'CANCELLED': 'Cancelado'
+    };
+    return labels[status] || status;
+  }
+
+  /**
+   * Obtiene la hora formateada de la orden
+   */
+  getOrderTime(order: any): string {
+    const dateStr = order.createdAt || order.created_at;
+    if (!dateStr) return 'N/A';
+    try {
+      return new Date(dateStr).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  /**
+   * Calcula subtotal de una orden
+   */
+  getOrderSubtotal(order: any): number {
+    if (order.subtotal) return order.subtotal;
+    return order.total / 1.08;
+  }
+
+  /**
+   * Calcula impuesto de una orden
+   */
+  getOrderTax(order: any): number {
+    if (order.tax) return order.tax;
+    return order.total - this.getOrderSubtotal(order);
+  }
+
+  /**
+   * Obtiene total de todas las órdenes ACTIVAS (excluyendo PAID y CANCELLED)
+   */
+  getTotalBill(): number {
+    return this.orders
+      .filter(order => order.status !== 'PAID' && order.status !== 'CANCELLED')
+      .reduce((sum, order) => sum + order.total, 0);
+  }
+
+  /**
+   * Obtiene total de órdenes seleccionadas para pago
+   */
+  getSelectedOrdersTotal(): number {
+    return this.orders
+      .filter(order => this.ordersToPayIds.has(order.id))
+      .reduce((sum, order) => sum + order.total, 0);
+  }
+
+  /**
+   * Marca una orden para pago
+   */
+  markOrderForPayment(orderId: number): void {
+    this.toggleOrderForPayment(orderId);
+  }
+
+  /**
+   * Verifica si se puede confirmar el pago
+   * - CASH: requiere dinero ingresado >= al total (para hacer cambio)
+   * - CARD/QR_PAYMENT: solo requiere que el monto sea > 0
+   */
+  canConfirmPayment(): boolean {
+    // El monto debe ser positivo
+    if (this.paymentAmount <= 0) {
+      return false;
     }
 
-    /**
-     * Obtiene el label del estado
-     */
-    getStatusLabel(status: string): string {
-      const labels: { [key: string]: string } = {
-        'PENDING': 'Pendiente',
-        'IN_PREPARATION': 'En Preparación',
-        'SERVED': 'Servido',
-        'PAID': 'Pagado',
-        'CANCELLED': 'Cancelado'
-      };
-      return labels[status] || status;
+    // Si es CASH: validar que se ingresó suficiente dinero
+    if (this.paymentMethod === 'CASH') {
+      return this.moneyReceived >= this.paymentAmount;
     }
 
-   /**
-    * Obtiene la hora formateada de la orden
-    */
-   getOrderTime(order: any): string {
-     const dateStr = order.createdAt || order.created_at;
-     if (!dateStr) return 'N/A';
-     try {
-       return new Date(dateStr).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
-     } catch (e) {
-       return dateStr;
-     }
-   }
-
-   /**
-    * Calcula subtotal de una orden
-    */
-   getOrderSubtotal(order: any): number {
-     if (order.subtotal) return order.subtotal;
-     return order.total / 1.08;
-   }
-
-   /**
-    * Calcula impuesto de una orden
-    */
-   getOrderTax(order: any): number {
-     if (order.tax) return order.tax;
-     return order.total - this.getOrderSubtotal(order);
-   }
-
-    /**
-     * Obtiene total de todas las órdenes ACTIVAS (excluyendo PAID y CANCELLED)
-     */
-    getTotalBill(): number {
-      return this.orders
-        .filter(order => order.status !== 'PAID' && order.status !== 'CANCELLED')
-        .reduce((sum, order) => sum + order.total, 0);
-    }
-
-   /**
-    * Obtiene total de órdenes seleccionadas para pago
-    */
-   getSelectedOrdersTotal(): number {
-     return this.orders
-       .filter(order => this.ordersToPayIds.has(order.id))
-       .reduce((sum, order) => sum + order.total, 0);
-   }
-
-   /**
-    * Marca una orden para pago
-    */
-   markOrderForPayment(orderId: number): void {
-     this.toggleOrderForPayment(orderId);
-   }
-
-    /**
-     * Verifica si se puede confirmar el pago
-     * - CASH: requiere dinero ingresado >= al total (para hacer cambio)
-     * - CARD/QR_PAYMENT: solo requiere que el monto sea > 0
-     */
-    canConfirmPayment(): boolean {
-      // El monto debe ser positivo
-      if (this.paymentAmount <= 0) {
-        return false;
-      }
-
-      // Si es CASH: validar que se ingresó suficiente dinero
-      if (this.paymentMethod === 'CASH') {
-        return this.moneyReceived >= this.paymentAmount;
-      }
-
-      // Para CARD o QR_PAYMENT: el monto es lo que importa (ya validado arriba)
-      return true;
-    }
+    // Para CARD o QR_PAYMENT: el monto es lo que importa (ya validado arriba)
+    return true;
+  }
 
   getNextStatus(currentStatus: string): string | null {
     switch (currentStatus) {
@@ -435,24 +438,24 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
     }
   }
 
-   canUpdateStatus(status: string): boolean {
-     return status !== 'PAID' && status !== 'CANCELLED';
-   }
+  canUpdateStatus(status: string): boolean {
+    return status !== 'PAID' && status !== 'CANCELLED';
+  }
 
-   /**
-    * Verifica si una orden puede ser cancelada
-    */
-   canCancelOrder(status: string): boolean {
-     return status !== 'PAID' && status !== 'CANCELLED';
-   }
+  /**
+   * Verifica si una orden puede ser cancelada
+   */
+  canCancelOrder(status: string): boolean {
+    return status !== 'PAID' && status !== 'CANCELLED';
+  }
 
-   /**
-    * Cancela una orden
-    */
-   cancelOrder(orderId: number): void {
-     if (!confirm('¿Seguro que deseas cancelar esta orden?')) return;
-     this.updateOrderStatus(orderId, 'CANCELLED');
-   }
+  /**
+   * Cancela una orden
+   */
+  cancelOrder(orderId: number): void {
+    if (!confirm('¿Seguro que deseas cancelar esta orden?')) return;
+    this.updateOrderStatus(orderId, 'CANCELLED');
+  }
 
   getAvailableNextStatuses(currentStatus: string): { value: string; label: string }[] {
     const transitions: { [key: string]: string[] } = {
