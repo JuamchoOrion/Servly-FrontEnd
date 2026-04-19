@@ -839,7 +839,7 @@ $white: #FFFFFF;
    🌙 DARK MODE
 ================================ */
 
-:root.dark-mode {
+:host-context(.dark-mode) {
   --text-primary: #ffffff;
   --text-secondary: #b0b0b0;
 

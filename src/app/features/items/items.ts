@@ -103,9 +103,9 @@ export class ItemsComponent implements OnInit, OnDestroy {
       name: ['', [Validators.required, Validators.minLength(2)]],
       description: ['', [Validators.required, Validators.minLength(5)]],
       unitOfMeasurement: ['', [Validators.required]],
-      expirationDays: [0, [Validators.required, Validators.min(1)]],
+      expirationDays: [0, [Validators.required, Validators.min(1), Validators.pattern(/^[0-9]+$/)]],
       category: ['', [Validators.required]],
-      idealStock: [0, [Validators.required, Validators.min(1)]]
+      idealStock: [0, [Validators.required, Validators.min(1), Validators.pattern(/^[0-9]+$/)]]
     });
   }
 

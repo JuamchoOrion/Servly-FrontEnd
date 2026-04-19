@@ -103,7 +103,7 @@ export class InventoryComponent implements OnInit {
    */
   private initializeBatchForm(): void {
     this.batchForm = this.fb.group({
-      quantity: [1, [Validators.required, Validators.min(1)]],
+      quantity: [1, [Validators.required, Validators.min(1), Validators.pattern(/^[0-9]+$/)]],
       supplierId: [null, [Validators.required]],
       batchNumber: ['', [Validators.required, Validators.minLength(3)]],
       expiryDate: [null]  // OPCIONAL - el backend calcula: hoy + item.expirationDays

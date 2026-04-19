@@ -1,87 +1,153 @@
-<div class="category-form-container">
+<div class="form-wrapper">
   <!-- Header -->
-  <div class="form-header">
-    <h1>{{ isEditMode ? 'Editar Categoría' : 'Crear Categoría' }}</h1>
-  </div>
+  <section class="form-header" role="region" aria-label="Encabezado del formulario">
+    <div class="header-back">
+      <button
+        type="button"
+        class="btn btn-ghost btn-back"
+        (click)="cancel()"
+        aria-label="Volver atrás">
+        <span class="material-icons" aria-hidden="true">arrow_back</span>
+      </button>
+    </div>
+    <div class="header-title">
+      <h1 class="title">
+        {{ isEditMode ? i18n.translate('categories.modal.editTitle') : i18n.translate('categories.modal.newTitle') }}
+      </h1>
+      <p class="subtitle">
+        {{ isEditMode
+          ? 'Actualiza los detalles de la categoría'
+          : 'Crea una nueva categoría de productos' }}
+      </p>
+    </div>
+  </section>
 
-  <!-- Messages -->
-  <div *ngIf="successMessage" class="alert alert-success">
-    {{ successMessage }}
-  </div>
-  <div *ngIf="errorMessage" class="alert alert-error">
-    {{ errorMessage }}
-  </div>
+  <!-- Alert Messages -->
+  <section *ngIf="successMessage || errorMessage" class="messages-container" role="region" aria-label="Mensajes">
+    <div *ngIf="successMessage" class="alert alert-success" role="status">
+      <span class="material-icons alert-icon" aria-hidden="true">check_circle</span>
+      <span>{{ successMessage }}</span>
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-error" role="alert">
+      <span class="material-icons alert-icon" aria-hidden="true">error</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+  </section>
 
   <!-- Loading State -->
-  <div class="loading-state" *ngIf="isLoading">
-    <div class="spinner"></div>
-    <p>Cargando...</p>
-  </div>
+  <section class="loading-section" *ngIf="isLoading" aria-live="polite" role="status">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>{{ i18n.translate('categories.loading') }}</p>
+  </section>
 
   <!-- Form -->
-  <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()" *ngIf="!isLoading" class="form">
-    <div class="form-section">
-      <!-- Name -->
-      <div class="form-group">
-        <label for="name" class="form-label">
-          {{ i18n.translate('categories.name') }}
-          <span class="required">*</span>
-        </label>
-        <input
-          id="name"
-          type="text"
-          formControlName="name"
-          class="form-input"
-          placeholder="Ej: Bebidas"
-          [class.is-invalid]="isFieldInvalid('name')"
-          [disabled]="isSaving">
-        <small class="form-error" *ngIf="getFieldError('name')">
-          {{ getFieldError('name') }}
-        </small>
-      </div>
+  <form
+    [formGroup]="categoryForm"
+    (ngSubmit)="saveCategory()"
+    *ngIf="!isLoading"
+    class="form"
+    novalidate
+    role="form">
 
-      <!-- Description -->
+    <section class="form-section">
+      <!-- Name Field -->
       <div class="form-group">
-        <label for="description" class="form-label">
-          {{ i18n.translate('categories.description') }}
-          <span class="required">*</span>
+        <label for="category-name" class="form-label">
+          {{ i18n.translate('categories.modal.nameLabel') }}
+          <span class="required" aria-label="requerido">*</span>
         </label>
-        <textarea
-          id="description"
-          formControlName="description"
-          class="form-textarea"
-          placeholder="Describe la categoría"
-          rows="4"
-          [class.is-invalid]="isFieldInvalid('description')"
-          [disabled]="isSaving"></textarea>
-        <small class="form-error" *ngIf="getFieldError('description')">
-          {{ getFieldError('description') }}
-        </small>
-      </div>
-
-      <!-- Active -->
-      <div class="form-group">
-        <label for="active" class="form-checkbox-label">
+        <div class="form-input-wrapper">
+          <span class="field-icon material-icons" aria-hidden="true">label</span>
           <input
-            id="active"
+            id="category-name"
+            type="text"
+            formControlName="name"
+            class="form-input"
+            placeholder="{{ i18n.translate('categories.modal.namePlaceholder') }}"
+            [class.is-invalid]="isFieldInvalid('name')"
+            [disabled]="isSaving"
+            aria-describedby="name-error"
+            autocomplete="off">
+        </div>
+        <div *ngIf="getFieldError('name')" id="name-error" class="form-error" role="alert">
+          <span class="material-icons error-icon" aria-hidden="true">warning</span>
+          {{ getFieldError('name') }}
+        </div>
+      </div>
+
+      <!-- Description Field -->
+      <div class="form-group">
+        <label for="category-description" class="form-label">
+          {{ i18n.translate('categories.modal.descriptionLabel') }}
+          <span class="required" aria-label="requerido">*</span>
+        </label>
+        <div class="form-textarea-wrapper">
+          <span class="field-icon material-icons" aria-hidden="true">description</span>
+          <textarea
+            id="category-description"
+            formControlName="description"
+            class="form-textarea"
+            placeholder="{{ i18n.translate('categories.modal.descriptionPlaceholder') }}"
+            rows="4"
+            [class.is-invalid]="isFieldInvalid('description')"
+            [disabled]="isSaving"
+            aria-describedby="description-error"></textarea>
+        </div>
+        <div class="form-field-hint">
+          {{ categoryForm.get('description')?.value?.length || 0 }} / 500 caracteres
+        </div>
+        <div *ngIf="getFieldError('description')" id="description-error" class="form-error" role="alert">
+          <span class="material-icons error-icon" aria-hidden="true">warning</span>
+          {{ getFieldError('description') }}
+        </div>
+      </div>
+
+      <!-- Active Toggle -->
+      <div class="form-group form-group-toggle">
+        <label for="category-active" class="form-toggle-label">
+          <input
+            id="category-active"
             type="checkbox"
             formControlName="active"
-            class="form-checkbox"
-            [disabled]="isSaving">
-          {{ i18n.translate('common.active') }}
+            class="form-toggle-checkbox"
+            [disabled]="isSaving"
+            aria-label="Activar categoría">
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">
+            {{ categoryForm.get('active')?.value
+              ? i18n.translate('categories.status.active')
+              : i18n.translate('categories.status.inativa') }}
+          </span>
         </label>
+        <p class="toggle-hint">
+          Esta categoría será {{ categoryForm.get('active')?.value ? 'visible' : 'oculta' }} para los clientes
+        </p>
       </div>
-    </div>
+    </section>
 
-    <!-- Buttons -->
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary" [disabled]="isSaving || categoryForm.invalid">
-        {{ isSaving ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear') }}
+    <!-- Form Actions -->
+    <section class="form-actions">
+      <button
+        type="submit"
+        class="btn btn-primary btn-lg"
+        [disabled]="isSaving || categoryForm.invalid"
+        [attr.aria-busy]="isSaving">
+        <span class="material-icons" aria-hidden="true">
+          {{ isSaving ? 'hourglass_empty' : (isEditMode ? 'edit' : 'add_circle_outline') }}
+        </span>
+        {{ isSaving
+          ? i18n.translate('categories.modal.saving')
+          : (isEditMode ? i18n.translate('categories.modal.update') : i18n.translate('categories.modal.create')) }}
       </button>
-      <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="isSaving">
-        Cancelar
+      <button
+        type="button"
+        class="btn btn-ghost btn-lg"
+        (click)="cancel()"
+        [disabled]="isSaving"
+        aria-label="Cancelar y volver atrás">
+        {{ i18n.translate('categories.modal.cancel') }}
       </button>
-    </div>
+    </section>
   </form>
 </div>
 

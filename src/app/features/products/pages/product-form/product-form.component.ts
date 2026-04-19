@@ -50,7 +50,7 @@ export class ProductFormComponent implements OnInit, OnDestroy {
     this.productForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
-      price: ['', [Validators.required, Validators.min(0.01)]],
+      price: ['', [Validators.required, Validators.min(0.01), Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
       categoryId: ['', Validators.required],
       recipeId: [''],
       active: [true],
@@ -240,25 +240,28 @@ export class ProductFormComponent implements OnInit, OnDestroy {
   /**
    * Obtiene error de validación para un campo
    */
-  getFieldError(fieldName: string): string | null {
-    const field = this.productForm.get(fieldName);
-    if (!field || !field.errors || !field.touched) {
-      return null;
-    }
+   getFieldError(fieldName: string): string | null {
+     const field = this.productForm.get(fieldName);
+     if (!field || !field.errors || !field.touched) {
+       return null;
+     }
 
-    if (field.errors['required']) {
-      return this.i18n.translate(`products.validation.${fieldName}Required`);
-    }
-    if (field.errors['minlength']) {
-      const minLength = field.errors['minlength'].requiredLength;
-      return this.i18n.translate(`products.validation.${fieldName}Min`, { min: minLength });
-    }
-    if (field.errors['min']) {
-      return this.i18n.translate('products.validation.priceMin');
-    }
+     if (field.errors['required']) {
+       return this.i18n.translate(`products.validation.${fieldName}Required`);
+     }
+     if (field.errors['minlength']) {
+       const minLength = field.errors['minlength'].requiredLength;
+       return this.i18n.translate(`products.validation.${fieldName}Min`, { min: minLength });
+     }
+     if (field.errors['min']) {
+       return this.i18n.translate('products.validation.priceMin');
+     }
+     if (field.errors['pattern']) {
+       return this.i18n.translate('products.validation.priceInvalid');
+     }
 
-    return null;
-  }
+     return null;
+   }
 
   /**
    * Verifica si un campo es inválido y tocado

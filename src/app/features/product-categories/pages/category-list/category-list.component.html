@@ -1,100 +1,183 @@
-<div class="category-container">
-  <!-- Header -->
-  <div class="category-header">
+<div class="categories-main">
+  <!-- Header Section -->
+  <section class="categories-header" role="region" aria-label="Encabezado de categorías">
     <div class="header-content">
-      <h1>{{ i18n.translate('categories.title') }}</h1>
-      <p>{{ i18n.translate('categories.subtitle') }}</p>
+      <div class="header-text">
+        <h1 class="title">{{ i18n.translate('categories.title') }}</h1>
+        <p class="subtitle">{{ i18n.translate('categories.subtitle') }}</p>
+      </div>
     </div>
-    <button class="btn btn-primary" (click)="createCategory()" *ngIf="isAdmin">
-      <span class="material-icons">add</span>
+    <button
+      class="btn btn-primary btn-lg create-btn"
+      (click)="createCategory()"
+      *ngIf="isAdmin"
+      aria-label="Crear nueva categoría">
+      <span class="material-icons" aria-hidden="true">add_circle_outline</span>
       {{ i18n.translate('categories.create') }}
     </button>
-  </div>
+  </section>
 
-  <!-- Messages -->
-  <div *ngIf="successMessage" class="alert alert-success">
-    {{ successMessage }}
-  </div>
-  <div *ngIf="errorMessage" class="alert alert-error">
-    {{ errorMessage }}
-  </div>
+  <!-- Alert Messages -->
+  <section *ngIf="successMessage || errorMessage" class="messages-container" role="region" aria-label="Mensajes de notificación">
+    <div *ngIf="successMessage" class="alert alert-success" role="status">
+      <span class="material-icons alert-icon" aria-hidden="true">check_circle</span>
+      <span>{{ successMessage }}</span>
+      <button class="alert-close" (click)="successMessage = null" aria-label="Cerrar notificación">
+        <span class="material-icons" aria-hidden="true">close</span>
+      </button>
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-error" role="alert">
+      <span class="material-icons alert-icon" aria-hidden="true">error</span>
+      <span>{{ errorMessage }}</span>
+      <button class="alert-close" (click)="errorMessage = null" aria-label="Cerrar alerta">
+        <span class="material-icons" aria-hidden="true">close</span>
+      </button>
+    </div>
+  </section>
 
-  <!-- Search -->
-  <div class="search-section">
-    <form class="search-form">
-      <div class="form-group">
-        <label>{{ i18n.translate('categories.name') }}</label>
+  <!-- Search & Filter Section -->
+  <section class="search-section" role="region" aria-label="Búsqueda y filtros">
+    <div class="search-wrapper">
+      <label for="search-input" class="sr-only">Buscar categorías</label>
+      <div class="search-input-group">
+        <span class="material-icons search-icon" aria-hidden="true">search</span>
         <input
+          id="search-input"
           type="text"
-          placeholder="Buscar por nombre o descripción..."
+          class="search-input"
+          placeholder="{{ i18n.translate('common.search') || 'Buscar por nombre o descripción...' }}"
           [(ngModel)]="searchText"
           (input)="getFilteredCategories()"
           [ngModelOptions]="{ standalone: true }"
-          class="form-input">
+          aria-label="Buscar categorías por nombre o descripción">
       </div>
-
-      <button type="button" class="btn btn-secondary" (click)="clearFilters()">
-        <span class="material-icons">clear</span>
-        {{ i18n.translate('common.clear') }}
+      <button
+        type="button"
+        class="btn btn-ghost clear-btn"
+        (click)="clearFilters()"
+        *ngIf="searchText"
+        aria-label="Limpiar búsqueda">
+        <span class="material-icons" aria-hidden="true">clear</span>
       </button>
-    </form>
-  </div>
+    </div>
+    <span class="results-count" aria-live="polite">
+      {{ getFilteredCategories().length }} {{ getFilteredCategories().length === 1 ? 'categoría' : 'categorías' }}
+    </span>
+  </section>
 
   <!-- Loading State -->
-  <div class="loading-state" *ngIf="isLoading">
-    <div class="spinner"></div>
+  <section class="loading-section" *ngIf="isLoading" aria-live="polite" role="status">
+    <div class="spinner" aria-hidden="true"></div>
     <p>{{ i18n.translate('categories.loading') }}</p>
-  </div>
+  </section>
 
-  <!-- Table -->
-  <div class="table-wrapper" *ngIf="!isLoading">
-    <table class="categories-table" *ngIf="getFilteredCategories().length > 0">
-      <thead>
-        <tr>
-          <th>{{ i18n.translate('categories.name') }}</th>
-          <th>{{ i18n.translate('categories.description') }}</th>
-          <th>{{ i18n.translate('categories.status') }}</th>
-          <th>Creado</th>
-          <th *ngIf="isAdmin">{{ i18n.translate('categories.actions') }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let category of getFilteredCategories()">
-          <td class="cell-name"><strong>{{ category.name }}</strong></td>
-          <td>{{ category.description }}</td>
-          <td>
-            <span class="badge" [class.badge-active]="category.active ?? true" [class.badge-inactive]="!(category.active ?? true)">
-              {{ getActiveText(category.active) }}
-            </span>
-          </td>
-          <td>{{ getFormattedDate(category.createdAt) }}</td>
-          <td *ngIf="isAdmin" class="cell-actions">
+  <!-- Categories Table -->
+  <section class="categories-content" *ngIf="!isLoading" role="region" aria-label="Lista de categorías de productos">
+    <!-- Table View -->
+    <div class="table-wrapper" *ngIf="getFilteredCategories().length > 0">
+      <table class="categories-table" role="grid" aria-label="Tabla de categorías">
+        <thead>
+          <tr role="row">
+            <th role="columnheader" scope="col">{{ i18n.translate('categories.table.name') }}</th>
+            <th role="columnheader" scope="col">{{ i18n.translate('categories.table.description') }}</th>
+            <th role="columnheader" scope="col">{{ i18n.translate('categories.table.status') }}</th>
+            <th role="columnheader" scope="col" class="col-actions" *ngIf="isAdmin">{{ i18n.translate('categories.table.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let category of getPaginatedCategories(); let idx = index" role="row" [attr.data-category-id]="category.id">
+            <td role="gridcell" class="cell-name">
+              <strong>{{ category.name }}</strong>
+            </td>
+            <td role="gridcell" class="cell-description">
+              {{ category.description }}
+            </td>
+            <td role="gridcell" class="cell-status">
+              <span
+                class="badge"
+                [class.badge-active]="category.active ?? true"
+                [class.badge-inactive]="!(category.active ?? true)"
+                [attr.aria-label]="'Estado: ' + getActiveText(category.active)">
+                {{ getActiveText(category.active) }}
+              </span>
+            </td>
+            <td role="gridcell" class="cell-actions" *ngIf="isAdmin">
+              <div class="action-buttons">
+                <button
+                  class="btn btn-icon btn-edit"
+                  (click)="editCategory(category.id)"
+                  title="Editar"
+                  [attr.aria-label]="'Editar categoría: ' + category.name">
+                  <span class="material-icons" aria-hidden="true">edit</span>
+                </button>
+                <button
+                  class="btn btn-icon btn-delete"
+                  (click)="deleteCategory(category)"
+                  title="Eliminar"
+                  [attr.aria-label]="'Eliminar categoría: ' + category.name">
+                  <span class="material-icons" aria-hidden="true">delete_outline</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="pagination-container" *ngIf="getTotalPages() > 1">
+        <div class="pagination-info">
+          <span>Mostrando {{ ((currentPage - 1) * itemsPerPage) + 1 }} a {{ Math.min(currentPage * itemsPerPage, getFilteredCategories().length) }} de {{ getFilteredCategories().length }} categorías</span>
+        </div>
+        <div class="pagination-controls">
+          <button
+            class="btn btn-pagination"
+            (click)="previousPage()"
+            [disabled]="currentPage === 1"
+            aria-label="Página anterior">
+            <span class="material-icons" aria-hidden="true">chevron_left</span>
+            Anterior
+          </button>
+
+          <div class="page-numbers">
             <button
-              class="btn btn-icon btn-edit"
-              (click)="editCategory(category.id)"
-              [title]="i18n.translate('categories.edit')">
-              <span class="material-icons">edit</span>
+              *ngFor="let page of [].constructor(getTotalPages()); let i = index"
+              class="btn btn-page-number"
+              [class.active]="i + 1 === currentPage"
+              (click)="goToPage(i + 1)"
+              [attr.aria-label]="'Ir a página ' + (i + 1)"
+              [attr.aria-current]="i + 1 === currentPage ? 'page' : null">
+              {{ i + 1 }}
             </button>
-            <button
-              class="btn btn-icon btn-delete"
-              (click)="deleteCategory(category)"
-              [title]="i18n.translate('categories.delete')">
-              <span class="material-icons">delete</span>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          </div>
+
+          <button
+            class="btn btn-pagination"
+            (click)="nextPage()"
+            [disabled]="currentPage === getTotalPages()"
+            aria-label="Próxima página">
+            Siguiente
+            <span class="material-icons" aria-hidden="true">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="getFilteredCategories().length === 0">
-      <span class="material-icons">category</span>
-      <h3>{{ i18n.translate('categories.empty') }}</h3>
+    <div class="empty-state" *ngIf="getFilteredCategories().length === 0" role="region" aria-label="Sin resultados">
+      <div class="empty-icon">
+        <span class="material-icons" aria-hidden="true">category</span>
+      </div>
+      <h2>{{ i18n.translate('categories.empty') }}</h2>
       <p>{{ i18n.translate('categories.emptyMessage') }}</p>
-      <button class="btn btn-primary" (click)="createCategory()" *ngIf="isAdmin">
+      <button
+        class="btn btn-primary btn-lg"
+        (click)="createCategory()"
+        *ngIf="isAdmin"
+        aria-label="Crear la primera categoría">
+        <span class="material-icons" aria-hidden="true">add</span>
         {{ i18n.translate('categories.create') }}
       </button>
     </div>
-  </div>
+  </section>
 </div>
 

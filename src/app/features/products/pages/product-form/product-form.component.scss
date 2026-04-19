@@ -404,7 +404,7 @@ $border-light:    #EFEFEF;
 }
 
 // Dark mode image upload
-:root.dark-mode {
+:host-context(.dark-mode) {
   .image-upload-area {
     border-color: $accent-gold;
     background-color: rgba($accent-gold, 0.05);
@@ -433,7 +433,7 @@ $border-light:    #EFEFEF;
 }
 
 // ══ Dark Mode ══────────────────────────────────────────────────────────
-:root.dark-mode {
+:host-context(.dark-mode) {
   --text-primary: #ffffff;
 
   .product-form {

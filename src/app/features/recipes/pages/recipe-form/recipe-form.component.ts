@@ -49,7 +49,7 @@ export class RecipeFormComponent implements OnInit, OnDestroy {
   ) {
     this.recipeForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
-      quantity: [1, [Validators.required, Validators.min(1)]],
+      quantity: [1, [Validators.required, Validators.min(1), Validators.pattern(/^[0-9]+$/)]],
       description: [''],
       itemDetails: this.fb.array([])
     });
@@ -142,12 +142,12 @@ export class RecipeFormComponent implements OnInit, OnDestroy {
             console.log('📦 Item cargado:', { itemId, quantity, annotation: item.annotation });
 
             if (itemId) {
-              itemDetailsArray.push(this.fb.group({
-                itemId: [itemId, Validators.required],
-                quantity: [quantity, [Validators.required, Validators.min(0.01)]],
-                annotation: [item.annotation || ''],
-                isOptional: [item.isOptional || false]
-              }));
+             itemDetailsArray.push(this.fb.group({
+                 itemId: [itemId, Validators.required],
+                 quantity: [quantity, [Validators.required, Validators.min(0.01), Validators.pattern(/^\d+(\.\d+)?$/)]],
+                 annotation: [item.annotation || ''],
+                 isOptional: [item.isOptional || false]
+               }));
             }
           });
 
@@ -190,15 +190,15 @@ export class RecipeFormComponent implements OnInit, OnDestroy {
    * Agrega un nuevo item a la receta
    */
   addItemDetail(): void {
-    const itemDetailsArray = this.itemDetailsArray;
-    itemDetailsArray.push(this.fb.group({
-      itemId: [null, Validators.required],
-      quantity: [null, [Validators.required, Validators.min(0.01)]],
-      annotation: [''],
-      isOptional: [false]
-    }));
-    this.cdr.markForCheck();
-  }
+     const itemDetailsArray = this.itemDetailsArray;
+     itemDetailsArray.push(this.fb.group({
+       itemId: [null, Validators.required],
+       quantity: [null, [Validators.required, Validators.min(0.01), Validators.pattern(/^\d+(\.\d+)?$/)]],
+       annotation: [''],
+       isOptional: [false]
+     }));
+     this.cdr.markForCheck();
+   }
 
   /**
    * Remueve un item de la receta
@@ -296,28 +296,31 @@ export class RecipeFormComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  /**
-   * Obtiene error de validación
-   */
-  getFieldError(fieldName: string): string | null {
-    const field = this.recipeForm.get(fieldName);
-    if (!field || !field.errors || !field.touched) {
-      return null;
-    }
+   /**
+    * Obtiene error de validación
+    */
+   getFieldError(fieldName: string): string | null {
+     const field = this.recipeForm.get(fieldName);
+     if (!field || !field.errors || !field.touched) {
+       return null;
+     }
 
-    if (field.errors['required']) {
-      return this.i18n.translate(`recipes.validation.${fieldName}Required`);
-    }
-    if (field.errors['minlength']) {
-      const minLength = field.errors['minlength'].requiredLength;
-      return this.i18n.translate(`recipes.validation.${fieldName}Min`, { min: minLength });
-    }
-    if (field.errors['min']) {
-      return this.i18n.translate('recipes.validation.quantityMin');
-    }
+     if (field.errors['required']) {
+       return this.i18n.translate(`recipes.validation.${fieldName}Required`);
+     }
+     if (field.errors['minlength']) {
+       const minLength = field.errors['minlength'].requiredLength;
+       return this.i18n.translate(`recipes.validation.${fieldName}Min`, { min: minLength });
+     }
+     if (field.errors['min']) {
+       return this.i18n.translate('recipes.validation.quantityMin');
+     }
+     if (field.errors['pattern']) {
+       return this.i18n.translate('recipes.validation.quantityInvalid');
+     }
 
-    return null;
-  }
+     return null;
+   }
 
   /**
    * Verifica si un campo es inválido y tocado
