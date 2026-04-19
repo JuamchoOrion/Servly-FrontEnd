@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -15,80 +15,124 @@ import { I18nService } from '../../../../core/services/i18n.service';
   styleUrls: ['./client-menu.component.scss']
 })
 export class ClientMenuComponent implements OnInit, OnDestroy {
-  menuItems: MenuItem[] = [];
-  filteredItems: MenuItem[] = [];
-  categories: any[] = [];
-  selectedCategory: string | null = null;
-  isLoading = true;
-  errorMessage: string | null = null;
-  tableNumber: number | null = null;
-  cart: Map<number, { item: MenuItem; quantity: number }> = new Map();
+   menuItems: MenuItem[] = [];
+   filteredItems: MenuItem[] = [];
+   categories: any[] = [];
+   selectedCategory: number | null = null;
+   isLoading = true;
+   errorMessage: string | null = null;
+   tableNumber: number | null = null;
+   cart: Map<number, { item: MenuItem; quantity: number }> = new Map();
 
-  private destroy$ = new Subject<void>();
+   private destroy$ = new Subject<void>();
 
-  constructor(
-    private clientService: ClientService,
-    private router: Router,
-    public i18n: I18nService
-  ) {}
+   constructor(
+     private clientService: ClientService,
+     private router: Router,
+     public i18n: I18nService,
+     private ngZone: NgZone,
+     private cdr: ChangeDetectorRef
+   ) {}
 
-  ngOnInit(): void {
-    // Verificar que hay sesión activa
-    if (!this.clientService.getCurrentSession()) {
-      this.router.navigate(['/client']);
-      return;
+    ngOnInit(): void {
+      // Verificar que hay sesión activa
+      if (!this.clientService.getCurrentSession()) {
+        this.router.navigate(['/client']);
+        return;
+      }
+
+       this.tableNumber = this.clientService.getCurrentTable();
+       this.loadCategories();
+       this.loadMenu();
+       this.loadCart();
+
+       // ✅ Timeout de seguridad: si después de 5 segundos aún está cargando, forzar a descargar
+       setTimeout(() => {
+         this.ngZone.run(() => {
+           if (this.isLoading && this.menuItems.length === 0 && !this.errorMessage) {
+             console.warn('⚠️ [ClientMenuComponent] Timeout de carga - forzando descargar');
+             this.isLoading = false;
+             this.errorMessage = 'Timeout al cargar el menú. Por favor, recarga la página.';
+             this.cdr.detectChanges(); // ✅ Forzar detección de cambios
+           }
+         });
+       }, 5000);
     }
 
-    this.tableNumber = this.clientService.getCurrentTable();
-    this.loadMenu();
-    this.loadCategories();
-    this.loadCart();
-  }
+   ngOnDestroy(): void {
+     this.destroy$.next();
+     this.destroy$.complete();
+   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
+   private loadCategories(): void {
+     console.log('🔵 [ClientMenuComponent] Cargando categorías...');
+     this.clientService.getCategories()
+       .pipe(takeUntil(this.destroy$))
+       .subscribe({
+         next: (response: any[]) => {
+           this.ngZone.run(() => {
+             this.categories = response.filter(cat => cat.active !== false); // Filtrar solo activas
+             console.log('✅ [ClientMenuComponent] Categorías cargadas:', this.categories.length);
+             this.cdr.detectChanges();
+           });
+         },
+         error: (error: any) => {
+           this.ngZone.run(() => {
+             console.error('❌ [ClientMenuComponent] Error cargando categorías:', error);
+             this.categories = [];
+             this.cdr.detectChanges();
+           });
+         }
+       });
+   }
 
-  private loadMenu(): void {
-    console.log('🔵 [ClientMenuComponent] Iniciando carga de menú (endpoint público)...');
-    this.clientService.getMenu()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: any) => {
-          // El endpoint público retorna un array directo o respuesta paginada
-          const items = Array.isArray(response)
-            ? response
-            : (response.content || response.data || []);
-          console.log('✅ [ClientMenuComponent] Menú recibido:', items.length, 'productos');
-          this.menuItems = items;
-          this.filteredItems = items;
-          this.isLoading = false;
-          console.log('✅ [ClientMenuComponent] Menú cargado completamente');
-        },
-        error: (error: any) => {
-          console.error('❌ [ClientMenuComponent] Error cargando menú:', error);
-          this.errorMessage = this.i18n.translate('client.errors.menuLoadFailed');
-          this.isLoading = false;
-          console.log('❌ [ClientMenuComponent] isLoading = false, errorMessage mostrado');
-        }
-      });
-  }
+    private loadMenu(): void {
+     console.log('🔵 [ClientMenuComponent] Iniciando carga de menú (endpoint público)...');
+     this.clientService.getMenu()
+       .pipe(takeUntil(this.destroy$))
+       .subscribe({
+         next: (response: any) => {
+           this.ngZone.run(() => {
+             try {
+               // El endpoint público retorna un array directo o respuesta paginada
+               const items = Array.isArray(response)
+                 ? response
+                 : (response.content || response.data || []);
+               console.log('✅ [ClientMenuComponent] Menú recibido:', items.length, 'productos');
+               console.log('✅ [ClientMenuComponent] Items:', items);
 
-  private loadCategories(): void {
-    this.clientService.getMenuCategories()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: any) => {
-          this.categories = response.data || [];
-        },
-        error: (error: any) => {
-          console.error('Error loading categories:', error);
-        }
-      });
-  }
+               // Asegurarse que cada item tiene un precio
+               this.menuItems = items.map((item: any) => ({
+                 ...item,
+                 price: item.price || item.basePrice || 0  // Normalizar precio
+               }));
 
-  private loadCart(): void {
+               this.filteredItems = [...this.menuItems];
+               console.log('✅ [ClientMenuComponent] Menú normalizado y cargado');
+               this.isLoading = false;
+               this.cdr.detectChanges(); // ✅ Forzar detección de cambios
+               console.log('✅ [ClientMenuComponent] Menú cargado completamente');
+             } catch (parseError) {
+               console.error('❌ [ClientMenuComponent] Error procesando menú:', parseError);
+               this.errorMessage = 'Error al procesar el menú';
+               this.isLoading = false;
+               this.cdr.detectChanges(); // ✅ Forzar detección de cambios
+             }
+           });
+         },
+         error: (error: any) => {
+           this.ngZone.run(() => {
+             console.error('❌ [ClientMenuComponent] Error cargando menú:', error);
+             this.errorMessage = this.i18n.translate('client.errors.menuLoadFailed');
+             this.isLoading = false;
+             this.cdr.detectChanges(); // ✅ Forzar detección de cambios
+             console.log('❌ [ClientMenuComponent] isLoading = false, errorMessage mostrado');
+           });
+         }
+       });
+   }
+
+   private loadCart(): void {
     const cartStr = sessionStorage.getItem('clientCart');
     if (cartStr) {
       try {
@@ -107,15 +151,17 @@ export class ClientMenuComponent implements OnInit, OnDestroy {
     sessionStorage.setItem('clientCart', JSON.stringify(cartArray));
   }
 
-  filterByCategory(categoryName: string | null): void {
-    this.selectedCategory = categoryName;
-    if (!categoryName) {
-      this.filteredItems = this.menuItems;
-    } else {
-      // Filtrar por nombre de categoría si está disponible
-      this.filteredItems = this.menuItems;
-    }
-  }
+   filterByCategory(categoryId: number | null): void {
+     this.selectedCategory = categoryId;
+     if (!categoryId) {
+       // Mostrar todos los items
+       this.filteredItems = [...this.menuItems];
+     } else {
+       // Filtrar por categoryId
+       this.filteredItems = this.menuItems.filter(item => item.categoryId === categoryId);
+     }
+     console.log('🔵 [ClientMenuComponent] Filtrado por categoría:', categoryId, 'Items:', this.filteredItems.length);
+   }
 
   addToCart(item: MenuItem): void {
     const existing = this.cart.get(item.id);
@@ -169,13 +215,29 @@ export class ClientMenuComponent implements OnInit, OnDestroy {
     this.router.navigate(['/client/checkout']);
   }
 
-  viewOrders(): void {
-    this.router.navigate(['/client/orders']);
-  }
+   viewOrders(): void {
+     this.router.navigate(['/client/orders']);
+   }
 
-  logout(): void {
-    this.clientService.closeSession();
-    this.router.navigate(['/client']);
-  }
+   logout(): void {
+     console.log('🔵 [ClientMenuComponent] Cerrando sesión...');
+     this.clientService.closeSessionOnServer()
+       .pipe(takeUntil(this.destroy$))
+       .subscribe({
+         next: () => {
+           this.ngZone.run(() => {
+             console.log('✅ [ClientMenuComponent] Sesión cerrada');
+             this.router.navigate(['/client']);
+           });
+         },
+         error: (error: any) => {
+           this.ngZone.run(() => {
+             console.error('❌ [ClientMenuComponent] Error al cerrar sesión:', error);
+             // Redirigir de todas formas
+             this.router.navigate(['/client']);
+           });
+         }
+       });
+   }
 }
 

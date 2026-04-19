@@ -53,13 +53,14 @@
       <div class="controls-section">
         <div class="filter-group">
           <label for="status-filter">Filtrar por Estado</label>
-          <select id="status-filter" [(ngModel)]="selectedStatusFilter" (change)="applyFilters()" class="status-filter">
-            <option value="ALL">Todas</option>
-            <option value="PENDING">⏳ Pendiente</option>
-            <option value="IN_PREPARATION">🍳 En Preparación</option>
-            <option value="SERVED">✅ Servido</option>
-            <option value="PAID">💳 Pagado</option>
-          </select>
+           <select id="status-filter" [(ngModel)]="selectedStatusFilter" (change)="applyFilters()" class="status-filter">
+             <option value="ALL">Todas</option>
+             <option value="PENDING">⏳ Pendiente</option>
+             <option value="IN_PREPARATION">🍳 En Preparación</option>
+             <option value="SERVED">✅ Servido</option>
+             <option value="PAID">💳 Pagado</option>
+             <option value="CANCELLED">❌ Cancelado</option>
+           </select>
         </div>
 
         <!-- Resumen -->
@@ -88,7 +89,8 @@
                [class.selected]="selectedOrder?.id === order.id"
                [class.status-pending]="order.status === 'PENDING'"
                [class.status-preparing]="order.status === 'IN_PREPARATION'"
-               [class.status-served]="order.status === 'SERVED'">
+               [class.status-served]="order.status === 'SERVED'"
+               [class.status-cancelled]="order.status === 'CANCELLED'">
 
             <!-- Card Header -->
             <div class="card-header">
@@ -136,29 +138,39 @@
                 </div>
               </div>
 
-              <!-- Actions -->
-              <div class="card-actions">
-                <!-- Status Update -->
-                <div class="action-group" *ngIf="canUpdateStatus(order.status)">
-                  <select [(ngModel)]="order.status" (change)="updateOrderStatus(order)" class="status-selector" [disabled]="isProcessing">
-                    <option value="PENDING">⏳ Pendiente</option>
-                    <option value="IN_PREPARATION">🍳 En Preparación</option>
-                    <option value="SERVED">✅ Servido</option>
-                  </select>
-                  <button class="btn btn-sm btn-update" (click)="updateOrderStatus(order)" [disabled]="isProcessing">
-                    {{ isProcessing ? 'Actualizando...' : 'Actualizar' }}
-                  </button>
-                </div>
+               <!-- Actions -->
+               <div class="card-actions">
+                 <!-- Status Update -->
+                 <div class="action-group" *ngIf="canUpdateStatus(order.status)">
+                   <select [(ngModel)]="order.status" (change)="updateOrderStatus(order)" class="status-selector" [disabled]="isProcessing">
+                     <option value="PENDING">⏳ Pendiente</option>
+                     <option value="IN_PREPARATION">🍳 En Preparación</option>
+                     <option value="SERVED">✅ Servido</option>
+                   </select>
+                   <button class="btn btn-sm btn-update" (click)="updateOrderStatus(order)" [disabled]="isProcessing">
+                     {{ isProcessing ? 'Actualizando...' : 'Actualizar' }}
+                   </button>
+                 </div>
 
-                <!-- Mark as Paid -->
-                <button *ngIf="order.status === 'SERVED'"
-                        class="btn btn-sm btn-success"
-                        (click)="markOrderForPayment(order.id)"
-                        [class.selected]="ordersToPayIds.has(order.id)">
-                  <span class="material-icons">{{ ordersToPayIds.has(order.id) ? 'check_box' : 'check_box_outline_blank' }}</span>
-                  {{ ordersToPayIds.has(order.id) ? 'Seleccionada' : 'Marcar para Pago' }}
-                </button>
-              </div>
+                 <!-- Cancel Order Button -->
+                 <button *ngIf="canCancelOrder(order.status)"
+                         class="btn btn-sm btn-danger"
+                         (click)="cancelOrder(order.id)"
+                         [disabled]="isProcessing"
+                         title="Cancelar esta orden">
+                   <span class="material-icons">cancel</span>
+                   Cancelar Orden
+                 </button>
+
+                 <!-- Mark as Paid -->
+                 <button *ngIf="order.status === 'SERVED'"
+                         class="btn btn-sm btn-success"
+                         (click)="markOrderForPayment(order.id)"
+                         [class.selected]="ordersToPayIds.has(order.id)">
+                   <span class="material-icons">{{ ordersToPayIds.has(order.id) ? 'check_box' : 'check_box_outline_blank' }}</span>
+                   {{ ordersToPayIds.has(order.id) ? 'Seleccionada' : 'Marcar para Pago' }}
+                 </button>
+               </div>
             </div>
 
             <!-- Click to Expand -->
@@ -191,10 +203,19 @@
                 <span>Pagado</span>
               </div>
             </div>
-            <div class="card-amount">
-              <span class="amount-label">Total Pagado:</span>
-              <span class="amount-value">${{ order.total?.toFixed(2) || '0.00' }}</span>
-            </div>
+             <div class="card-amount">
+               <span class="amount-label">Total Pagado:</span>
+               <span class="amount-value">${{ order.total?.toFixed(2) || '0.00' }}</span>
+             </div>
+             <div class="card-actions">
+               <button class="btn btn-sm btn-primary"
+                       (click)="generateInvoice([order.id])"
+                       [disabled]="isProcessing"
+                       title="Generar factura para esta orden">
+                 <span class="material-icons">receipt</span>
+                 Generar Factura
+               </button>
+             </div>
           </div>
         </div>
       </div>

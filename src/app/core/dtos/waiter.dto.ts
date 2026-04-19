@@ -23,7 +23,7 @@ export interface TableSession {
 // Order (Staff View)
 export interface StaffOrder {
   id: number;
-  status: 'PENDING' | 'IN_PREPARATION' | 'SERVED' | 'PAID';
+  status: 'PENDING' | 'IN_PREPARATION' | 'SERVED' | 'PAID' | 'CANCELLED';
   items: StaffOrderItem[];
   total: number;
   createdAt: string;
@@ -45,7 +45,7 @@ export interface StaffOrderItem {
 
 // Status Update
 export interface UpdateOrderStatusRequest {
-  status: 'PENDING' | 'IN_PREPARATION' | 'SERVED' | 'PAID';
+  status: 'PENDING' | 'IN_PREPARATION' | 'SERVED' | 'PAID' | 'CANCELLED';
 }
 
 export interface UpdateOrderStatusResponse {

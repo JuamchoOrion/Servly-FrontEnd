@@ -30,29 +30,38 @@ export class ClientWelcomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Si ya hay sesión, ir al menú
+    // ✅ PRIMERO: Verificar si viene desde QR (parámetro ?table=X) - SINCRÓNICO
+    // Se usa snapshot para obtener parámetros de forma sincrónica
+    // Esto asegura que se ejecute ANTES de cualquier redirección
+    const tableParam = this.route.snapshot.queryParams['table'];
+    if (tableParam) {
+      const tableNumber = parseInt(tableParam, 10);
+      console.log('🔵 [ClientWelcomeComponent] QR detectado con mesa:', tableNumber);
+      console.log('🔵 [ClientWelcomeComponent] URL completa:', window.location.href);
+
+      // Validar el número de mesa
+      if (tableNumber >= 1 && tableNumber <= 999) {
+        // Abrir sesión automáticamente SIN revisar sesión previa
+        // Esto permite escanear múltiples mesas sin limpiar antes
+        this.form.patchValue({ tableNumber });
+        this.openSessionAutomatically(tableNumber);
+        return;
+      } else {
+        this.errorMessage = this.i18n.translate('client.errors.invalidTable');
+        return;
+      }
+    }
+
+    // ✅ SEGUNDO: Si NO viene de QR, revisar si ya hay sesión activa
+    // Esto evita el conflicto entre sesión existente y parámetro QR
     if (this.clientService.getCurrentSession()) {
+      console.log('🔵 [ClientWelcomeComponent] Sesión existente detectada, navegando a menú');
       this.router.navigate(['/client/menu']);
       return;
     }
 
-    // Verificar si viene desde QR (parámetro ?table=X)
-    this.route.queryParams.subscribe(params => {
-      const tableParam = params['table'];
-      if (tableParam) {
-        const tableNumber = parseInt(tableParam, 10);
-        console.log('🔵 [ClientWelcomeComponent] QR detectado con mesa:', tableNumber);
-
-        // Validar el número de mesa
-        if (tableNumber >= 1 && tableNumber <= 999) {
-          // Abrir sesión automáticamente
-          this.form.patchValue({ tableNumber });
-          this.openSessionAutomatically(tableNumber);
-        } else {
-          this.errorMessage = this.i18n.translate('client.errors.invalidTable');
-        }
-      }
-    });
+    // ✅ TERCERO: Mostrar formulario manual si no hay QR ni sesión previa
+    console.log('🔵 [ClientWelcomeComponent] Mostrando formulario manual de entrada');
   }
 
   /**

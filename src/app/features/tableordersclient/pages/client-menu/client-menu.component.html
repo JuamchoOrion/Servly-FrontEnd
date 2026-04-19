@@ -20,24 +20,24 @@
   </header>
 
   <div class="menu-container">
-    <!-- Categorías -->
-    <div class="categories-filter">
-      <button
-        class="category-btn"
-        [class.active]="selectedCategory === null"
-        (click)="filterByCategory(null)"
-      >
-        {{ i18n.translate('client.menu.allItems') }}
-      </button>
-      <button
-        *ngFor="let category of categories"
-        class="category-btn"
-        [class.active]="selectedCategory === category.name"
-        (click)="filterByCategory(category.name)"
-      >
-        {{ category.name }}
-      </button>
-    </div>
+     <!-- Categorías -->
+     <div class="categories-filter">
+       <button
+         class="category-btn"
+         [class.active]="selectedCategory === null"
+         (click)="filterByCategory(null)"
+       >
+         {{ i18n.translate('client.menu.allItems') }}
+       </button>
+       <button
+         *ngFor="let category of categories"
+         class="category-btn"
+         [class.active]="selectedCategory === category.id"
+         (click)="filterByCategory(category.id)"
+       >
+         {{ category.name }}
+       </button>
+     </div>
 
     <!-- Contenido Principal -->
     <div class="menu-content">
@@ -73,6 +73,8 @@
             </div>
             <div class="item-content">
               <h3 class="item-name">{{ item.name }}</h3>
+              <!-- ✅ NUEVO: Mostrar categoría -->
+              <span *ngIf="item.categoryName" class="item-category">{{ item.categoryName }}</span>
               <p class="item-description">{{ item.description }}</p>
               <div class="item-footer">
                 <span class="item-price">${{ (item.basePrice || item.price || 0).toFixed(2) }}</span>

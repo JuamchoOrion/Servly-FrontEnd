@@ -28,7 +28,7 @@
       {{ errorMessage }}
     </div>
 
-    <div *ngIf="!isLoading && orders.length === 0" class="empty-state">
+    <div *ngIf="!isLoading && getActiveOrders().length === 0" class="empty-state">
       <span class="material-icons">receipt_long</span>
       <h2>{{ i18n.translate('client.orders.noOrders') }}</h2>
       <p>{{ i18n.translate('client.orders.createOrder') }}</p>
@@ -38,13 +38,14 @@
       </button>
     </div>
 
-    <div class="orders-grid">
-      <div *ngFor="let order of orders" class="order-card" [class.expanded]="selectedOrder?.id === order.id">
-        <div class="order-header" (click)="selectOrder(order)">
-          <div class="order-info">
-            <span class="order-id">{{ i18n.translate('client.orders.order') }} #{{ order.id }}</span>
-            <span class="order-time">{{ getOrderTime(order) }}</span>
-          </div>
+    <!-- 📋 ÓRDENES ACTIVAS (PENDING, IN_PREPARATION, SERVED) -->
+    <div class="orders-grid" *ngIf="getActiveOrders().length > 0">
+      <div *ngFor="let order of getActiveOrders()" class="order-card" [class.expanded]="selectedOrder?.id === order.id">
+         <div class="order-header" (click)="selectOrder(order)">
+           <div class="order-info">
+             <span class="order-id">{{ i18n.translate('client.orders.order') }} #{{ order.id }}</span>
+             <span class="order-time">Día: {{ getOrderDate(order) }}</span>
+           </div>
           <div class="order-status" [ngClass]="getStatusColor(order.status)">
             <span class="material-icons">{{ getStatusIcon(order.status) }}</span>
             <span>{{ i18n.translate('client.orders.status.' + order.status) }}</span>
@@ -83,30 +84,21 @@
             </div>
           </div>
 
-          <div class="actions-section">
-            <button class="btn-action" (click)="requestHelp(order.id)">
-              <span class="material-icons">help</span>
-              {{ i18n.translate('client.orders.requestHelp') }}
-            </button>
+           <div class="actions-section">
+             <button class="btn-action" (click)="requestHelp(order.id)">
+               <span class="material-icons">help</span>
+               {{ i18n.translate('client.orders.requestHelp') }}
+             </button>
 
-            <button
-              *ngIf="order.status === 'SERVED'"
-              class="btn-action btn-confirm"
-              (click)="confirmDelivery(order.id)"
-            >
-              <span class="material-icons">check_circle</span>
-              {{ i18n.translate('client.orders.confirmDelivery') }}
-            </button>
-
-            <button
-              *ngIf="order.status === 'PAID'"
-              class="btn-action btn-invoice"
-              (click)="requestInvoice([order.id])"
-            >
-              <span class="material-icons">receipt</span>
-              {{ i18n.translate('client.orders.requestInvoice') }}
-            </button>
-          </div>
+             <button
+               *ngIf="order.status === 'PAID'"
+               class="btn-action btn-invoice"
+               (click)="requestInvoice([order.id])"
+             >
+               <span class="material-icons">receipt</span>
+               {{ i18n.translate('client.orders.requestInvoice') }}
+             </button>
+           </div>
 
           <div *ngIf="order.estimatedTime" class="estimated-time">
             <span class="material-icons">schedule</span>
@@ -116,8 +108,9 @@
       </div>
     </div>
 
-    <div *ngIf="!isLoading && orders.length > 0" class="bulk-actions">
-      <button class="btn btn-secondary" (click)="requestInvoice(orders.map(o => o.id))">
+    <!-- 💼 ACCIONES EN LOTE -->
+    <div *ngIf="!isLoading && getActiveOrders().length > 0" class="bulk-actions">
+      <button class="btn btn-secondary" (click)="requestInvoice(getActiveOrders().map(o => o.id))">
         <span class="material-icons">receipt</span>
         {{ i18n.translate('client.orders.requestAllInvoices') }}
       </button>

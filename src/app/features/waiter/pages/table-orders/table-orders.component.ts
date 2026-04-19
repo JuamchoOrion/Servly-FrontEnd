@@ -316,38 +316,41 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
     this.router.navigate(['/waiter/tables']);
   }
 
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'PENDING': return 'status-pending';
-      case 'IN_PREPARATION': return 'status-preparing';
-      case 'SERVED': return 'status-served';
-      case 'PAID': return 'status-paid';
-      default: return '';
-    }
-  }
-
-   getStatusIcon(status: string): string {
+   getStatusColor(status: string): string {
      switch (status) {
-       case 'PENDING': return 'schedule';
-       case 'IN_PREPARATION': return 'local_dining';
-       case 'SERVED': return 'done';
-       case 'PAID': return 'check_circle';
-       default: return 'help';
+       case 'PENDING': return 'status-pending';
+       case 'IN_PREPARATION': return 'status-preparing';
+       case 'SERVED': return 'status-served';
+       case 'PAID': return 'status-paid';
+       case 'CANCELLED': return 'status-cancelled';
+       default: return '';
      }
    }
 
-   /**
-    * Obtiene el label del estado
-    */
-   getStatusLabel(status: string): string {
-     const labels: { [key: string]: string } = {
-       'PENDING': 'Pendiente',
-       'IN_PREPARATION': 'En Preparación',
-       'SERVED': 'Servido',
-       'PAID': 'Pagado'
-     };
-     return labels[status] || status;
-   }
+    getStatusIcon(status: string): string {
+      switch (status) {
+        case 'PENDING': return 'schedule';
+        case 'IN_PREPARATION': return 'local_dining';
+        case 'SERVED': return 'done';
+        case 'PAID': return 'check_circle';
+        case 'CANCELLED': return 'cancel';
+        default: return 'help';
+      }
+    }
+
+    /**
+     * Obtiene el label del estado
+     */
+    getStatusLabel(status: string): string {
+      const labels: { [key: string]: string } = {
+        'PENDING': 'Pendiente',
+        'IN_PREPARATION': 'En Preparación',
+        'SERVED': 'Servido',
+        'PAID': 'Pagado',
+        'CANCELLED': 'Cancelado'
+      };
+      return labels[status] || status;
+    }
 
    /**
     * Obtiene la hora formateada de la orden
@@ -378,12 +381,14 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
      return order.total - this.getOrderSubtotal(order);
    }
 
-   /**
-    * Obtiene total de todas las órdenes
-    */
-   getTotalBill(): number {
-     return this.orders.reduce((sum, order) => sum + order.total, 0);
-   }
+    /**
+     * Obtiene total de todas las órdenes ACTIVAS (excluyendo PAID y CANCELLED)
+     */
+    getTotalBill(): number {
+      return this.orders
+        .filter(order => order.status !== 'PAID' && order.status !== 'CANCELLED')
+        .reduce((sum, order) => sum + order.total, 0);
+    }
 
    /**
     * Obtiene total de órdenes seleccionadas para pago
@@ -401,15 +406,25 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
      this.toggleOrderForPayment(orderId);
    }
 
-   /**
-    * Verifica si se puede confirmar el pago
-    */
-   canConfirmPayment(): boolean {
-     if (this.paymentMethod === 'CASH') {
-       return this.moneyReceived >= this.paymentAmount;
-     }
-     return this.paymentAmount > 0;
-   }
+    /**
+     * Verifica si se puede confirmar el pago
+     * - CASH: requiere dinero ingresado >= al total (para hacer cambio)
+     * - CARD/QR_PAYMENT: solo requiere que el monto sea > 0
+     */
+    canConfirmPayment(): boolean {
+      // El monto debe ser positivo
+      if (this.paymentAmount <= 0) {
+        return false;
+      }
+
+      // Si es CASH: validar que se ingresó suficiente dinero
+      if (this.paymentMethod === 'CASH') {
+        return this.moneyReceived >= this.paymentAmount;
+      }
+
+      // Para CARD o QR_PAYMENT: el monto es lo que importa (ya validado arriba)
+      return true;
+    }
 
   getNextStatus(currentStatus: string): string | null {
     switch (currentStatus) {
@@ -420,9 +435,24 @@ export class TableOrdersComponent implements OnInit, OnDestroy {
     }
   }
 
-  canUpdateStatus(status: string): boolean {
-    return status !== 'PAID';
-  }
+   canUpdateStatus(status: string): boolean {
+     return status !== 'PAID' && status !== 'CANCELLED';
+   }
+
+   /**
+    * Verifica si una orden puede ser cancelada
+    */
+   canCancelOrder(status: string): boolean {
+     return status !== 'PAID' && status !== 'CANCELLED';
+   }
+
+   /**
+    * Cancela una orden
+    */
+   cancelOrder(orderId: number): void {
+     if (!confirm('¿Seguro que deseas cancelar esta orden?')) return;
+     this.updateOrderStatus(orderId, 'CANCELLED');
+   }
 
   getAvailableNextStatuses(currentStatus: string): { value: string; label: string }[] {
     const transitions: { [key: string]: string[] } = {

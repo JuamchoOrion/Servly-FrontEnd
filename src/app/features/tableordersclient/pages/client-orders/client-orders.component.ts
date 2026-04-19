@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Subject, interval, of } from 'rxjs';
-import { takeUntil, switchMap, startWith } from 'rxjs/operators';
+import { Subject, interval } from 'rxjs';
+import { takeUntil, startWith, switchMap } from 'rxjs/operators';
 import { ClientService } from '../../../../core/services/client.service';
 import { Order } from '../../../../core/dtos/client.dto';
 import { I18nService } from '../../../../core/services/i18n.service';
@@ -23,11 +23,13 @@ export class ClientOrdersComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(
-    private clientService: ClientService,
-    private router: Router,
-    public i18n: I18nService
-  ) {}
+   constructor(
+     private clientService: ClientService,
+     private router: Router,
+     public i18n: I18nService,
+     private ngZone: NgZone,
+     private cdr: ChangeDetectorRef
+   ) {}
 
   ngOnInit(): void {
     console.log('🔵 [ClientOrdersComponent] Inicializando componente');
@@ -51,18 +53,24 @@ export class ClientOrdersComponent implements OnInit, OnDestroy {
         }),
         takeUntil(this.destroy$)
       )
-      .subscribe({
-        next: (orders: Order[]) => {
-          console.log('✅ [ClientOrdersComponent] Órdenes cargadas:', orders.length, orders);
-          this.orders = orders;
-          this.isLoading = false;
-        },
-        error: (error: any) => {
-          console.error('❌ [ClientOrdersComponent] Error cargando órdenes:', error);
-          this.errorMessage = 'Error al cargar las órdenes';
-          this.isLoading = false;
-        }
-      });
+       .subscribe({
+         next: (orders: Order[]) => {
+           this.ngZone.run(() => {
+             console.log('✅ [ClientOrdersComponent] Órdenes cargadas:', orders.length, orders);
+             this.orders = orders;
+             this.isLoading = false;
+             this.cdr.detectChanges(); // ✅ Forzar detección de cambios
+           });
+         },
+         error: (error: any) => {
+           this.ngZone.run(() => {
+             console.error('❌ [ClientOrdersComponent] Error cargando órdenes:', error);
+             this.errorMessage = 'Error al cargar las órdenes';
+             this.isLoading = false;
+             this.cdr.detectChanges(); // ✅ Forzar detección de cambios
+           });
+         }
+       });
   }
 
   ngOnDestroy(): void {
@@ -155,16 +163,34 @@ export class ClientOrdersComponent implements OnInit, OnDestroy {
     this.router.navigate(['/client/menu']);
   }
 
-  logout(): void {
-    this.clientService.closeSession();
-    this.router.navigate(['/client']);
-  }
+   logout(): void {
+     console.log('🔵 [ClientOrdersComponent] Cerrando sesión...');
+     this.clientService.closeSessionOnServer()
+       .pipe(takeUntil(this.destroy$))
+       .subscribe({
+         next: () => {
+           this.ngZone.run(() => {
+             console.log('✅ [ClientOrdersComponent] Sesión cerrada');
+             this.router.navigate(['/client']);
+           });
+         },
+         error: (error: any) => {
+           this.ngZone.run(() => {
+             console.error('❌ [ClientOrdersComponent] Error al cerrar sesión:', error);
+             // Redirigir de todas formas
+             this.router.navigate(['/client']);
+           });
+         }
+       });
+   }
 
   getOrderDate(order: Order): string {
     const dateStr = order.createdAt || order.created_at;
     if (!dateStr) return 'N/A';
     try {
-      return new Date(dateStr).toLocaleDateString('es-CO');
+      const date = new Date(dateStr);
+      // Mostrar solo el día del mes (ej: "19")
+      return date.getDate().toString();
     } catch (e) {
       return dateStr;
     }
@@ -174,10 +200,39 @@ export class ClientOrdersComponent implements OnInit, OnDestroy {
     const dateStr = order.createdAt || order.created_at;
     if (!dateStr) return 'N/A';
     try {
-      return new Date(dateStr).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+      const date = new Date(dateStr);
+      // Formato: "14:30" (24 horas) o "2:30 PM" (12 horas)
+      return date.toLocaleTimeString('es-CO', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false  // ✅ Usa formato 24 horas (14:30 en lugar de 2:30 PM)
+      });
     } catch (e) {
       return dateStr;
     }
+  }
+
+   /**
+    * Obtiene solo la ÚLTIMA orden ACTIVA (excluyendo PAID)
+    * Retorna un array con 1 elemento (la orden más reciente por ID)
+    */
+   getActiveOrders(): Order[] {
+     const activeOrders = this.orders.filter(order => order.status !== 'PAID');
+     if (activeOrders.length === 0) return [];
+
+     // Obtener la orden con mayor ID (la más reciente)
+     const latestOrder = activeOrders.reduce((max, order) =>
+       order.id > max.id ? order : max
+     );
+
+     return [latestOrder];
+   }
+
+  /**
+   * Obtiene solo las órdenes PAGADAS
+   */
+  getPaidOrders(): Order[] {
+    return this.orders.filter(order => order.status === 'PAID');
   }
 
   getSubtotal(order: Order): number {

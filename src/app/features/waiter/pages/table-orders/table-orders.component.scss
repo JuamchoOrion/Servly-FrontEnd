@@ -368,7 +368,12 @@ $shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
     opacity: 0.7;
   }
 
-  &:hover:not(.status-paid) {
+  &.status-cancelled {
+    border-left-color: $error-color;
+    opacity: 0.6;
+  }
+
+  &:hover:not(.status-paid):not(.status-cancelled) {
     box-shadow: $shadow-lg;
     transform: translateY(-2px);
   }
@@ -426,6 +431,11 @@ $shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
       &.status-paid {
         background: rgba($status-paid, 0.1);
         color: $status-paid;
+      }
+
+      &.status-cancelled {
+        background: rgba($error-color, 0.1);
+        color: $error-color;
       }
     }
   }
@@ -780,6 +790,42 @@ $shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
 
     &:hover:not(:disabled) {
       background: darken($border-color, 10%);
+    }
+  }
+
+  .btn-danger {
+    background: $error-color;
+    color: white;
+    margin-top: 8px;
+
+    &:hover:not(:disabled) {
+      background: darken($error-color, 10%);
+      transform: scale(1.02);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-success {
+    background: $success-color;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: darken($success-color, 10%);
+      transform: scale(1.02);
+    }
+
+    &.selected {
+      background: darken($success-color, 15%);
+      font-weight: bold;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
   }
 }

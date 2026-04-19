@@ -2,8 +2,11 @@
 export interface ClientSession {
   sessionToken: string;
   tableNumber: number;
-  expiresIn: number;
-  message: string;
+  expiresIn?: number;        // Segundos restantes (formato antiguo)
+  expiresAt?: string;        // ISO string (formato nuevo del backend)
+  sessionId?: string;        // ID de sesión
+  tokenType?: string;        // Tipo de token (Bearer, etc)
+  message?: string;          // Mensaje opcional
 }
 
 // Menu Item
@@ -15,6 +18,8 @@ export interface MenuItem {
   description: string;
   recipeItems?: RecipeItem[];
   category?: string;
+  categoryId?: number;      // ✅ NUEVO
+  categoryName?: string;    // ✅ NUEVO
   imageUrl?: string;
   image?: string;
 }
