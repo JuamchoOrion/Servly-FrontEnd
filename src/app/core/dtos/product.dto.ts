@@ -61,9 +61,12 @@ export interface Product {
   id: number;
   name: string;
   description: string;
-  basePrice: number; // Campo del backend es basePrice, no price
+  basePrice?: number; // Campo del backend es basePrice, no price
   price?: number; // Alias para basePrice
   category?: string;
+  categoryId?: number; // ID de la categoría
+  categoryName?: string; // Nombre de la categoría
+  recipeId?: number; // ID de la receta
   image?: string;
   imageUrl?: string; // URL de imagen en Cloudinary (desde POST con imagen)
   active?: boolean;

@@ -20,6 +20,7 @@ import { I18nService } from '../../../../core/services/i18n.service';
 })
 export class ProductListComponent implements OnInit, OnDestroy {
   // Data
+  private allProductsSubject = new BehaviorSubject<Product[]>([]);
   private productsSubject = new BehaviorSubject<Product[]>([]);
   products$ = this.productsSubject.asObservable();
 
@@ -39,12 +40,17 @@ export class ProductListComponent implements OnInit, OnDestroy {
   selectedCategoryId: number | null = null;
   searchText = '';
 
-  // Pagination
+  // Pagination - Backend
   currentPage = 0;
   pageSize = 10;
   totalElements = 0;
   totalPages = 0;
   isLastPage = false;
+
+  // Pagination - Frontend (para búsqueda y filtros)
+  currentFrontendPage = 1;
+  itemsPerPage = 10;
+  filteredProducts: Product[] = [];
 
   // State
   isLoading = false;
@@ -90,32 +96,34 @@ export class ProductListComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Carga la lista de productos
-   */
-  loadProducts(): void {
-    this.isLoading = true;
-    this.errorMessage = null;
-    this.cdr.markForCheck();
+   /**
+    * Carga la lista de productos
+    */
+   loadProducts(): void {
+     this.isLoading = true;
+     this.errorMessage = null;
+     this.cdr.markForCheck();
 
-    this.productService.getProducts(this.currentPage, this.pageSize)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: PaginatedProductResponse) => {
-          this.products = response.content;
-          this.totalElements = response.totalElements;
-          this.totalPages = response.totalPages;
-          this.isLastPage = response.isLast;
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        },
-        error: (error: any) => {
-          this.errorMessage = this.i18n.translate('products.errors.loadFailed');
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        }
-      });
-  }
+     this.productService.getProducts(this.currentPage, this.pageSize)
+       .pipe(takeUntil(this.destroy$))
+       .subscribe({
+         next: (response: PaginatedProductResponse) => {
+           this.products = response.content;
+           this.filteredProducts = response.content; // Inicializar filteredProducts
+           this.currentFrontendPage = 1; // Reset frontend pagination
+           this.totalElements = response.totalElements;
+           this.totalPages = response.totalPages;
+           this.isLastPage = response.isLast;
+           this.isLoading = false;
+           this.cdr.markForCheck();
+         },
+         error: (error: any) => {
+           this.errorMessage = this.i18n.translate('products.errors.loadFailed');
+           this.isLoading = false;
+           this.cdr.markForCheck();
+         }
+       });
+   }
 
   /**
    * Verifica si el usuario es administrador
@@ -146,15 +154,66 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.loadProducts();
   }
 
-  /**
-   * Busca productos por nombre (lado cliente)
-   */
-  searchProducts(): void {
-    const filtered = this.products.filter(p =>
-      p.name.toLowerCase().includes(this.searchText.toLowerCase())
-    );
-    this.productsSubject.next(filtered);
-  }
+   /**
+    * Busca productos por nombre (lado cliente)
+    */
+   searchProducts(): void {
+     this.currentFrontendPage = 1;
+     const filtered = this.products.filter(p =>
+       p.name.toLowerCase().includes(this.searchText.toLowerCase())
+     );
+     this.filteredProducts = filtered;
+     this.products = this.getPagedProducts();
+   }
+
+   /**
+    * Obtiene los productos paginados para frontend
+    */
+   private getPagedProducts(): Product[] {
+     const start = (this.currentFrontendPage - 1) * this.itemsPerPage;
+     const end = start + this.itemsPerPage;
+     return this.filteredProducts.slice(start, end);
+   }
+
+   /**
+    * Obtiene total de páginas para frontend
+    */
+   getFrontendTotalPages(): number {
+     return Math.ceil(this.filteredProducts.length / this.itemsPerPage);
+   }
+
+   /**
+    * Navega a siguiente página (frontend)
+    */
+   nextFrontendPage(): void {
+     if (this.currentFrontendPage < this.getFrontendTotalPages()) {
+       this.currentFrontendPage++;
+       this.products = this.getPagedProducts();
+       this.cdr.markForCheck();
+     }
+   }
+
+   /**
+    * Navega a página anterior (frontend)
+    */
+   previousFrontendPage(): void {
+     if (this.currentFrontendPage > 1) {
+       this.currentFrontendPage--;
+       this.products = this.getPagedProducts();
+       this.cdr.markForCheck();
+     }
+   }
+
+   /**
+    * Va a página específica (frontend)
+    */
+   goToFrontendPage(page: number): void {
+     if (page > 0 && page <= this.getFrontendTotalPages()) {
+       this.currentFrontendPage = page;
+       this.products = this.getPagedProducts();
+       this.cdr.markForCheck();
+     }
+   }
 
   /**
    * Navega a crear nuevo producto

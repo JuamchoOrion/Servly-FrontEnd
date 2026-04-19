@@ -1,0 +1,276 @@
+/* ===============================
+   🎨 CLIENT NAVBAR STYLES
+================================ */
+
+$primary-black: #1E1E1E;
+$accent-gold: #C8A951;
+$light-bg: #F5F5F5;
+$white: #FFFFFF;
+$text-light: #666666;
+$border-light: #EFEFEF;
+
+.client-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: #1E1E1E;
+  border-bottom: 1px solid #333333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  @media (max-width: 768px) {
+    padding: 12px 16px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px 12px;
+  }
+}
+
+/* Logo */
+.navbar-logo {
+  flex: 1;
+
+  .logo-text {
+    font-size: 24px;
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #FFFFFF 0%, $accent-gold 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+
+    @media (max-width: 480px) {
+      font-size: 20px;
+    }
+  }
+}
+
+/* User Section */
+.user-section {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.user-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: none;
+  border: 1px solid #444444;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  color: #FFFFFF;
+  font-family: inherit;
+
+  &:hover {
+    background-color: #2a2a2a;
+    border-color: $accent-gold;
+  }
+
+  .user-icon {
+    font-size: 20px;
+    color: #999999;
+  }
+
+  .user-email {
+    font-weight: 500;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    @media (max-width: 480px) {
+      display: none;
+    }
+  }
+
+  .dropdown-arrow {
+    font-size: 20px;
+    transition: transform 0.2s ease;
+    color: #999999;
+
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+/* Dropdown Menu */
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: #252525;
+  border: 1px solid #333333;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  min-width: 180px;
+  overflow: hidden;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  text-align: left;
+
+  .material-icons {
+    font-size: 18px;
+    color: #999999;
+  }
+
+  &:hover {
+    background-color: #333333;
+    color: $accent-gold;
+
+    .material-icons {
+      color: $accent-gold;
+    }
+  }
+
+  &:active {
+    background-color: #2a2a2a;
+  }
+}
+
+/* ===============================
+   🌙 DARK MODE
+================================ */
+
+:root.dark-mode {
+  .client-navbar {
+    background: #1e1e1e;
+    border-bottom-color: #404040;
+  }
+
+  .navbar-logo .logo-text {
+    color: #ffffff;
+    background: linear-gradient(135deg, #ffffff 0%, $accent-gold 100%);
+    -webkit-text-fill-color: transparent;
+  }
+
+  .user-btn {
+    border-color: #404040;
+    color: #ffffff;
+
+    &:hover {
+      background-color: #252525;
+      border-color: $accent-gold;
+    }
+
+    .user-icon {
+      color: #999999;
+    }
+
+    .dropdown-arrow {
+      color: #999999;
+    }
+  }
+
+  .user-dropdown {
+    background: #1e1e1e;
+    border-color: #404040;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .dropdown-item {
+    color: #ffffff;
+
+    .material-icons {
+      color: #999999;
+    }
+
+    &:hover {
+      background-color: #252525;
+      color: $accent-gold;
+
+      .material-icons {
+        color: $accent-gold;
+      }
+    }
+
+    &:active {
+      background-color: #2a2a2a;
+    }
+  }
+}
+
+/* ===============================
+   🔆 HIGH CONTRAST
+================================ */
+
+:root.high-contrast {
+  .client-navbar {
+    background: #ffffff !important;
+    border-bottom: 3px solid #000000 !important;
+  }
+
+  .navbar-logo .logo-text {
+    color: #000000 !important;
+    font-weight: 900 !important;
+    background: none !important;
+    -webkit-text-fill-color: unset !important;
+  }
+
+  .user-btn {
+    border: 3px solid #000000 !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+    background: #ffffff !important;
+
+    &:hover {
+      background-color: #f0f0f0 !important;
+      border-color: #000000 !important;
+    }
+
+    .user-icon,
+    .dropdown-arrow {
+      color: #000000 !important;
+    }
+  }
+
+  .user-dropdown {
+    background: #ffffff !important;
+    border: 3px solid #000000 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+  }
+
+  .dropdown-item {
+    color: #000000 !important;
+    font-weight: 700 !important;
+    border-bottom: 1px solid #000000 !important;
+
+    .material-icons {
+      color: #000000 !important;
+    }
+
+    &:hover {
+      background-color: #f5f5f5 !important;
+      color: #000000 !important;
+    }
+
+    &:active {
+      background-color: #eeeeee !important;
+    }
+  }
+}
+

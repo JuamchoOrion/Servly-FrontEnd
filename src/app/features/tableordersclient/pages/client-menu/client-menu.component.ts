@@ -6,11 +6,13 @@ import { takeUntil } from 'rxjs/operators';
 import { ClientService } from '../../../../core/services/client.service';
 import { MenuItem } from '../../../../core/dtos/client.dto';
 import { I18nService } from '../../../../core/services/i18n.service';
+import { ClientNavbarComponent } from '../../../../shared/components/client-navbar/client-navbar.component';
+import { FooterComponent } from '../../../../shared/components/footer/footer.component';
 
 @Component({
   selector: 'app-client-menu',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ClientNavbarComponent, FooterComponent],
   templateUrl: './client-menu.component.html',
   styleUrls: ['./client-menu.component.scss']
 })

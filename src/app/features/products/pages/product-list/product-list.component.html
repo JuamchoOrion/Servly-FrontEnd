@@ -1,165 +1,178 @@
-<div class="products-container">
-  <!-- Header -->
-  <div class="products-header">
-    <div class="header-content">
-      <h1>{{ i18n.translate('products.title') }}</h1>
-      <p>{{ i18n.translate('products.subtitle') }}</p>
-    </div>
-    <button
-      class="btn btn-primary"
-      (click)="createProduct()"
-      *ngIf="isAdmin"
-      [disabled]="isLoading">
-      <span class="material-icons">add</span>
-      {{ i18n.translate('products.create') }}
-    </button>
-  </div>
+<div class="products-page">
+  <!-- Background -->
+  <div class="products-background"></div>
 
-  <!-- Error Alert -->
-  <div class="alert alert-error" *ngIf="errorMessage">
-    <span class="material-icons">error</span>
-    <div class="alert-content">
-      <strong>{{ i18n.translate('common.error') }}</strong>
-      <p>{{ errorMessage }}</p>
-    </div>
-    <button type="button" class="alert-close" (click)="closeMessage('error')">
-      <span class="material-icons">close</span>
-    </button>
-  </div>
-
-  <!-- Success Alert -->
-  <div class="alert alert-success" *ngIf="successMessage">
-    <span class="material-icons">check_circle</span>
-    <div class="alert-content">
-      <p>{{ successMessage }}</p>
-    </div>
-    <button type="button" class="alert-close" (click)="closeMessage('success')">
-      <span class="material-icons">close</span>
-    </button>
-  </div>
-
-  <!-- Filters -->
-  <div class="products-filters">
-    <form [formGroup]="filterForm" class="filter-form">
-      <div class="filter-group">
-        <label>{{ i18n.translate('products.filterByCategory') }}</label>
-        <select formControlName="categoryId" (change)="filterByCategory()" class="form-select">
-          <option [value]="null">{{ i18n.translate('common.all') }}</option>
-          <option *ngFor="let category of categories" [value]="category.id">
-            {{ category.name }}
-          </option>
-        </select>
+  <!-- Main Content -->
+  <main class="products-container">
+    <!-- Header -->
+    <header class="products-header">
+      <div class="header-content">
+        <h1>{{ i18n.translate('products.title') }}</h1>
+        <p>{{ i18n.translate('products.subtitle') }}</p>
       </div>
-
-      <div class="filter-group">
-        <label>{{ i18n.translate('products.search') }}</label>
-        <input
-          type="text"
-          placeholder="{{ i18n.translate('products.searchPlaceholder') }}"
-          [(ngModel)]="searchText"
-          (input)="searchProducts()"
-          [ngModelOptions]="{ standalone: true }"
-          class="form-input">
-      </div>
-
-      <button type="button" class="btn btn-secondary" (click)="clearFilters()">
-        <span class="material-icons">clear</span>
-        {{ i18n.translate('common.clear') }}
+      <button
+        class="btn-create-product"
+        (click)="createProduct()"
+        *ngIf="isAdmin"
+        [disabled]="isLoading"
+        title="{{ i18n.translate('products.create') }}">
+        <span class="material-icons">add</span>
+        {{ i18n.translate('products.create') }}
       </button>
-    </form>
-  </div>
+    </header>
 
-  <!-- Loading State -->
-  <div class="loading-state" *ngIf="isLoading">
-    <div class="spinner"></div>
-    <p>{{ i18n.translate('products.loading') }}</p>
-  </div>
+    <!-- Error Alert -->
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <span class="material-icons">error</span>
+      <div class="alert-content">
+        <strong>{{ i18n.translate('common.error') }}</strong>
+        <p>{{ errorMessage }}</p>
+      </div>
+       <button type="button" class="alert-close" (click)="closeMessage('error')" [attr.aria-label]="'Cerrar alerta de error'">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
 
-  <!-- Table -->
-  <div class="products-table-wrapper" *ngIf="!isLoading">
-    <table class="products-table" *ngIf="products.length > 0">
-      <thead>
-        <tr>
-          <th>{{ i18n.translate('products.image') }}</th>
-          <th>{{ i18n.translate('products.name') }}</th>
-          <th>{{ i18n.translate('products.category') }}</th>
-          <th>{{ i18n.translate('products.price') }}</th>
-          <th>{{ i18n.translate('products.status') }}</th>
-          <th *ngIf="isAdmin">{{ i18n.translate('products.actions') }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let product of products">
-          <td class="cell-image">
-            <img
-              *ngIf="product.imageUrl || product.image"
-              [src]="product.imageUrl || product.image"
-              alt="{{ product.name }}"
-              class="product-thumbnail">
-            <div *ngIf="!(product.imageUrl || product.image)" class="no-image">
-              <span class="material-icons">image</span>
-            </div>
-          </td>
-          <td class="cell-name">
-            <div class="product-info">
-              <strong>{{ product.name }}</strong>
-              <small>{{ product.description }}</small>
-            </div>
-          </td>
-          <td>{{ getCategoryName(product) }}</td>
-          <td class="cell-price">${{ product.basePrice | number:'1.2-2' }}</td>
-          <td>
-            <span class="badge" [class.badge-active]="product.active ?? true" [class.badge-inactive]="!(product.active ?? true)">
-              {{ getActiveText(product.active) }}
-            </span>
-          </td>
-          <td *ngIf="isAdmin" class="cell-actions">
-            <button
-              class="btn btn-icon btn-edit"
-              (click)="editProduct(product.id)"
-              [title]="i18n.translate('products.edit')">
-              <span class="material-icons">edit</span>
-            </button>
-            <button
-              class="btn btn-icon btn-delete"
-              (click)="deleteProduct(product)"
-              [title]="i18n.translate('products.delete')">
-              <span class="material-icons">delete</span>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- Success Alert -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <span class="material-icons">check_circle</span>
+      <div class="alert-content">
+        <p>{{ successMessage }}</p>
+      </div>
+       <button type="button" class="alert-close" (click)="closeMessage('success')" [attr.aria-label]="'Cerrar alerta de éxito'">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="products-filters">
+      <form [formGroup]="filterForm" class="filter-form">
+         <div class="filter-group">
+          <label for="categoryFilter">{{ i18n.translate('products.filterByCategory') }}</label>
+          <select id="categoryFilter" formControlName="categoryId" (change)="filterByCategory()" class="form-select" [attr.aria-label]="i18n.translate('products.filterByCategory')">
+            <option [value]="null">{{ i18n.translate('common.all') }}</option>
+            <option *ngFor="let category of categories" [value]="category.id">
+              {{ category.name }}
+            </option>
+          </select>
+        </div>
+
+         <div class="filter-group">
+          <label for="searchInput">{{ i18n.translate('products.search') }}</label>
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="{{ i18n.translate('products.searchPlaceholder') }}"
+            [(ngModel)]="searchText"
+            (input)="searchProducts()"
+            [ngModelOptions]="{ standalone: true }"
+            class="form-input"
+            [attr.aria-label]="i18n.translate('products.search')">
+        </div>
+
+        <button type="button" class="btn-clear-filters" (click)="clearFilters()" [attr.aria-label]="'Limpiar filtros'">
+          <span class="material-icons" aria-hidden="true">clear</span>
+          {{ i18n.translate('common.clear') }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>{{ i18n.translate('products.loading') }}</p>
+    </div>
+
+    <!-- Products Table (Premium Design) -->
+    <div class="products-table-wrapper" *ngIf="!isLoading && products.length > 0">
+      <table class="products-table" role="grid">
+        <thead>
+          <tr role="row">
+            <th role="columnheader">{{ i18n.translate('products.image') }}</th>
+            <th role="columnheader">{{ i18n.translate('products.name') }}</th>
+            <th role="columnheader">{{ i18n.translate('products.category') }}</th>
+            <th role="columnheader">{{ i18n.translate('products.price') }}</th>
+            <th role="columnheader">{{ i18n.translate('products.status') }}</th>
+            <th *ngIf="isAdmin" role="columnheader">{{ i18n.translate('products.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of products" role="row">
+            <td class="cell-image" role="gridcell">
+              <img
+                *ngIf="product.imageUrl || product.image"
+                [src]="product.imageUrl || product.image"
+                alt="{{ product.name }}"
+                class="product-thumbnail">
+              <div *ngIf="!(product.imageUrl || product.image)" class="no-image">
+                <span class="material-icons" aria-hidden="true">image</span>
+              </div>
+            </td>
+            <td class="cell-name" role="gridcell">
+              <div class="product-info">
+                <strong>{{ product.name }}</strong>
+                <small>{{ product.description }}</small>
+              </div>
+            </td>
+            <td role="gridcell">{{ getCategoryName(product) }}</td>
+            <td class="cell-price" role="gridcell">${{ product.price | number:'1.2-2' }}</td>
+            <td role="gridcell">
+              <span class="badge" [class.badge-active]="product.active ?? true" [class.badge-inactive]="!(product.active ?? true)">
+                {{ getActiveText(product.active) }}
+              </span>
+            </td>
+            <td *ngIf="isAdmin" class="cell-actions" role="gridcell">
+              <button
+                class="btn-action btn-edit"
+                (click)="editProduct(product.id)"
+                [attr.aria-label]="'Editar ' + product.name">
+                <span class="material-icons" aria-hidden="true">edit</span>
+              </button>
+              <button
+                class="btn-action btn-delete"
+                (click)="deleteProduct(product)"
+                [attr.aria-label]="'Eliminar ' + product.name">
+                <span class="material-icons" aria-hidden="true">delete</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="products.length === 0">
-      <span class="material-icons">inventory_2</span>
+    <div class="empty-state" *ngIf="!isLoading && products.length === 0">
+      <div class="empty-icon">
+        <span class="material-icons">inventory_2</span>
+      </div>
       <h3>{{ i18n.translate('products.empty') }}</h3>
       <p>{{ i18n.translate('products.emptyMessage') }}</p>
     </div>
-  </div>
 
-  <!-- Pagination -->
-  <div class="pagination" *ngIf="!isLoading && products.length > 0">
-    <button
-      class="btn btn-secondary"
-      (click)="previousPage()"
-      [disabled]="currentPage === 0">
-      <span class="material-icons">chevron_left</span>
-      {{ i18n.translate('common.previous') }}
-    </button>
+     <!-- Pagination -->
+     <div class="pagination" *ngIf="!isLoading && products.length > 0">
+       <button
+         class="btn-pagination"
+         (click)="previousFrontendPage()"
+         [disabled]="currentFrontendPage === 1"
+         [attr.aria-label]="'Página anterior'">
+         <span class="material-icons" aria-hidden="true">chevron_left</span>
+         {{ i18n.translate('common.previous') }}
+       </button>
 
-    <div class="pagination-info">
-      {{ i18n.translate('common.page') }} {{ currentPage + 1 }} {{ i18n.translate('common.of') }} {{ totalPages }}
-    </div>
+       <div class="pagination-info" role="status" aria-live="polite">
+         {{ i18n.translate('common.page') }} {{ currentFrontendPage }} {{ i18n.translate('common.of') }} {{ getFrontendTotalPages() }}
+       </div>
 
-    <button
-      class="btn btn-secondary"
-      (click)="nextPage()"
-      [disabled]="isLastPage">
-      {{ i18n.translate('common.next') }}
-      <span class="material-icons">chevron_right</span>
-    </button>
-  </div>
+       <button
+         class="btn-pagination"
+         (click)="nextFrontendPage()"
+         [disabled]="currentFrontendPage >= getFrontendTotalPages()"
+         [attr.aria-label]="'Página siguiente'">
+         {{ i18n.translate('common.next') }}
+         <span class="material-icons" aria-hidden="true">chevron_right</span>
+       </button>
+     </div>
+  </main>
 </div>
 

@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRe
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ProductService } from '../../../../core/services/product.service';
 import { Product, Category, Recipe, ProductFormData, CreateProductRequest } from '../../../../core/dtos/product.dto';
@@ -118,9 +118,9 @@ export class ProductFormComponent implements OnInit, OnDestroy {
           this.productForm.patchValue({
             name: product.name,
             description: product.description,
-            price: product.basePrice || product.price,
-            categoryId: product.id, // Ajustar según respuesta real del backend
-            recipeId: product.id || '', // Ajustar según respuesta real
+            price: product.price || product.basePrice,
+            categoryId: product.categoryId || '',
+            recipeId: product.recipeId || '',
             active: product.active ?? true,
             image: product.imageUrl || product.image || ''
           });
@@ -162,24 +162,26 @@ export class ProductFormComponent implements OnInit, OnDestroy {
       name: formData.name.trim(),
       description: formData.description.trim(),
       price: parseFloat(formData.price.toString()),
+      categoryId: parseInt(formData.categoryId.toString()),
+      recipeId: formData.recipeId ? parseInt(formData.recipeId.toString()) : undefined,
       active: formData.active
     };
 
-    // Si estamos editando y hay imagen, usar updateProductWithImage
-    // Si solo tenemos cambios normales, usar updateProduct
-    const operation$ = this.isEditMode && this.productId
-      ? this.imageFile
+    // Determinar si usar crear con imagen o crear sin imagen
+    let operation$: Observable<Product>;
+
+    if (this.isEditMode && this.productId) {
+      // Modo edición
+      operation$ = this.imageFile
         ? this.productService.updateProductWithImage(this.productId, productData, this.imageFile)
         : this.productService.updateProduct(this.productId, {
             ...productData,
-            productCategoryId: parseInt(formData.categoryId.toString()),
-            recipeId: formData.recipeId ? parseInt(formData.recipeId.toString()) : undefined
-          })
-      : this.productService.createProduct({
-          ...productData,
-          productCategoryId: parseInt(formData.categoryId.toString()),
-          recipeId: formData.recipeId ? parseInt(formData.recipeId.toString()) : undefined
-        });
+            productCategoryId: productData.categoryId
+          });
+    } else {
+      // Modo creación - siempre usar createProductWithImage para soportar imagen
+      operation$ = this.productService.createProductWithImage(productData, this.imageFile || undefined);
+    }
 
     operation$
       .pipe(takeUntil(this.destroy$))
