@@ -25,6 +25,20 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const clientService = inject(ClientService);
   const router = inject(Router);
 
+  // ✅ URLs que se pasan SIN MODIFICAR (n8n no recibe nada)
+  const passThoughUrls = [
+    '/n8n/',
+    'https://mayaxxy.app.n8n.cloud'
+  ];
+
+  const isPassThrough = passThoughUrls.some(url => req.url.includes(url));
+
+  // Pass-through: pasa la request sin modificar NADA
+  if (isPassThrough) {
+    console.log('🔵 [AuthInterceptor] Request PASADA sin modificar (n8n):', req.method, req.url);
+    return next(req);
+  }
+
   // URLs excluidas (no requieren token JWT, pero SÍ envían cookies)
   const excludedUrls = [
     '/oauth2/',
@@ -33,9 +47,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     '/api/auth/verify-2fa',
     '/api/auth/refresh',
     '/api/client/session',     // Solo la sesión no requiere autenticación
-    '/api/menu/',              // Menú público
-    '/n8n/',
-    'https://mayaxxy.app.n8n.cloud'
+    '/api/menu/'               // Menú público
   ];
 
   const isExcluded = excludedUrls.some(url => req.url.includes(url));

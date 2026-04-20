@@ -113,21 +113,63 @@ $text-light: #666666;
       }
     }
 
-    .footer-right {
-      flex: 0 1 auto;
-      text-align: right;
+     .footer-right {
+       flex: 0 1 auto;
+       text-align: right;
 
-      .footer-text {
-        font-size: 11px;
-        color: $text-light;
-        font-weight: 500;
-        display: block;
+       .footer-text {
+         font-size: 11px;
+         color: $text-light;
+         font-weight: 500;
+         display: block;
 
-        @media (min-width: 768px) {
-          font-size: 12px;
-        }
-      }
-    }
+         @media (min-width: 768px) {
+           font-size: 12px;
+         }
+       }
+
+       .footer-contact-section {
+         margin-top: 8px;
+         display: flex;
+         flex-direction: column;
+         gap: 4px;
+         align-items: flex-end;
+
+         @media (min-width: 768px) {
+           margin-top: 12px;
+         }
+
+         .footer-contact-label {
+           font-size: 11px;
+           color: $text-light;
+           font-weight: 500;
+           display: block;
+
+           @media (min-width: 768px) {
+             font-size: 12px;
+           }
+         }
+
+         .footer-email {
+           font-size: 12px;
+           color: $accent-gold;
+           font-weight: 600;
+           text-decoration: none;
+           transition: all 0.3s ease;
+           display: inline-flex;
+           align-items: center;
+
+           @media (min-width: 768px) {
+             font-size: 13px;
+           }
+
+           &:hover {
+             color: darken($accent-gold, 10%);
+             text-decoration: underline;
+           }
+         }
+       }
+     }
   }
 }
 
@@ -209,11 +251,25 @@ $text-light: #666666;
         }
       }
 
-      .footer-right {
-        .footer-text {
-          color: #999999 !important;
-        }
-      }
+       .footer-right {
+         .footer-text {
+           color: #999999 !important;
+         }
+
+         .footer-contact-section {
+           .footer-contact-label {
+             color: #999999 !important;
+           }
+
+           .footer-email {
+             color: $accent-gold !important;
+
+             &:hover {
+               color: lighten($accent-gold, 10%) !important;
+             }
+           }
+         }
+       }
     }
   }
 }
