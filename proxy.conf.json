@@ -6,8 +6,8 @@
     "logLevel": "debug"
   },
   "/n8n/webhook/**": {
-    "target": "http://localhost:5678",
-    "secure": false,
+    "target": "https://mayaxxy.app.n8n.cloud",
+    "secure": true,
     "changeOrigin": true,
     "pathRewrite": {
       "^/n8n": ""

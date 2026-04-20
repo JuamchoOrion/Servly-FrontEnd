@@ -5,7 +5,7 @@ import { ChatbotMessage, ChatbotResponse } from '../../core/dtos/chatbot.dto';
 
 @Injectable({ providedIn: 'root' })
 export class ChatbotService {
-  private readonly N8N_URL = '/n8n/webhook/da6ef6e3-e05c-4cee-81ff-40cf374ef1ed/chat';
+  private readonly N8N_URL = 'https://mayaxxy.app.n8n.cloud/webhook/da6ef6e3-e05c-4cee-81ff-40cf374ef1ed/chat';
   private sessionId = `mesa-${Date.now()}`;
 
   private messageHistorySubject = new BehaviorSubject<ChatbotMessage[]>([]);

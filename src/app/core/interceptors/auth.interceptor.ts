@@ -35,6 +35,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     '/api/client/session',     // Solo la sesión no requiere autenticación
     '/api/menu/',              // Menú público
     '/n8n/',
+    'https://mayaxxy.app.n8n.cloud'
   ];
 
   const isExcluded = excludedUrls.some(url => req.url.includes(url));
