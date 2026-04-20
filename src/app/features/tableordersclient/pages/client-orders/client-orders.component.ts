@@ -6,13 +6,14 @@ import { takeUntil, startWith, switchMap } from 'rxjs/operators';
 import { ClientService } from '../../../../core/services/client.service';
 import { Order } from '../../../../core/dtos/client.dto';
 import { I18nService } from '../../../../core/services/i18n.service';
+import { AccessibilityMenuComponent } from '../../../../shared/components/accessibility-menu/accessibility-menu.component';
 import { ClientNavbarComponent } from '../../../../shared/components/client-navbar/client-navbar.component';
 import { FooterComponent } from '../../../../shared/components/footer/footer.component';
 
 @Component({
   selector: 'app-client-orders',
   standalone: true,
-  imports: [CommonModule, ClientNavbarComponent, FooterComponent],
+  imports: [CommonModule, AccessibilityMenuComponent, ClientNavbarComponent, FooterComponent],
   templateUrl: './client-orders.component.html',
   styleUrls: ['./client-orders.component.scss']
 })
@@ -55,15 +56,21 @@ export class ClientOrdersComponent implements OnInit, OnDestroy {
         }),
         takeUntil(this.destroy$)
       )
-       .subscribe({
-         next: (orders: Order[]) => {
-           this.ngZone.run(() => {
-             console.log('✅ [ClientOrdersComponent] Órdenes cargadas:', orders.length, orders);
-             this.orders = orders;
-             this.isLoading = false;
-             this.cdr.detectChanges(); // ✅ Forzar detección de cambios
-           });
-         },
+        .subscribe({
+          next: (orders: Order[]) => {
+            this.ngZone.run(() => {
+              console.log('✅ [ClientOrdersComponent] Órdenes cargadas:', orders.length, orders);
+              this.orders = orders;
+              this.isLoading = false;
+
+              // ✅ Seleccionar automáticamente la última orden
+              if (orders.length > 0) {
+                this.selectedOrder = orders[0]; // Primera orden es la más reciente
+              }
+
+              this.cdr.detectChanges(); // ✅ Forzar detección de cambios
+            });
+          },
          error: (error: any) => {
            this.ngZone.run(() => {
              console.error('❌ [ClientOrdersComponent] Error cargando órdenes:', error);

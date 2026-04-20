@@ -7,13 +7,14 @@ import { takeUntil } from 'rxjs/operators';
 import { ClientService } from '../../../../core/services/client.service';
 import { CreateClientOrderRequest, Order } from '../../../../core/dtos/client.dto';
 import { I18nService } from '../../../../core/services/i18n.service';
+import { AccessibilityMenuComponent } from '../../../../shared/components/accessibility-menu/accessibility-menu.component';
 import { ClientNavbarComponent } from '../../../../shared/components/client-navbar/client-navbar.component';
 import { FooterComponent } from '../../../../shared/components/footer/footer.component';
 
 @Component({
   selector: 'app-client-checkout',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ClientNavbarComponent, FooterComponent],
+  imports: [CommonModule, ReactiveFormsModule, AccessibilityMenuComponent, ClientNavbarComponent, FooterComponent],
   templateUrl: './client-checkout.component.html',
   styleUrls: ['./client-checkout.component.scss']
 })

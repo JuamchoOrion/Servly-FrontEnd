@@ -90,6 +90,7 @@ $border-light:    #EFEFEF;
     width: 100%;
     margin: 0 auto;
     padding: 20px;
+    pointer-events: auto;
 
     .categories-filter {
       display: flex;
@@ -305,6 +306,7 @@ $border-light:    #EFEFEF;
         height: fit-content;
         position: sticky;
         top: 20px;
+        z-index: 10;
 
         .cart-header {
           padding: 16px;
@@ -484,3 +486,452 @@ $border-light:    #EFEFEF;
     transform: rotate(360deg);
   }
 }
+
+// ── Paginación ──────────────────────────────────────────────────────────────
+.pagination-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border-top: 1px solid #EFEFEF;
+  background-color: white;
+  border-radius: 0 0 0.75rem 0.75rem;
+  margin-top: 1.5rem;
+
+  .pagination-info {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .pagination-item-count {
+      font-size: 0.85rem;
+      color: #999;
+    }
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    .btn-pagination {
+      padding: 0.625rem 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      color: #667eea;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+
+      &:hover:not(:disabled) {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .material-icons {
+        font-size: 20px;
+      }
+
+      // Reductor de movimiento
+      :root.reduce-motion & {
+        transition: none;
+      }
+    }
+
+    .page-numbers {
+      display: flex;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+
+      .btn-page-number {
+        min-width: 2.5rem;
+        height: 2.5rem;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        color: #667eea;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+
+        &:hover:not(:disabled) {
+          background: #667eea;
+          color: white;
+          border-color: #667eea;
+        }
+
+        &.active {
+          background: #667eea;
+          color: white;
+          border-color: #667eea;
+        }
+
+        &.ellipsis {
+          cursor: default;
+          background: transparent;
+          border: none;
+          color: #999;
+          font-weight: normal;
+
+          &:hover {
+            background: transparent;
+            border: none;
+            color: #999;
+          }
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        // Reductor de movimiento
+        :root.reduce-motion & {
+          transition: none;
+        }
+      }
+    }
+  }
+
+  // Responsive
+  @media (max-width: 768px) {
+    .pagination-info {
+      font-size: 0.85rem;
+    }
+
+    .pagination-controls {
+      .btn-pagination {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+
+        .material-icons {
+          font-size: 18px;
+        }
+      }
+
+      .page-numbers {
+        gap: 0.25rem;
+
+        .btn-page-number {
+          min-width: 2rem;
+          height: 2rem;
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+}
+
+// ── Dark Mode ──────────────────────────────────────────────────────────────
+:host-context(.dark-mode) {
+  .client-menu {
+    background: #1a1a1a;
+
+    .menu-header {
+      background: #2a2a2a;
+      border-bottom-color: #3a3a3a;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+      h1 {
+        color: #f5f5f5;
+      }
+
+      .table-info {
+        color: #cccccc;
+      }
+    }
+
+    .menu-container {
+      .categories-filter {
+        .category-btn {
+          background: #2a2a2a;
+          border-color: #3a3a3a;
+          color: #cccccc;
+
+          &:hover {
+            border-color: #667eea;
+            color: #667eea;
+          }
+
+          &.active {
+            background: #667eea;
+            color: white;
+          }
+        }
+      }
+
+      .menu-content {
+        .menu-items {
+          .loading,
+          .empty {
+            color: #cccccc;
+
+            .spinner {
+              border-color: #3a3a3a;
+              border-top-color: #667eea;
+            }
+          }
+
+          .error-banner {
+            background: rgba(198, 40, 40, 0.2);
+            border-left-color: #c62828;
+            color: #ff6b6b;
+          }
+
+          .items-grid {
+            .menu-item-card {
+              background: #2a2a2a;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+              &:hover {
+                box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+              }
+
+              .item-content {
+                .item-name {
+                  color: #f5f5f5;
+                }
+
+                .item-category {
+                  background: #667eea;
+                  color: white;
+                }
+
+                .item-description {
+                  color: #cccccc;
+                }
+
+                .item-footer {
+                  .item-price {
+                    color: #f5f5f5;
+                  }
+                }
+              }
+            }
+          }
+
+          .pagination-container {
+            background: #2a2a2a;
+            border-top-color: #3a3a3a;
+
+            .pagination-info {
+              color: #cccccc;
+
+              .pagination-item-count {
+                color: #999999;
+              }
+            }
+
+            .pagination-controls {
+              .btn-pagination {
+                background: #2a2a2a;
+                border-color: #3a3a3a;
+                color: #667eea;
+
+                &:hover:not(:disabled) {
+                  background: #667eea;
+                  color: white;
+                  border-color: #667eea;
+                }
+
+                &:disabled {
+                  opacity: 0.3;
+                }
+              }
+
+              .page-numbers {
+                .btn-page-number {
+                  background: #2a2a2a;
+                  border-color: #3a3a3a;
+                  color: #667eea;
+
+                  &:hover:not(:disabled) {
+                    background: #667eea;
+                    color: white;
+                    border-color: #667eea;
+                  }
+
+                  &.active {
+                    background: #667eea;
+                    color: white;
+                  }
+
+                  &.ellipsis {
+                    background: transparent;
+                    border: none;
+                    color: #666666;
+                  }
+
+                  &:disabled {
+                    opacity: 0.3;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        .cart-sidebar {
+          background: #2a2a2a;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+          .cart-header {
+            border-bottom-color: #3a3a3a;
+
+            h2 {
+              color: #f5f5f5;
+            }
+
+            .cart-count {
+              background: #667eea;
+              color: white;
+            }
+          }
+
+          .cart-items {
+            .empty-cart {
+              color: #cccccc;
+            }
+
+            .cart-item {
+              border-color: #3a3a3a;
+
+              .item-details {
+                .item-name {
+                  color: #f5f5f5;
+                }
+
+                .item-price {
+                  color: #667eea;
+                }
+              }
+
+              .quantity-control {
+                .qty-btn {
+                  background: #3a3a3a;
+                  color: #f5f5f5;
+                  border-color: #444444;
+
+                  &:hover {
+                    background: #667eea;
+                    color: white;
+                  }
+                }
+
+                .qty {
+                  color: #f5f5f5;
+                }
+              }
+
+              .btn-remove {
+                color: #ff6b6b;
+
+                &:hover {
+                  background: rgba(255, 107, 107, 0.1);
+                }
+              }
+            }
+          }
+
+          .cart-footer {
+            border-top-color: #3a3a3a;
+
+            .total {
+              color: #f5f5f5;
+
+              .amount {
+                color: #667eea;
+              }
+            }
+
+            .btn-checkout {
+              background: #667eea;
+              color: white;
+
+              &:hover {
+                background: #5568d3;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// ── High Contrast ───────────────────────────────────────────────────────────
+:host-context(.high-contrast) {
+  .client-menu {
+    .menu-header {
+      border-bottom-width: 4px;
+    }
+
+    .menu-container {
+      .categories-filter {
+        .category-btn {
+          border-width: 3px;
+          font-weight: 700;
+        }
+      }
+
+      .menu-content {
+        .menu-items {
+          .pagination-container {
+            .pagination-controls {
+              .btn-pagination {
+                border-width: 2px;
+                font-weight: 700;
+              }
+
+              .page-numbers {
+                .btn-page-number {
+                  border-width: 2px;
+                  font-weight: 700;
+                }
+              }
+            }
+          }
+        }
+
+        .cart-sidebar {
+          border-width: 3px;
+          border-color: #000;
+        }
+      }
+    }
+  }
+}
+
+// ── Reduce Motion ───────────────────────────────────────────────────────────
+:host-context(.reduce-motion) {
+  .client-menu {
+    * {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+}
+
