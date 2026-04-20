@@ -7,6 +7,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { DashboardService, DashboardStats } from '../../core/services/dashboard.service';
 import { StockBatch, StockBatchStatus } from '../../core/services/stock-batch.service';
 import { I18nService } from '../../core/services/i18n.service';
+import { AccessibilityMenuComponent } from '../../shared/components/accessibility-menu/accessibility-menu.component';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType, Chart, registerables } from 'chart.js';
 
@@ -16,7 +17,7 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, BaseChartDirective],
+  imports: [CommonModule, RouterLink, AccessibilityMenuComponent, BaseChartDirective],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

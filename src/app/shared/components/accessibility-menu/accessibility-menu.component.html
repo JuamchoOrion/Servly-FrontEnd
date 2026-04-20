@@ -3,7 +3,7 @@
   <!-- Botón flotante de accesibilidad -->
   <button
     class="accessibility-toggle"
-    (click)="toggleMenu()"
+    (click)="toggleMenu(); $event.stopPropagation()"
     aria-label="Abrir menú de accesibilidad"
     title="Configuración de Accesibilidad"
     [attr.aria-expanded]="isOpen"

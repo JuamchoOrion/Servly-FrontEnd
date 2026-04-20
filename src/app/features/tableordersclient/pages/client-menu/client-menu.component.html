@@ -1,5 +1,8 @@
 <app-client-navbar></app-client-navbar>
 
+<!-- Menú de Accesibilidad (flotante) -->
+<app-accessibility-menu></app-accessibility-menu>
+
 <div class="client-menu">
   <header class="menu-header">
     <div class="header-content">
@@ -43,51 +46,98 @@
 
     <!-- Contenido Principal -->
     <div class="menu-content">
-      <!-- Menú Items -->
-      <div class="menu-items">
-        <div *ngIf="isLoading" class="loading">
-          <div class="spinner"></div>
-          {{ i18n.translate('client.loading') }}
-        </div>
+     <!-- Menú Items -->
+       <div class="menu-items">
+         <div *ngIf="isLoading" class="loading">
+           <div class="spinner"></div>
+           {{ i18n.translate('client.loading') }}
+         </div>
 
-        <div *ngIf="!isLoading && errorMessage" class="error-banner">
-          <span class="material-icons">error</span>
-          <div>
-            <strong>{{ errorMessage }}</strong>
-            <p style="margin: 8px 0 0 0; font-size: 12px; opacity: 0.8;">Recarga la página o intenta más tarde</p>
-          </div>
-        </div>
+         <div *ngIf="!isLoading && errorMessage" class="error-banner" role="alert" aria-live="polite">
+           <span class="material-icons" aria-hidden="true">error</span>
+           <div>
+             <strong>{{ errorMessage }}</strong>
+             <p style="margin: 8px 0 0 0; font-size: 12px; opacity: 0.8;">Recarga la página o intenta más tarde</p>
+           </div>
+         </div>
 
-        <div *ngIf="!isLoading && !errorMessage && filteredItems.length === 0" class="empty">
-          <span class="material-icons">restaurant_menu</span>
-          {{ i18n.translate('client.menu.noItems') }}
-        </div>
+         <div *ngIf="!isLoading && !errorMessage && filteredItems.length === 0" class="empty" role="status">
+           <span class="material-icons" aria-hidden="true">restaurant_menu</span>
+           {{ i18n.translate('client.menu.noItems') }}
+         </div>
 
-        <div class="items-grid">
-          <div *ngFor="let item of filteredItems" class="menu-item-card">
-            <div class="item-image">
-              <img
-                *ngIf="item.imageUrl || item.image"
-                [src]="item.imageUrl || item.image"
-                [alt]="item.name"
-                class="product-image">
-              <span *ngIf="!(item.imageUrl || item.image)" class="material-icons icon-fallback">restaurant</span>
+         <div class="items-grid" role="region" aria-label="Menú de items">
+           <div *ngFor="let item of paginatedItems" class="menu-item-card" role="article">
+             <div class="item-image">
+               <img
+                 *ngIf="item.imageUrl || item.image"
+                 [src]="item.imageUrl || item.image"
+                 [alt]="item.name"
+                 class="product-image">
+               <span *ngIf="!(item.imageUrl || item.image)" class="material-icons icon-fallback" aria-hidden="true">restaurant</span>
+             </div>
+             <div class="item-content">
+               <h3 class="item-name">{{ item.name }}</h3>
+               <!-- ✅ NUEVO: Mostrar categoría -->
+               <span *ngIf="item.categoryName" class="item-category">{{ item.categoryName }}</span>
+               <p class="item-description">{{ item.description }}</p>
+               <div class="item-footer">
+                 <span class="item-price" aria-label="Precio: ${{ (item.basePrice || item.price || 0).toFixed(2) }}">${{ (item.basePrice || item.price || 0).toFixed(2) }}</span>
+                 <button
+                   class="btn-add"
+                   (click)="addToCart(item)"
+                   [attr.aria-label]="'Agregar ' + item.name + ' al carrito'">
+                   <span class="material-icons" aria-hidden="true">add_shopping_cart</span>
+                 </button>
+               </div>
+             </div>
+           </div>
+         </div>
+
+         <!-- Paginación -->
+          <div *ngIf="!isLoading && !errorMessage && filteredItems.length > 0 && totalPages > 1" class="pagination-container">
+            <div class="pagination-info" role="status" aria-live="polite">
+              <span>{{ i18n.translate('common.page') }} {{ currentPage }} {{ i18n.translate('common.of') }} {{ totalPages }}</span>
+              <span class="pagination-item-count">{{ i18n.translate('common.showing') }} {{ ((currentPage - 1) * itemsPerPage) + 1 }}-{{ currentPage * itemsPerPage > filteredItems.length ? filteredItems.length : currentPage * itemsPerPage }} {{ i18n.translate('common.of') }} {{ filteredItems.length }}</span>
             </div>
-            <div class="item-content">
-              <h3 class="item-name">{{ item.name }}</h3>
-              <!-- ✅ NUEVO: Mostrar categoría -->
-              <span *ngIf="item.categoryName" class="item-category">{{ item.categoryName }}</span>
-              <p class="item-description">{{ item.description }}</p>
-              <div class="item-footer">
-                <span class="item-price">${{ (item.basePrice || item.price || 0).toFixed(2) }}</span>
-                <button class="btn-add" (click)="addToCart(item)">
-                  <span class="material-icons">add_shopping_cart</span>
+
+            <div class="pagination-controls" role="navigation" aria-label="Paginación del menú">
+              <button
+                class="btn-pagination"
+                (click)="previousPage()"
+                [disabled]="isFirstPage()"
+                [attr.aria-label]="'Página anterior'"
+                [attr.aria-disabled]="isFirstPage()">
+                <span class="material-icons" aria-hidden="true">chevron_left</span>
+                {{ i18n.translate('common.previous') }}
+              </button>
+
+              <div class="page-numbers">
+                <button
+                  *ngFor="let page of pageNumbers"
+                  class="btn-page-number"
+                  [class.active]="page === currentPage"
+                  [class.ellipsis]="page === -1"
+                  (click)="page !== -1 && goToPage(page)"
+                  [disabled]="page === -1"
+                  [attr.aria-label]="page === -1 ? 'Más páginas' : 'Ir a página ' + page"
+                  [attr.aria-current]="page === currentPage ? 'page' : null">
+                  {{ page === -1 ? '...' : page }}
                 </button>
               </div>
+
+              <button
+                class="btn-pagination"
+                (click)="nextPage()"
+                [disabled]="isLastPage()"
+                [attr.aria-label]="'Página siguiente'"
+                [attr.aria-disabled]="isLastPage()">
+                {{ i18n.translate('common.next') }}
+                <span class="material-icons" aria-hidden="true">chevron_right</span>
+              </button>
             </div>
-          </div>
-        </div>
-      </div>
+         </div>
+       </div>
 
       <!-- Carrito -->
       <aside class="cart-sidebar">

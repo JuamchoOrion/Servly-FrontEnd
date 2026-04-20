@@ -628,8 +628,11 @@ export class I18nService {
       'common.clear': 'Limpiar',
       'common.previous': 'Anterior',
       'common.next': 'Siguiente',
+      'common.previousPage': 'Página anterior',
+      'common.nextPage': 'Página siguiente',
       'common.page': 'Página',
       'common.of': 'de',
+      'common.showing': 'Mostrando',
     },
     en: {
       // Auth - Login
@@ -1259,8 +1262,11 @@ export class I18nService {
       'common.clear': 'Limpiar',
       'common.previous': 'Anterior',
       'common.next': 'Siguiente',
+      'common.previousPage': 'Página anterior',
+      'common.nextPage': 'Página siguiente',
       'common.page': 'Página',
       'common.of': 'de',
+      'common.showing': 'Mostrando',
     },
     pt: {
       // Auth - Login
@@ -1843,8 +1849,11 @@ export class I18nService {
       'common.clear': 'Limpiar',
       'common.previous': 'Anterior',
       'common.next': 'Siguiente',
+      'common.previousPage': 'Página anterior',
+      'common.nextPage': 'Página siguiente',
       'common.page': 'Página',
       'common.of': 'de',
+      'common.showing': 'Mostrando',
     },
   };
 
