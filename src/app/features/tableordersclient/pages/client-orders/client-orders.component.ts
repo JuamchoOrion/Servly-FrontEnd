@@ -9,11 +9,12 @@ import { I18nService } from '../../../../core/services/i18n.service';
 import { AccessibilityMenuComponent } from '../../../../shared/components/accessibility-menu/accessibility-menu.component';
 import { ClientNavbarComponent } from '../../../../shared/components/client-navbar/client-navbar.component';
 import { FooterComponent } from '../../../../shared/components/footer/footer.component';
+import { ChatbotWidgetComponent } from '../../../../shared/components/chatbot-widget/chatbot-widget.component';
 
 @Component({
   selector: 'app-client-orders',
   standalone: true,
-  imports: [CommonModule, AccessibilityMenuComponent, ClientNavbarComponent, FooterComponent],
+  imports: [CommonModule, AccessibilityMenuComponent, ClientNavbarComponent, FooterComponent, ChatbotWidgetComponent],
   templateUrl: './client-orders.component.html',
   styleUrls: ['./client-orders.component.scss']
 })
@@ -60,12 +61,13 @@ export class ClientOrdersComponent implements OnInit, OnDestroy {
           next: (orders: Order[]) => {
             this.ngZone.run(() => {
               console.log('✅ [ClientOrdersComponent] Órdenes cargadas:', orders.length, orders);
-              this.orders = orders;
+              // Ordenar por ID de mayor a menor (más recientes primero)
+              this.orders = orders.sort((a, b) => b.id - a.id);
               this.isLoading = false;
 
-              // ✅ Seleccionar automáticamente la última orden
-              if (orders.length > 0) {
-                this.selectedOrder = orders[0]; // Primera orden es la más reciente
+              // ✅ Seleccionar automáticamente la última orden (que ahora es la primera)
+              if (this.orders.length > 0) {
+                this.selectedOrder = this.orders[0];
               }
 
               this.cdr.detectChanges(); // ✅ Forzar detección de cambios
@@ -229,12 +231,8 @@ export class ClientOrdersComponent implements OnInit, OnDestroy {
      const activeOrders = this.orders.filter(order => order.status !== 'PAID');
      if (activeOrders.length === 0) return [];
 
-     // Obtener la orden con mayor ID (la más reciente)
-     const latestOrder = activeOrders.reduce((max, order) =>
-       order.id > max.id ? order : max
-     );
-
-     return [latestOrder];
+     // Como el arreglo ya está ordenado de mayor a menor, el primero es el más reciente
+     return [activeOrders[0]];
    }
 
   /**
@@ -260,5 +258,15 @@ export class ClientOrdersComponent implements OnInit, OnDestroy {
     if (item.subtotal) return item.subtotal;
     const price = item.unit_price || item.price || 0;
     return (price * (item.quantity || 0));
+  }
+
+  getParsedOptionalItems(item: any): any[] {
+    if (!item.optional_items) return [];
+    try {
+      return JSON.parse(item.optional_items);
+    } catch (e) {
+      console.error('Error parsing optional_items', e);
+      return [];
+    }
   }
 }

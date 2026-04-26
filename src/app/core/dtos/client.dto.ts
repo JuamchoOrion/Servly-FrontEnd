@@ -45,7 +45,8 @@ export interface OrderItem {
 export interface OrderItemVariation {
   productId: number;
   quantity: number;
-  itemQuantityOverrides?: { [itemId: number]: number };
+  annotations?: string;
+  itemQuantityOverrides?: { [itemId: string]: number } | null;
 }
 
 export interface CreateOrderRequest {
@@ -83,6 +84,8 @@ export interface OrderItemResponse {
   subtotal?: number;
   tax_percent?: number;
   item_id?: number;
+  optional_items?: string;
+  annotations?: string;
 }
 
 // Help Request

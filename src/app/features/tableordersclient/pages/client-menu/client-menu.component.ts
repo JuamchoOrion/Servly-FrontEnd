@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -10,11 +11,12 @@ import { AccessibilityService, type AccessibilitySettings } from '../../../../sh
 import { AccessibilityMenuComponent } from '../../../../shared/components/accessibility-menu/accessibility-menu.component';
 import { ClientNavbarComponent } from '../../../../shared/components/client-navbar/client-navbar.component';
 import { FooterComponent } from '../../../../shared/components/footer/footer.component';
+import { ChatbotWidgetComponent } from '../../../../shared/components/chatbot-widget/chatbot-widget.component';
 
 @Component({
   selector: 'app-client-menu',
   standalone: true,
-  imports: [CommonModule, AccessibilityMenuComponent, ClientNavbarComponent, FooterComponent],
+  imports: [CommonModule, FormsModule, AccessibilityMenuComponent, ClientNavbarComponent, FooterComponent, ChatbotWidgetComponent],
   templateUrl: './client-menu.component.html',
   styleUrls: ['./client-menu.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -28,7 +30,13 @@ export class ClientMenuComponent implements OnInit, OnDestroy {
    isLoading = true;
    errorMessage: string | null = null;
    tableNumber: number | null = null;
-   cart: Map<number, { item: MenuItem; quantity: number }> = new Map();
+   cart: Map<number, any> = new Map();
+   isAnimating = false;
+
+   // Customization Modal State
+   customizingItem: MenuItem | null = null;
+   customizingOverrides: { [ingredientId: number]: number } = {};
+   customizingNotes: string = '';
 
    // Pagination properties
    currentPage = 1;
@@ -203,13 +211,88 @@ export class ClientMenuComponent implements OnInit, OnDestroy {
     }
 
   addToCart(item: MenuItem): void {
+    const recipeItems = (item as any).recipe?.itemDetailList || item.recipeItems || [];
+    const optionalItems = recipeItems.filter((ing: any) => ing.isOptional);
+
+    if (optionalItems.length > 0) {
+      this.customizingItem = item;
+      this.customizingOverrides = {};
+      this.customizingNotes = '';
+
+      const existing = this.cart.get(item.id);
+      if (existing && existing.itemOverrides) {
+        this.customizingOverrides = { ...existing.itemOverrides };
+        this.customizingNotes = existing.notes || '';
+      } else {
+        optionalItems.forEach((ing: any) => {
+          const ingId = ing.item?.id || ing.itemId || ing.id;
+          if (ingId) {
+            this.customizingOverrides[ingId] = ing.quantity || 0;
+          }
+        });
+      }
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.executeAddToCart(item, {}, '');
+  }
+
+  getOptionalIngredients(): any[] {
+    if (!this.customizingItem) return [];
+    const recipeItems = (this.customizingItem as any).recipe?.itemDetailList || this.customizingItem.recipeItems || [];
+    return recipeItems.filter((ing: any) => ing.isOptional);
+  }
+
+  updateCustomizingIngredient(ingredient: any, delta: number): void {
+    const ingId = ingredient.item?.id || ingredient.itemId || ingredient.id;
+    if (!ingId) return;
+    
+    const current = this.customizingOverrides[ingId] !== undefined ? this.customizingOverrides[ingId] : (ingredient.quantity || 0);
+    const newQty = current + delta;
+    if (newQty >= ingredient.minQuantity && newQty <= ingredient.maxQuantity) {
+      this.customizingOverrides[ingId] = newQty;
+    }
+  }
+
+  closeCustomizationModal(): void {
+    this.customizingItem = null;
+    this.cdr.markForCheck();
+  }
+
+  confirmCustomization(): void {
+    if (this.customizingItem) {
+      this.executeAddToCart(this.customizingItem, this.customizingOverrides, this.customizingNotes);
+    }
+  }
+
+  private executeAddToCart(item: MenuItem, overrides: any, notes: string): void {
+    const finalOverrides: any = {};
+    if (overrides) {
+      Object.keys(overrides).forEach(key => {
+        if (overrides[key] > 0) {
+          finalOverrides[key] = overrides[key];
+        }
+      });
+    }
+
     const existing = this.cart.get(item.id);
     if (existing) {
       existing.quantity += 1;
+      existing.itemOverrides = finalOverrides;
+      existing.notes = notes;
     } else {
-      this.cart.set(item.id, { item, quantity: 1 });
+      this.cart.set(item.id, { item, quantity: 1, itemOverrides: finalOverrides, notes });
     }
     this.saveCart();
+
+    this.customizingItem = null;
+    this.isAnimating = true;
+    this.cdr.markForCheck();
+    setTimeout(() => {
+      this.isAnimating = false;
+      this.cdr.markForCheck();
+    }, 300);
   }
 
   removeFromCart(itemId: number): void {

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -10,11 +10,12 @@ import { I18nService } from '../../../../core/services/i18n.service';
 import { AccessibilityMenuComponent } from '../../../../shared/components/accessibility-menu/accessibility-menu.component';
 import { ClientNavbarComponent } from '../../../../shared/components/client-navbar/client-navbar.component';
 import { FooterComponent } from '../../../../shared/components/footer/footer.component';
+import { ChatbotWidgetComponent } from '../../../../shared/components/chatbot-widget/chatbot-widget.component';
 
 @Component({
   selector: 'app-client-checkout',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AccessibilityMenuComponent, ClientNavbarComponent, FooterComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, AccessibilityMenuComponent, ClientNavbarComponent, FooterComponent, ChatbotWidgetComponent],
   templateUrl: './client-checkout.component.html',
   styleUrls: ['./client-checkout.component.scss']
 })
@@ -72,7 +73,9 @@ export class ClientCheckoutComponent implements OnInit, OnDestroy {
           name: item.item?.name || item.name,
           price: item.item?.basePrice || item.item?.price || item.price || 0,
           quantity: item.quantity,
-          notes: ''
+          notes: item.notes || '',
+          recipeItems: item.item?.recipe?.itemDetailList || item.item?.recipeItems || [],
+          itemOverrides: item.itemOverrides || {} // Cargar overrides guardados en el menú
         }));
         this.calculateTotals();
       } catch (error) {
@@ -93,6 +96,55 @@ export class ClientCheckoutComponent implements OnInit, OnDestroy {
     this.total = this.subtotal + this.tax;
   }
 
+  hasOptionalItems(item: any): boolean {
+    return item.recipeItems && item.recipeItems.some((ing: any) => ing.isOptional);
+  }
+
+  getIngredientId(ingredient: any): number | null {
+    return ingredient.item?.id || ingredient.itemId || ingredient.id || null;
+  }
+
+  getIngredientQty(itemIndex: number, ingredient: any): number {
+    const item = this.cartItems[itemIndex];
+    const ingredientId = this.getIngredientId(ingredient);
+    if (!ingredientId) return ingredient.quantity || 0;
+    
+    return item.itemOverrides[ingredientId] !== undefined 
+      ? item.itemOverrides[ingredientId] 
+      : (ingredient.quantity || 0);
+  }
+
+  updateIngredient(itemIndex: number, ingredient: any, delta: number): void {
+    const item = this.cartItems[itemIndex];
+    const ingredientId = this.getIngredientId(ingredient);
+    if (!ingredientId) return;
+
+    const currentQty = this.getIngredientQty(itemIndex, ingredient);
+    const newQty = currentQty + delta;
+
+    if (newQty >= ingredient.minQuantity && newQty <= ingredient.maxQuantity) {
+      item.itemOverrides[ingredientId] = newQty;
+      // Guardar de vuelta al sessionStorage para persistir en recargas
+      this.saveCartToStorage();
+    }
+  }
+
+  saveCartToStorage(): void {
+    // Reconstruir el formato del carrito original
+    const cartToSave = this.cartItems.map(item => {
+      const originalCartData = JSON.parse(sessionStorage.getItem('clientCart') || '[]');
+      const originalItem = originalCartData.find((oc: any) => (oc.item?.id || oc.id) === item.id);
+      
+      return {
+        ...originalItem,
+        quantity: item.quantity,
+        notes: item.notes,
+        itemOverrides: item.itemOverrides
+      };
+    });
+    sessionStorage.setItem('clientCart', JSON.stringify(cartToSave));
+  }
+
   submitOrder(): void {
     if (this.checkoutForm.invalid) {
       this.errorMessage = this.i18n.translate('client.errors.invalidPayment');
@@ -104,11 +156,39 @@ export class ClientCheckoutComponent implements OnInit, OnDestroy {
 
     // Mapear cartItems al formato que espera el backend
     const request: CreateClientOrderRequest = {
-      products: this.cartItems.map(item => ({
-        productId: item.id,
-        quantity: item.quantity,
-        itemQuantityOverrides: {} // Por ahora vacío, puede ser llenado si hay receta
-      }))
+      products: this.cartItems.map(item => {
+        const overridesToSend: { [key: string]: number } = {};
+        let hasOverrides = false;
+        
+        if (item.recipeItems) {
+          item.recipeItems.forEach((ing: any) => {
+            if (!ing.isOptional) return; // Solo items opcionales
+            
+            const ingId = ing.item?.id || ing.itemId || ing.id;
+            if (ingId && item.itemOverrides && item.itemOverrides[ingId] !== undefined) {
+              const qty = item.itemOverrides[ingId];
+              if (qty > 0) { // Un item opcional con quantity 0 = no incluirlo
+                overridesToSend[ingId.toString()] = qty;
+                hasOverrides = true;
+              }
+            }
+          });
+        }
+
+        const requestItem: any = {
+          productId: item.id,
+          quantity: item.quantity,
+          annotations: item.notes || ''
+        };
+        
+        if (hasOverrides) {
+          requestItem.itemQuantityOverrides = overridesToSend;
+        } else {
+          requestItem.itemQuantityOverrides = null;
+        }
+
+        return requestItem;
+      })
     };
 
     console.log('🔵 [CheckoutComponent] Enviando orden:', request);

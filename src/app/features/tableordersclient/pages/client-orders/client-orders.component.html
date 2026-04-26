@@ -5,116 +5,127 @@
 <div class="client-orders">
   <header class="orders-header">
     <div class="header-content">
-      <h1>{{ i18n.translate('client.orders.title') }}</h1>
-      <span class="table-info">
-        <span class="material-icons">table_restaurant</span>
-        {{ i18n.translate('client.menu.table') }} {{ tableNumber }}
-      </span>
-    </div>
-    <div class="header-actions">
-      <button class="btn-icon" (click)="backToMenu()" title="{{ i18n.translate('client.menu.menu') }}">
-        <span class="material-icons">restaurant_menu</span>
-      </button>
-      <button class="btn-icon btn-logout" (click)="logout()" title="{{ i18n.translate('client.menu.logout') }}">
-        <span class="material-icons">logout</span>
-      </button>
+      <div class="title-section">
+        <h1>{{ i18n.translate('client.orders.title') }}</h1>
+        <div class="table-badge">
+          <span class="material-icons">table_restaurant</span>
+          <span>{{ i18n.translate('client.menu.table') }} {{ tableNumber }}</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="action-btn menu-btn" (click)="backToMenu()" title="{{ i18n.translate('client.menu.menu') }}">
+          <span class="material-icons">restaurant_menu</span>
+          <span class="btn-text">{{ i18n.translate('client.menu.menu') }}</span>
+        </button>
+        <button class="action-btn logout-btn" (click)="logout()" title="{{ i18n.translate('client.menu.logout') }}">
+          <span class="material-icons">logout</span>
+        </button>
+      </div>
     </div>
   </header>
 
-  <div class="orders-container">
-    <div *ngIf="isLoading" class="loading">
-      <div class="spinner"></div>
-      {{ i18n.translate('client.loading') }}
+  <main class="orders-main">
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner-ring"></div>
+      <p>{{ i18n.translate('client.loading') }}</p>
     </div>
 
-    <div *ngIf="!isLoading && errorMessage" class="error-banner">
-      <span class="material-icons">error</span>
-      {{ errorMessage }}
+    <div *ngIf="!isLoading && errorMessage" class="alert-banner error">
+      <span class="material-icons">error_outline</span>
+      <p>{{ errorMessage }}</p>
     </div>
 
     <div *ngIf="!isLoading && getActiveOrders().length === 0" class="empty-state">
-      <span class="material-icons">receipt_long</span>
+      <div class="empty-icon-wrapper">
+        <span class="material-icons">receipt_long</span>
+      </div>
       <h2>{{ i18n.translate('client.orders.noOrders') }}</h2>
       <p>{{ i18n.translate('client.orders.createOrder') }}</p>
-      <button class="btn btn-primary" (click)="backToMenu()">
+      <button class="primary-btn" (click)="backToMenu()">
         <span class="material-icons">add_shopping_cart</span>
         {{ i18n.translate('client.menu.menu') }}
       </button>
     </div>
 
-     <!-- 📋 ÓRDENES ACTIVAS - Mostrar solo la orden seleccionada expandida -->
-     <div *ngIf="selectedOrder" class="order-card expanded">
-       <div class="order-header">
-         <div class="order-info">
-           <span class="order-id">{{ i18n.translate('client.orders.order') }} #{{ selectedOrder.id }}</span>
-           <span class="order-time">Día: {{ getOrderDate(selectedOrder) }}</span>
-         </div>
-        <div class="order-status" [ngClass]="getStatusColor(selectedOrder.status)">
+    <!-- 📋 ÓRDENES ACTIVAS -->
+    <div *ngIf="selectedOrder" class="premium-order-card">
+      <div class="order-header-banner" [ngClass]="getStatusColor(selectedOrder.status)">
+        <div class="order-meta">
+          <span class="order-number">{{ i18n.translate('client.orders.order') }} #{{ selectedOrder.id }}</span>
+          <span class="order-date"><span class="material-icons">event</span> {{ getOrderDate(selectedOrder) }}</span>
+        </div>
+        <div class="status-badge">
           <span class="material-icons">{{ getStatusIcon(selectedOrder.status) }}</span>
-          <span>{{ i18n.translate('client.orders.status.' + selectedOrder.status) }}</span>
+          {{ i18n.translate('client.orders.status.' + selectedOrder.status) }}
         </div>
       </div>
 
-      <div class="order-details">
-        <div class="items-section">
-          <h3>{{ i18n.translate('client.orders.items') }}</h3>
-          <div class="items-list">
-            <div *ngFor="let item of selectedOrder.items" class="order-item">
-              <div class="item-info">
-                <span class="item-name">{{ item.name || item.item_name }}</span>
-                <span class="item-qty">x{{ item.quantity ?? 0 }}</span>
+      <div class="order-body">
+        <div class="items-container">
+          <h3 class="section-title">
+            <span class="material-icons">shopping_bag</span>
+            {{ i18n.translate('client.orders.items') }}
+          </h3>
+          <ul class="items-list">
+            <li *ngFor="let item of selectedOrder.items" class="order-item">
+              <div class="item-details">
+                <span class="item-qty">{{ item.quantity ?? 0 }}x</span>
+                <div class="item-name-group" style="display: flex; flex-direction: column;">
+                  <span class="item-name">{{ item.name || item.item_name }}</span>
+                  <div class="item-annotations" *ngIf="item.annotations || getParsedOptionalItems(item).length > 0" style="margin-top: 4px; display: flex; flex-direction: column; gap: 4px;">
+                    <small *ngIf="item.annotations" class="note-text" style="font-style: italic; opacity: 0.9;">Nota: {{ item.annotations }}</small>
+                    <ul class="optional-items-list" *ngIf="getParsedOptionalItems(item).length > 0" style="list-style: none; padding-left: 0; margin: 0; font-size: 0.85em; opacity: 0.8;">
+                      <li *ngFor="let opt of getParsedOptionalItems(item)" style="margin-bottom: 2px;">
+                        + {{ opt.itemName || opt.item_name }} (x{{ opt.quantity }})
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
               <span class="item-price">${{ getItemPrice(item).toFixed(2) }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="summary-container">
+          <div class="summary-row">
+            <span class="label">{{ i18n.translate('client.checkout.subtotal') }}</span>
+            <span class="value">${{ getSubtotal(selectedOrder).toFixed(2) }}</span>
+          </div>
+          <div class="summary-row tax">
+            <span class="label">{{ i18n.translate('client.checkout.tax') }}</span>
+            <span class="value">${{ getTax(selectedOrder).toFixed(2) }}</span>
+          </div>
+          <div class="summary-row total">
+            <span class="label">{{ i18n.translate('client.checkout.total') }}</span>
+            <span class="value">${{ selectedOrder.total.toFixed(2) }}</span>
+          </div>
+        </div>
+
+        <div class="order-footer">
+          <div *ngIf="selectedOrder.estimatedTime" class="estimated-time-box">
+            <span class="material-icons">hourglass_empty</span>
+            <div class="time-details">
+              <span class="time-label">{{ i18n.translate('client.orders.estimatedTime') }}</span>
+              <span class="time-value">{{ selectedOrder.estimatedTime }}</span>
             </div>
           </div>
-        </div>
 
-        <div class="total-section">
-          <div class="total-row">
-            <span>{{ i18n.translate('client.checkout.subtotal') }}</span>
-            <span>${{ getSubtotal(selectedOrder).toFixed(2) }}</span>
+          <div class="action-buttons">
+            <button class="secondary-btn" (click)="requestHelp(selectedOrder.id)">
+              <span class="material-icons">support_agent</span>
+              {{ i18n.translate('client.orders.requestHelp') }}
+            </button>
+            <button *ngIf="selectedOrder.status === 'PAID'" class="outline-btn" (click)="requestInvoice([selectedOrder.id])">
+              <span class="material-icons">receipt</span>
+              {{ i18n.translate('client.orders.requestInvoice') }}
+            </button>
           </div>
-          <div class="total-row">
-            <span>{{ i18n.translate('client.checkout.tax') }}</span>
-            <span>${{ getTax(selectedOrder).toFixed(2) }}</span>
-          </div>
-          <div class="total-row final">
-            <span>{{ i18n.translate('client.checkout.total') }}</span>
-            <span>${{ selectedOrder.total.toFixed(2) }}</span>
-          </div>
-        </div>
-
-         <div class="actions-section">
-           <button class="btn-action" (click)="requestHelp(selectedOrder.id)">
-             <span class="material-icons">help</span>
-             {{ i18n.translate('client.orders.requestHelp') }}
-           </button>
-
-           <button
-             *ngIf="selectedOrder.status === 'PAID'"
-             class="btn-action btn-invoice"
-             (click)="requestInvoice([selectedOrder.id])"
-           >
-             <span class="material-icons">receipt</span>
-             {{ i18n.translate('client.orders.requestInvoice') }}
-           </button>
-         </div>
-
-        <div *ngIf="selectedOrder.estimatedTime" class="estimated-time">
-          <span class="material-icons">schedule</span>
-          {{ i18n.translate('client.orders.estimatedTime') }}: {{ selectedOrder.estimatedTime }}
         </div>
       </div>
     </div>
+  </main>
+</div>
 
-    <!-- 💼 ACCIONES EN LOTE - Mostrar botón para volver a menú -->
-    <div *ngIf="!isLoading && getActiveOrders().length > 0 && selectedOrder" class="bulk-actions">
-      <button class="btn btn-secondary" (click)="backToMenu()">
-        <span class="material-icons">restaurant_menu</span>
-        {{ i18n.translate('client.menu.menu') }}
-      </button>
-     </div>
-   </div>
- </div>
-
+<app-chatbot-widget></app-chatbot-widget>
 <app-footer></app-footer>

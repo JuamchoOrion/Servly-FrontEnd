@@ -4,125 +4,185 @@
 
 <div class="client-checkout">
   <header class="checkout-header">
-    <button class="btn-back" (click)="backToMenu()">
-      <span class="material-icons">arrow_back</span>
-    </button>
-    <h1>{{ i18n.translate('client.checkout.title') }}</h1>
+    <div class="header-content">
+      <button class="action-btn back-btn" (click)="backToMenu()">
+        <span class="material-icons">arrow_back</span>
+        <span class="btn-text">Volver</span>
+      </button>
+      <h1>{{ i18n.translate('client.checkout.title') }}</h1>
+    </div>
   </header>
 
-  <!-- Banner de error -->
-  <div *ngIf="errorMessage" class="error-alert">
-    <span class="material-icons">error_outline</span>
-    <div class="error-content">
-      <strong>Error al procesar tu pedido</strong>
-      <p>{{ errorMessage }}</p>
+  <main class="checkout-main">
+    <!-- Banner de error -->
+    <div *ngIf="errorMessage" class="alert-banner error slide-down">
+      <span class="material-icons">error_outline</span>
+      <div class="alert-content">
+        <strong>Error al procesar tu pedido</strong>
+        <p>{{ errorMessage }}</p>
+      </div>
+      <button (click)="errorMessage = null" class="close-btn">
+        <span class="material-icons">close</span>
+      </button>
     </div>
-    <button (click)="errorMessage = null" class="btn-close">
-      <span class="material-icons">close</span>
-    </button>
-  </div>
 
-  <!-- Banner de éxito -->
-  <div *ngIf="successMessage" class="success-alert">
-    <span class="material-icons">check_circle</span>
-    <div class="success-content">
-      <strong>¡Pedido confirmado!</strong>
-      <p>{{ successMessage }}</p>
+    <!-- Banner de éxito -->
+    <div *ngIf="successMessage" class="alert-banner success slide-down">
+      <span class="material-icons">check_circle_outline</span>
+      <div class="alert-content">
+        <strong>¡Pedido confirmado!</strong>
+        <p>{{ successMessage }}</p>
+      </div>
     </div>
-  </div>
 
-  <div class="checkout-container">
-    <div class="checkout-content">
-      <!-- Resumen de orden -->
-      <section class="order-summary">
-        <h2>{{ i18n.translate('client.checkout.orderSummary') }}</h2>
+    <div class="checkout-grid">
+      <div class="checkout-content">
+        <!-- Resumen de orden -->
+        <section class="checkout-section order-summary-section">
+          <h2>
+            <span class="material-icons">receipt_long</span>
+            {{ i18n.translate('client.checkout.orderSummary') }}
+          </h2>
 
-        <div class="items-list">
-          <div *ngFor="let item of cartItems" class="summary-item">
-            <div class="item-info">
-              <span class="item-name">{{ item.name }}</span>
-              <span class="item-qty">x{{ item.quantity }}</span>
-            </div>
-            <span class="item-total">${{ (item.price * item.quantity).toFixed(2) }}</span>
-          </div>
-        </div>
-
-        <div class="summary-totals">
-          <div class="total-row">
-            <span>{{ i18n.translate('client.checkout.subtotal') }}</span>
-            <span>${{ subtotal.toFixed(2) }}</span>
-          </div>
-          <div class="total-row">
-            <span>{{ i18n.translate('client.checkout.tax') }}</span>
-            <span>${{ tax.toFixed(2) }}</span>
-          </div>
-          <div class="total-row total">
-            <span>{{ i18n.translate('client.checkout.total') }}</span>
-            <span class="amount">${{ total.toFixed(2) }}</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Métodos de pago -->
-      <section class="payment-methods">
-        <h2>{{ i18n.translate('client.checkout.paymentMethod') }}</h2>
-
-        <form [formGroup]="checkoutForm" class="payment-form">
-          <div class="methods-grid">
-            <label *ngFor="let method of paymentMethods" class="payment-option">
-              <input
-                type="radio"
-                [value]="method.value"
-                formControlName="paymentMethod"
-              />
-              <div class="method-card">
-                <span class="material-icons">{{ method.icon }}</span>
-                <span class="method-label">{{ method.label }}</span>
+          <div class="items-list">
+            <div *ngFor="let item of cartItems; let i = index" class="summary-item-container">
+              <div class="summary-item">
+                <div class="item-info">
+                  <span class="item-qty">{{ item.quantity }}x</span>
+                  <span class="item-name">{{ item.name }}</span>
+                </div>
+                <span class="item-total">${{ (item.price * item.quantity).toFixed(2) }}</span>
               </div>
-            </label>
+
+              <div class="item-customization" *ngIf="hasOptionalItems(item)">
+                <div class="customization-header">Adiciones Opcionales</div>
+                <div class="ingredient-list">
+                  <ng-container *ngFor="let ing of item.recipeItems">
+                    <div class="ingredient-row" *ngIf="ing.isOptional">
+                      <span class="ingredient-name">
+                        {{ ing.annotation || ing.itemName || ing.item?.name || ing.name || 'Adición' }}
+                        <span class="base-qty" *ngIf="ing.quantity > 0">(Base: {{ ing.quantity }})</span>
+                      </span>
+                      <div class="ingredient-controls">
+                        <button type="button" class="ctrl-btn" 
+                                (click)="updateIngredient(i, ing, -1)" 
+                                [disabled]="getIngredientQty(i, ing) <= ing.minQuantity">
+                          <span class="material-icons">remove</span>
+                        </button>
+                        <span class="qty">{{ getIngredientQty(i, ing) }}</span>
+                        <button type="button" class="ctrl-btn" 
+                                (click)="updateIngredient(i, ing, 1)" 
+                                [disabled]="getIngredientQty(i, ing) >= ing.maxQuantity">
+                          <span class="material-icons">add</span>
+                        </button>
+                      </div>
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
+
+              <div class="item-notes">
+                <textarea [(ngModel)]="item.notes" (change)="saveCartToStorage()" [ngModelOptions]="{standalone: true}" 
+                          placeholder="Anotaciones (Ej. sin salsas...)"></textarea>
+              </div>
+            </div>
           </div>
-        </form>
-      </section>
+
+          <div class="summary-totals">
+            <div class="total-row">
+              <span>{{ i18n.translate('client.checkout.subtotal') }}</span>
+              <span>${{ subtotal.toFixed(2) }}</span>
+            </div>
+            <div class="total-row">
+              <span>{{ i18n.translate('client.checkout.tax') }}</span>
+              <span>${{ tax.toFixed(2) }}</span>
+            </div>
+            <div class="total-row total-highlight">
+              <span>{{ i18n.translate('client.checkout.total') }}</span>
+              <span class="amount">${{ total.toFixed(2) }}</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Métodos de pago -->
+        <section class="checkout-section payment-methods-section">
+          <h2>
+            <span class="material-icons">account_balance_wallet</span>
+            {{ i18n.translate('client.checkout.paymentMethod') }}
+          </h2>
+
+          <form [formGroup]="checkoutForm" class="payment-form">
+            <div class="methods-grid">
+              <label *ngFor="let method of paymentMethods" class="payment-option">
+                <input
+                  type="radio"
+                  [value]="method.value"
+                  formControlName="paymentMethod"
+                />
+                <div class="method-card">
+                  <div class="icon-wrapper">
+                    <span class="material-icons">{{ method.icon }}</span>
+                  </div>
+                  <span class="method-label">{{ method.label }}</span>
+                  <div class="check-indicator">
+                    <span class="material-icons">check_circle</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <!-- Barra lateral con resumen -->
+      <aside class="checkout-sidebar">
+        <div class="sidebar-card floating-card">
+          <div class="sidebar-header">
+            <h3>{{ i18n.translate('client.checkout.finalTotal') }}</h3>
+            <div class="final-total">${{ total.toFixed(2) }}</div>
+          </div>
+
+          <div *ngIf="errorMessage" class="status-message error">
+            <span class="material-icons">error</span>
+            <p>{{ errorMessage }}</p>
+          </div>
+
+          <div *ngIf="successMessage" class="status-message success">
+            <span class="material-icons">check_circle</span>
+            <p>{{ successMessage }}</p>
+          </div>
+
+          <div class="sidebar-actions">
+            <button
+              class="primary-btn submit-btn"
+              (click)="submitOrder()"
+              [disabled]="checkoutForm.invalid || isSubmitting"
+            >
+              <ng-container *ngIf="!isSubmitting">
+                <span class="material-icons">verified</span>
+                {{ i18n.translate('client.checkout.confirmOrder') }}
+              </ng-container>
+              <ng-container *ngIf="isSubmitting">
+                <div class="spinner-small"></div>
+                {{ i18n.translate('client.checkout.processing') }}
+              </ng-container>
+            </button>
+
+            <button
+              type="button"
+              class="secondary-btn"
+              (click)="backToMenu()"
+              [disabled]="isSubmitting"
+            >
+              <span class="material-icons">restaurant_menu</span>
+              {{ i18n.translate('client.checkout.backToMenu') }}
+            </button>
+          </div>
+        </div>
+      </aside>
     </div>
+  </main>
+</div>
 
-    <!-- Barra lateral con resumen -->
-    <aside class="checkout-sidebar">
-      <div class="sidebar-card">
-        <h3>{{ i18n.translate('client.checkout.finalTotal') }}</h3>
-        <div class="final-total">${{ total.toFixed(2) }}</div>
-
-        <div *ngIf="errorMessage" class="error-message">
-          <span class="material-icons">error</span>
-          {{ errorMessage }}
-        </div>
-
-        <div *ngIf="successMessage" class="success-message">
-          <span class="material-icons">check_circle</span>
-          {{ successMessage }}
-        </div>
-
-        <button
-          class="btn btn-primary btn-lg btn-submit"
-          (click)="submitOrder()"
-          [disabled]="checkoutForm.invalid || isSubmitting"
-        >
-          <span *ngIf="!isSubmitting" class="material-icons">check</span>
-          <span *ngIf="isSubmitting" class="spinner"></span>
-          {{ isSubmitting ? i18n.translate('client.checkout.processing') : i18n.translate('client.checkout.confirmOrder') }}
-        </button>
-
-        <button
-          type="button"
-          class="btn btn-secondary btn-lg"
-          (click)="backToMenu()"
-          [disabled]="isSubmitting"
-        >
-          <span class="material-icons">arrow_back</span>
-          {{ i18n.translate('client.checkout.backToMenu') }}
-        </button>
-       </div>
-     </aside>
-   </div>
- </div>
-
+<app-chatbot-widget></app-chatbot-widget>
 <app-footer></app-footer>
