@@ -2,19 +2,22 @@
   <!-- Header -->
   <div class="tables-header">
     <div class="header-content">
-      <h1><span class="material-icons">table_restaurant</span>Mesas</h1>
-      <p>Gestión de mesas del restaurante</p>
+      <h1>
+        <span class="material-icons">table_restaurant</span>
+        {{ i18n.translate('tables.title') }}
+      </h1>
+      <p>{{ i18n.translate('tables.subtitle') }}</p>
     </div>
     <button *ngIf="isAdmin" class="btn btn-primary" (click)="openCreateForm()">
       <span class="material-icons">add</span>
-      Nueva Mesa
+      {{ i18n.translate('tables.create') }}
     </button>
   </div>
 
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-state">
     <span class="material-icons spinning">refresh</span>
-    <p>Cargando mesas...</p>
+    <p>{{ i18n.translate('tables.loading') }}</p>
   </div>
 
   <!-- Content -->
@@ -22,18 +25,18 @@
     <!-- Filters -->
     <div class="filters-bar">
       <div class="filter-group">
-        <label>Estado:</label>
+        <label>{{ i18n.translate('tables.filters.status') }}:</label>
         <select [(ngModel)]="filterStatus" (ngModelChange)="applyFilters()">
-          <option value="ALL">Todos</option>
+          <option value="ALL">{{ i18n.translate('tables.filters.status.all') }}</option>
           <option *ngFor="let option of tableStatusOptions" [value]="option.value">
-            {{ option.label }}
+            {{ i18n.translate(option.labelKey || 'tables.status.' + option.value.toLowerCase()) }}
           </option>
         </select>
       </div>
       <div class="filter-group">
-        <label>Ubicación:</label>
+        <label>{{ i18n.translate('tables.filters.location') }}:</label>
         <select [(ngModel)]="filterLocation" (ngModelChange)="applyFilters()">
-          <option value="ALL">Todas</option>
+          <option value="ALL">{{ i18n.translate('tables.filters.location.all') }}</option>
           <option *ngFor="let location of uniqueLocations" [value]="location">
             {{ location }}
           </option>
@@ -41,44 +44,46 @@
       </div>
       <button class="btn btn-secondary btn-sm" (click)="resetFilters()">
         <span class="material-icons">refresh</span>
-        Limpiar
+        {{ i18n.translate('tables.filters.clear') }}
       </button>
     </div>
 
     <!-- Empty State -->
     <div *ngIf="tables.length === 0" class="empty-state">
       <span class="material-icons empty-icon">table_restaurant</span>
-      <h2>No hay mesas registradas</h2>
-      <p *ngIf="isAdmin">Haz clic en "Nueva Mesa" para agregar la primera mesa</p>
+      <h2>{{ i18n.translate('tables.empty') }}</h2>
+      <p *ngIf="isAdmin">{{ i18n.translate('tables.emptyMessage') }}</p>
     </div>
 
     <!-- Tables Grid -->
     <div *ngIf="tables.length > 0" class="tables-grid">
       <div *ngFor="let table of filteredTables; trackBy: trackByTableNumber" class="table-card">
         <div class="table-header">
-          <h3>Mesa #{{ table.table_number }}</h3>
+          <h3>{{ i18n.translate('tables.card.title', { number: table.table_number }) }}</h3>
           <span class="status-badge" [ngClass]="'status-' + table.status.toLowerCase()">
             <span class="material-icons">{{ getStatusInfo(table.status).icon }}</span>
             {{ getStatusInfo(table.status).label }}
           </span>
         </div>
-        
+
         <div class="table-details">
           <div class="detail-item">
             <span class="material-icons">people</span>
-            <span>Capacidad: <strong>{{ table.capacity }}</strong></span>
+            <span>{{ i18n.translate('tables.card.capacity') }}: <strong>{{ table.capacity }}</strong></span>
           </div>
           <div class="detail-item">
             <span class="material-icons">location_on</span>
-            <span>Ubicación: <strong>{{ table.location }}</strong></span>
+            <span>{{ i18n.translate('tables.card.location') }}: <strong>{{ table.location }}</strong></span>
           </div>
         </div>
 
         <div class="table-actions">
-          <button *ngIf="isAdmin" class="btn btn-icon" (click)="openStatusUpdate(table)" title="Cambiar estado">
+          <button *ngIf="isAdmin" class="btn btn-icon" (click)="openStatusUpdate(table)"
+                  [title]="i18n.translate('tables.actions.updateStatus')">
             <span class="material-icons">edit</span>
           </button>
-          <button *ngIf="isAdmin" class="btn btn-icon btn-danger" (click)="openDeleteConfirm(table)" title="Eliminar mesa">
+          <button *ngIf="isAdmin" class="btn btn-icon btn-danger" (click)="openDeleteConfirm(table)"
+                  [title]="i18n.translate('tables.actions.delete')">
             <span class="material-icons">delete</span>
           </button>
         </div>
@@ -88,7 +93,7 @@
     <!-- No Results -->
     <div *ngIf="filteredTables.length === 0 && tables.length > 0" class="no-results">
       <span class="material-icons">search_off</span>
-      <p>No se encontraron mesas con los filtros aplicados</p>
+      <p>{{ i18n.translate('tables.noResults') }}</p>
     </div>
   </div>
 
@@ -96,48 +101,57 @@
   <div *ngIf="showCreateForm" class="modal-overlay" (click)="closeCreateForm()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2><span class="material-icons">add_circle</span>Nueva Mesa</h2>
+        <h2>
+          <span class="material-icons">add_circle</span>
+          {{ i18n.translate('tables.modal.newTitle') }}
+        </h2>
         <button class="btn-close" (click)="closeCreateForm()">
           <span class="material-icons">close</span>
         </button>
       </div>
-      
+
       <form (ngSubmit)="createTable()" class="modal-form">
         <div class="form-group">
-          <label for="tableNumber">Número de Mesa *</label>
-          <input 
-            type="number" 
-            id="tableNumber" 
-            [(ngModel)]="formData.tableNumber" 
+          <label for="tableNumber">
+            {{ i18n.translate('tables.modal.tableNumberLabel') }} *
+          </label>
+          <input
+            type="number"
+            id="tableNumber"
+            [(ngModel)]="formData.tableNumber"
             name="tableNumber"
             min="1"
             required
-            placeholder="Ej: 1, 2, 3..."
+            [placeholder]="i18n.translate('tables.modal.tableNumberPlaceholder')"
           >
         </div>
 
         <div class="form-group">
-          <label for="capacity">Capacidad *</label>
-          <input 
-            type="number" 
-            id="capacity" 
-            [(ngModel)]="formData.capacity" 
+          <label for="capacity">
+            {{ i18n.translate('tables.modal.capacityLabel') }} *
+          </label>
+          <input
+            type="number"
+            id="capacity"
+            [(ngModel)]="formData.capacity"
             name="capacity"
             min="1"
             required
-            placeholder="Ej: 4, 6, 8..."
+            [placeholder]="i18n.translate('tables.modal.capacityPlaceholder')"
           >
         </div>
 
         <div class="form-group">
-          <label for="location">Ubicación *</label>
-          <input 
-            type="text" 
-            id="location" 
-            [(ngModel)]="formData.location" 
+          <label for="location">
+            {{ i18n.translate('tables.modal.locationLabel') }} *
+          </label>
+          <input
+            type="text"
+            id="location"
+            [(ngModel)]="formData.location"
             name="location"
             required
-            placeholder="Ej: Salón principal, Terraza..."
+            [placeholder]="i18n.translate('tables.modal.locationPlaceholder')"
           >
         </div>
 
@@ -148,11 +162,11 @@
 
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" (click)="closeCreateForm()">
-            Cancelar
+            {{ i18n.translate('tables.modal.cancel') }}
           </button>
           <button type="submit" class="btn btn-primary">
             <span class="material-icons">save</span>
-            Crear Mesa
+            {{ i18n.translate('tables.modal.create') }}
           </button>
         </div>
       </form>
@@ -163,23 +177,28 @@
   <div *ngIf="statusUpdateTable" class="modal-overlay" (click)="closeStatusUpdate()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2><span class="material-icons">update</span>Cambiar Estado</h2>
+        <h2>
+          <span class="material-icons">update</span>
+          {{ i18n.translate('tables.modal.statusTitle') }}
+        </h2>
         <button class="btn-close" (click)="closeStatusUpdate()">
           <span class="material-icons">close</span>
         </button>
       </div>
-      
+
       <div class="status-options">
-        <p class="modal-subtitle">Mesa #{{ statusUpdateTable.table_number }}</p>
+        <p class="modal-subtitle">
+          {{ i18n.translate('tables.modal.statusSubtitle', { number: statusUpdateTable.table_number }) }}
+        </p>
         <div class="status-grid">
-          <button 
-            *ngFor="let option of tableStatusOptions" 
-            class="status-option-btn" 
+          <button
+            *ngFor="let option of tableStatusOptions"
+            class="status-option-btn"
             [ngClass]="'status-' + option.color"
             (click)="updateStatus(option.value)"
           >
             <span class="material-icons">{{ option.icon }}</span>
-            <span>{{ option.label }}</span>
+            <span>{{ i18n.translate(option.labelKey || 'tables.status.' + option.value.toLowerCase()) }}</span>
           </button>
         </div>
       </div>
@@ -190,24 +209,27 @@
   <div *ngIf="deleteConfirmTable" class="modal-overlay" (click)="closeDeleteConfirm()">
     <div class="modal-content modal-sm" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2><span class="material-icons warning-icon">warning</span>Confirmar Eliminación</h2>
+        <h2>
+          <span class="material-icons warning-icon">warning</span>
+          {{ i18n.translate('tables.modal.deleteTitle') }}
+        </h2>
         <button class="btn-close" (click)="closeDeleteConfirm()">
           <span class="material-icons">close</span>
         </button>
       </div>
-      
+
       <div class="modal-body">
-        <p>¿Estás seguro de que deseas eliminar la <strong>Mesa #{{ deleteConfirmTable.table_number }}</strong>?</p>
-        <p class="text-muted">Esta acción no se puede deshacer.</p>
+        <p [innerHTML]="i18n.translate('tables.modal.deleteConfirm', { number: deleteConfirmTable.table_number })"></p>
+        <p class="text-muted">{{ i18n.translate('tables.modal.deleteWarning') }}</p>
       </div>
 
       <div class="modal-actions">
         <button class="btn btn-secondary" (click)="closeDeleteConfirm()">
-          Cancelar
+          {{ i18n.translate('tables.modal.cancel') }}
         </button>
         <button class="btn btn-danger" (click)="deleteTable()">
           <span class="material-icons">delete</span>
-          Eliminar
+          {{ i18n.translate('tables.modal.delete') }}
         </button>
       </div>
     </div>

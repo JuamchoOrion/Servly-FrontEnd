@@ -18,7 +18,11 @@ import { I18nService } from '../../core/services/i18n.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ItemCategoriesComponent implements OnInit, OnDestroy {
-  // Data - usando BehaviorSubject para mejor reactividad
+  // ===============================
+  // 📊 DATA & STATE
+  // ===============================
+
+  // Categories con BehaviorSubject para reactividad
   private categoriesSubject = new BehaviorSubject<ItemCategoryResponse[]>([]);
   categories$ = this.categoriesSubject.asObservable();
 
@@ -31,14 +35,30 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  // Pagination
+  // Categorías originales para filtrado local
+  protected originalCategories: ItemCategoryResponse[] = [];
+
+  // ===============================
+  // 🔍 FILTERS
+  // ===============================
+
+  searchName: string = '';
+  filterStatus: 'all' | 'active' | 'inactive' = 'all';
+
+  // ===============================
+  // 📄 PAGINATION
+  // ===============================
+
   currentPage = 0;
   pageSize = 10;
   totalElements = 0;
   totalPages = 0;
   isLastPage = false;
 
-  // State
+  // ===============================
+  // ⚙️ UI STATE
+  // ===============================
+
   isLoading = false;
   isFormVisible = false;
   isEditMode = false;
@@ -46,14 +66,23 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
   successMessage: string | null = null;
   errorMessage: string | null = null;
 
-  // Form
+  // ===============================
+  // 📝 FORM
+  // ===============================
+
   categoryForm!: FormGroup;
 
-  // Permissions
+  // ===============================
+  // 🔐 PERMISSIONS
+  // ===============================
+
   isAdmin = false;
   isStorekeeper = false;
 
-  // Cleanup
+  // ===============================
+  // 🧹 CLEANUP
+  // ===============================
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -71,7 +100,7 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
     this.checkUserPermissions();
     this.loadCategories();
 
-    // Suscribirse a cambios de categorías para actualizar automáticamente
+    // Suscribirse a cambios para actualizar vista
     this.categories$
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
@@ -84,9 +113,10 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /**
-   * Verificar permisos del usuario
-   */
+  // ===============================
+  // 🔐 PERMISSIONS METHODS
+  // ===============================
+
   private checkUserPermissions(): void {
     const user = this.authService.getCurrentUser();
     if (user) {
@@ -95,9 +125,18 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Inicializar formulario reactivo
-   */
+  private canModify(): boolean {
+    return this.isAdmin || this.isStorekeeper;
+  }
+
+  canEdit(): boolean {
+    return this.canModify();
+  }
+
+  // ===============================
+  // 📝 FORM METHODS
+  // ===============================
+
   private initializeForm(): void {
     this.categoryForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
@@ -105,44 +144,14 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Cargar todas las categorías con paginación
-   */
-  loadCategories(): void {
-    this.isLoading = true;
-    this.errorMessage = null;
-    this.cdr.markForCheck();
-
-    this.itemCategoryService.getCategoriesPaginated(this.currentPage, this.pageSize)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: any) => {
-          this.ngZone.run(() => {
-            this.categories = [...(response.content || [])];
-            this.currentPage = response.pageNumber;
-            this.pageSize = response.pageSize;
-            this.totalElements = response.totalElements;
-            this.totalPages = response.totalPages;
-            this.isLastPage = response.isLast;
-            this.isLoading = false;
-            this.cdr.markForCheck();
-          });
-        },
-        error: (error: any) => {
-          this.ngZone.run(() => {
-            this.categories = [];
-            this.errorMessage = this.i18n.translate('categories.error.loading');
-            console.error('Error loading categories:', error);
-            this.isLoading = false;
-            this.cdr.markForCheck();
-          });
-        }
-      });
+  get nameControl() {
+    return this.categoryForm.get('name');
   }
 
-  /**
-   * Abrir formulario para crear nueva categoría
-   */
+  get descriptionControl() {
+    return this.categoryForm.get('description');
+  }
+
   openCreateForm(): void {
     this.isEditMode = false;
     this.selectedCategoryId = null;
@@ -152,9 +161,6 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  /**
-   * Abrir formulario para editar categoría
-   */
   openEditForm(category: ItemCategoryResponse): void {
     if (!this.canModify()) return;
 
@@ -169,9 +175,6 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  /**
-   * Cerrar formulario
-   */
   closeForm(): void {
     this.isFormVisible = false;
     this.categoryForm.reset();
@@ -180,9 +183,6 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  /**
-   * Enviar formulario (crear o actualizar)
-   */
   submitForm(): void {
     if (this.categoryForm.invalid) {
       this.errorMessage = this.i18n.translate('categories.error.form');
@@ -197,9 +197,142 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ===============================
+  // 🔍 FILTER METHODS
+  // ===============================
+
   /**
-   * Crear nueva categoría
+   * Aplicar filtros a las categorías (filtrado local)
    */
+  private applyFiltersToData(): void {
+    let filtered = [...this.originalCategories];
+
+    // Filtro por nombre (busca en name y description)
+    if (this.searchName.trim()) {
+      const searchTerm = this.searchName.toLowerCase().trim();
+      filtered = filtered.filter(cat =>
+        cat.name.toLowerCase().includes(searchTerm) ||
+        (cat.description?.toLowerCase().includes(searchTerm) ?? false)
+      );
+    }
+
+    // Filtro por estado
+    if (this.filterStatus !== 'all') {
+      const isActive = this.filterStatus === 'active';
+      filtered = filtered.filter(cat => cat.active === isActive);
+    }
+
+    // Actualizar vista con categorías filtradas
+    this.categoriesSubject.next(filtered);
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Cambiar búsqueda por nombre
+   */
+  onSearchNameChange(value: string): void {
+    this.searchName = value;
+    this.currentPage = 0;
+    this.applyFiltersToData();
+  }
+
+  /**
+   * Limpiar búsqueda por nombre
+   */
+  clearSearchName(): void {
+    this.searchName = '';
+    this.applyFiltersToData();
+  }
+
+  /**
+   * Cambiar filtro de estado
+   */
+  onStatusChange(value: 'all' | 'active' | 'inactive'): void {
+    this.filterStatus = value;
+    this.currentPage = 0;
+    this.applyFiltersToData();
+  }
+
+  /**
+   * Limpiar filtro de estado
+   */
+  clearStatusFilter(): void {
+    this.filterStatus = 'all';
+    this.applyFiltersToData();
+  }
+
+  /**
+   * Limpiar todos los filtros
+   */
+  clearAllFilters(): void {
+    this.searchName = '';
+    this.filterStatus = 'all';
+    this.currentPage = 0;
+    this.applyFiltersToData();
+  }
+
+  /**
+   * Verificar si hay filtros activos
+   */
+  hasActiveFilters(): boolean {
+    return this.searchName.trim().length > 0 || this.filterStatus !== 'all';
+  }
+
+  /**
+   * Aplicar filtros manualmente (para botón o enter)
+   */
+  applyFilters(): void {
+    this.applyFiltersToData();
+  }
+
+  // ===============================
+  // 📦 DATA LOADING
+  // ===============================
+
+  loadCategories(): void {
+    this.isLoading = true;
+    this.errorMessage = null;
+    this.cdr.markForCheck();
+
+    this.itemCategoryService.getCategoriesPaginated(this.currentPage, this.pageSize)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: any) => {
+          this.ngZone.run(() => {
+            const categories = [...(response.content || [])];
+
+            // Guardar categorías originales para filtrado local
+            this.originalCategories = categories;
+
+            // Aplicar filtros si existen
+            this.applyFiltersToData();
+
+            this.currentPage = response.pageNumber;
+            this.pageSize = response.pageSize;
+            this.totalElements = response.totalElements;
+            this.totalPages = response.totalPages;
+            this.isLastPage = response.isLast;
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          });
+        },
+        error: (error: any) => {
+          this.ngZone.run(() => {
+            this.categories = [];
+            this.originalCategories = [];
+            this.errorMessage = this.i18n.translate('categories.error.loading');
+            console.error('Error loading categories:', error);
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          });
+        }
+      });
+  }
+
+  // ===============================
+  // ➕ CREATE CATEGORY
+  // ===============================
+
   private createCategory(): void {
     const request: CreateItemCategoryRequest = this.categoryForm.value;
     this.isLoading = true;
@@ -210,11 +343,15 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (newCategory: ItemCategoryResponse) => {
           this.ngZone.run(() => {
-            this.categories = [...this.categories, newCategory];
+            // Actualizar lista original y aplicar filtros
+            this.originalCategories = [...this.originalCategories, newCategory];
+            this.applyFiltersToData();
+
             this.successMessage = this.i18n.translate('categories.success.created');
             this.closeForm();
             this.isLoading = false;
             this.cdr.markForCheck();
+
             setTimeout(() => {
               this.successMessage = null;
               this.cdr.markForCheck();
@@ -232,9 +369,10 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Actualizar categoría existente
-   */
+  // ===============================
+  // ✏️ UPDATE CATEGORY
+  // ===============================
+
   private updateCategory(): void {
     if (!this.selectedCategoryId) return;
 
@@ -247,11 +385,17 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (updatedCategory: ItemCategoryResponse) => {
           this.ngZone.run(() => {
-            this.categories = this.categories.map(c => c.id === this.selectedCategoryId ? updatedCategory : c);
+            // Actualizar en lista original y aplicar filtros
+            this.originalCategories = this.originalCategories.map(c =>
+              c.id === this.selectedCategoryId ? updatedCategory : c
+            );
+            this.applyFiltersToData();
+
             this.successMessage = this.i18n.translate('categories.success.updated');
             this.closeForm();
             this.isLoading = false;
             this.cdr.markForCheck();
+
             setTimeout(() => {
               this.successMessage = null;
               this.cdr.markForCheck();
@@ -269,9 +413,10 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Toggle (activar/desactivar) categoría
-   */
+  // ===============================
+  // 🔄 TOGGLE CATEGORY STATUS
+  // ===============================
+
   toggleCategory(category: ItemCategoryResponse): void {
     if (!this.canModify()) return;
 
@@ -280,12 +425,18 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (updatedCategory: ItemCategoryResponse) => {
           this.ngZone.run(() => {
-            this.categories = this.categories.map(c => c.id === category.id ? updatedCategory : c);
+            // Actualizar en lista original y aplicar filtros
+            this.originalCategories = this.originalCategories.map(c =>
+              c.id === category.id ? updatedCategory : c
+            );
+            this.applyFiltersToData();
+
             const status = updatedCategory.active ? 'categories.status.active' : 'categories.status.inactive';
             this.successMessage = this.i18n.translate('categories.success.toggled', {
               status: this.i18n.translate(status)
             });
             this.cdr.markForCheck();
+
             setTimeout(() => {
               this.successMessage = null;
               this.cdr.markForCheck();
@@ -302,9 +453,10 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Eliminar categoría con confirmación
-   */
+  // ===============================
+  // 🗑️ DELETE CATEGORY
+  // ===============================
+
   deleteCategory(category: ItemCategoryResponse): void {
     if (!this.canModify()) return;
 
@@ -316,9 +468,13 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.ngZone.run(() => {
-            this.categories = this.categories.filter(c => c.id !== category.id);
+            // Eliminar de lista original y aplicar filtros
+            this.originalCategories = this.originalCategories.filter(c => c.id !== category.id);
+            this.applyFiltersToData();
+
             this.successMessage = this.i18n.translate('categories.success.deleted');
             this.cdr.markForCheck();
+
             setTimeout(() => {
               this.successMessage = null;
               this.cdr.markForCheck();
@@ -335,32 +491,10 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Verificar si el usuario puede modificar categorías
-   */
-  private canModify(): boolean {
-    return this.isAdmin || this.isStorekeeper;
-  }
+  // ===============================
+  // 📄 PAGINATION METHODS
+  // ===============================
 
-  /**
-   * Verificar si puede ver opciones de edición
-   */
-  canEdit(): boolean {
-    return this.canModify();
-  }
-
-  /**
-   * Obtener control del formulario
-   */
-  get nameControl() {
-    return this.categoryForm.get('name');
-  }
-
-  get descriptionControl() {
-    return this.categoryForm.get('description');
-  }
-
-  // Métodos de Paginación
   nextPage(): void {
     if (!this.isLastPage && this.currentPage < this.totalPages - 1) {
       this.currentPage++;
@@ -428,4 +562,3 @@ export class ItemCategoriesComponent implements OnInit, OnDestroy {
     return pages;
   }
 }
-

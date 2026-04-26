@@ -15,6 +15,83 @@
         + {{ i18n.translate('categories.create') }}
       </button>
     </div>
+    <!-- Filters Section -->
+    <div class="filters-section" *ngIf="originalCategories.length > 0 || isLoading">      <div class="filters-container">
+
+        <!-- Search by Name -->
+        <div class="filter-group">
+          <label for="searchName" class="filter-label">
+            <span class="material-icons filter-icon">search</span>
+            {{ i18n.translate('categories.filters.name') }}
+          </label>
+          <input
+            id="searchName"
+            type="text"
+            class="form-input filter-input"
+            [placeholder]="i18n.translate('categories.filters.namePlaceholder')"
+            [value]="searchName"
+            (input)="onSearchNameChange($any($event.target).value)"
+            (keyup.enter)="applyFilters()">
+          <button
+            *ngIf="searchName"
+            class="btn-clear"
+            (click)="clearSearchName()"
+            [title]="i18n.translate('categories.filters.clear')">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+
+        <!-- Filter by Status -->
+        <div class="filter-group">
+          <label for="filterStatus" class="filter-label">
+            <span class="material-icons filter-icon">filter_list</span>
+            {{ i18n.translate('categories.filters.status') }}
+          </label>
+          <select
+            id="filterStatus"
+            class="form-input filter-select"
+            [value]="filterStatus"
+            (change)="onStatusChange($any($event.target).value)">
+            <option value="all">{{ i18n.translate('categories.filters.status.all') }}</option>
+            <option value="active">{{ i18n.translate('categories.filters.status.active') }}</option>
+            <option value="inactive">{{ i18n.translate('categories.filters.status.inactive') }}</option>
+          </select>
+        </div>
+
+        <!-- Clear All Filters -->
+        <button
+          *ngIf="hasActiveFilters()"
+          class="btn btn-secondary btn-clear-filters"
+          (click)="clearAllFilters()">
+          <span class="material-icons">refresh</span>
+          {{ i18n.translate('categories.filters.clearAll') }}
+        </button>
+
+      </div>
+
+      <!-- Active Filters Tags -->
+      <div class="active-filters" *ngIf="hasActiveFilters()">
+    <span
+      *ngIf="searchName"
+      class="filter-tag">
+      {{ i18n.translate('categories.filters.name') }}: "{{ searchName }}"
+      <button class="btn-tag-remove" (click)="clearSearchName()">
+        <span class="material-icons">close</span>
+      </button>
+    </span>
+        <span
+          *ngIf="filterStatus !== 'all'"
+          class="filter-tag">
+      {{ i18n.translate('categories.filters.status') }}:
+          {{ filterStatus === 'active' ?
+          i18n.translate('categories.filters.status.active') :
+          i18n.translate('categories.filters.status.inactive') }}
+          <button class="btn-tag-remove" (click)="clearStatusFilter()">
+        <span class="material-icons">close</span>
+      </button>
+    </span>
+      </div>
+    </div>
 
     <!-- Success Message -->
     <div class="alert alert-success" *ngIf="successMessage">
