@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { TableService } from '../../core/services/table.service';
 import { AuthService } from '../../core/services/auth.service';
+import { I18nService } from '../../core/services/i18n.service';
 import {
   RestaurantTableDTO,
   CreateRestaurantTableRequest,
@@ -46,12 +47,12 @@ export class TablesComponent implements OnInit, OnDestroy {
   // Delete confirmation
   deleteConfirmTable: RestaurantTableDTO | null = null;
 
-  // Status options
+  // Status options - con labelKey para i18n
   tableStatusOptions = [
-    { value: TableStatus.AVAILABLE, label: 'Disponible', icon: 'check_circle', color: 'green' },
-    { value: TableStatus.OCCUPIED, label: 'Ocupada', icon: 'people', color: 'red' },
-    { value: TableStatus.RESERVED, label: 'Reservada', icon: 'event', color: 'orange' },
-    { value: TableStatus.MAINTENANCE, label: 'Mantenimiento', icon: 'build', color: 'gray' }
+    { value: TableStatus.AVAILABLE, labelKey: 'tables.status.available', icon: 'check_circle', color: 'green' },
+    { value: TableStatus.OCCUPIED, labelKey: 'tables.status.occupied', icon: 'people', color: 'red' },
+    { value: TableStatus.RESERVED, labelKey: 'tables.status.reserved', icon: 'event', color: 'orange' },
+    { value: TableStatus.MAINTENANCE, labelKey: 'tables.status.maintenance', icon: 'build', color: 'gray' }
   ];
 
   private tablesSubscription?: Subscription;
@@ -60,6 +61,7 @@ export class TablesComponent implements OnInit, OnDestroy {
   constructor(
     private tableService: TableService,
     private authService: AuthService,
+    public i18n: I18nService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -95,6 +97,7 @@ export class TablesComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Error loading tables:', err);
+        this.formError = this.i18n.translate('tables.error.loading');
         this.isLoading = false;
         this.cdr.detectChanges();
       }
@@ -119,7 +122,7 @@ export class TablesComponent implements OnInit, OnDestroy {
   resetFilters(): void {
     this.filterStatus = 'ALL';
     this.filterLocation = 'ALL';
-    this.filteredTables = this.tables;
+    this.filteredTables = [...this.tables];
   }
 
   // ========== CREATE ==========
@@ -153,7 +156,13 @@ export class TablesComponent implements OnInit, OnDestroy {
         this.loadTables();
       },
       error: (err) => {
-        this.formError = err?.error?.message || 'Error al crear la mesa';
+        const errorCode = err?.error?.code;
+        if (errorCode === 'TABLE_DUPLICATE') {
+          this.formError = this.i18n.translate('tables.error.duplicate');
+        } else {
+          this.formError = this.i18n.translate('tables.error.creating');
+        }
+        console.error('Error creating table:', err);
         this.cdr.detectChanges();
       }
     });
@@ -184,6 +193,8 @@ export class TablesComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Error updating status:', err);
+        this.formError = this.i18n.translate('tables.error.updating');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -213,6 +224,8 @@ export class TablesComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Error deleting table:', err);
+        this.formError = this.i18n.translate('tables.error.deleting');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -221,24 +234,31 @@ export class TablesComponent implements OnInit, OnDestroy {
 
   private validateForm(): boolean {
     if (!this.formData.tableNumber || this.formData.tableNumber < 1) {
-      this.formError = 'Número de mesa inválido';
+      this.formError = this.i18n.translate('tables.validation.tableNumberInvalid');
       return false;
     }
     if (!this.formData.capacity || this.formData.capacity < 1) {
-      this.formError = 'Capacidad inválida';
+      this.formError = this.i18n.translate('tables.validation.capacityInvalid');
       return false;
     }
     if (!this.formData.location.trim()) {
-      this.formError = 'Ubicación requerida';
+      this.formError = this.i18n.translate('tables.validation.locationRequired');
       return false;
     }
     this.formError = '';
     return true;
   }
 
+  /**
+   * Obtiene información del estado con traducción i18n
+   */
   getStatusInfo(status: TableStatus): { label: string; icon: string; color: string } {
-    return this.tableStatusOptions.find(opt => opt.value === status) ||
-           { label: status, icon: 'help', color: 'gray' };
+    const option = this.tableStatusOptions.find(opt => opt.value === status);
+    return {
+      label: this.i18n.translate(option?.labelKey || `tables.status.${status.toLowerCase()}`),
+      icon: option?.icon || 'help',
+      color: option?.color || 'gray'
+    };
   }
 
   trackByTableNumber(index: number, table: RestaurantTableDTO): number {
